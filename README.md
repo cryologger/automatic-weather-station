@@ -1,2 +1,2 @@
-# Cryologger_Automatic_Weather_Station
-A low-cost, open-source automatic weather station.
+# Cryologger Automatic Weather Station
+A low-cost automatic weather station based on the open-source Arduino (www.arduino.cc) platform.
