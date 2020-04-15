@@ -363,8 +363,9 @@ void readBattery()
   //Serial.print("readBattery() function execution: "); Serial.print(batteryLoopTime); Serial.println(F(" ms"));
 }
 
-void readTrh()
-{
+// Read temperature and humidity from Davis Instruments 6830
+void readTrh() {
+
   // Enable power to temperature/relative humidity sensor
   //digitalWrite(GPIO_PWR_2_PIN, HIGH); // Always on due to bug
 
@@ -384,8 +385,7 @@ void readTrh()
 }
 
 // Measure wind speed and direction from Davis Instruments 7911 anemometer
-void readAnemometer()
-{
+void readAnemometer() {
   unsigned int startTime = millis();
   // Enable power to anemometer
   digitalWrite(GPIO_PWR_1_PIN, HIGH);
@@ -395,8 +395,7 @@ void readAnemometer()
   revolutions1 = 0;
 
   // Measure wind speed for duration of samplePeriod
-  while (millis() < startTime + (samplePeriod * 1000))
-  {
+  while (millis() < startTime + (samplePeriod * 1000)) {
     petDog(); // Reset Watchdog Timer
   }
 
@@ -411,8 +410,7 @@ void readAnemometer()
   windSpeed1 *= 0.44704;                                // Convert wind speed 1 to metres per second
 
   // Measure wind direction
-  for (byte i = 0; i < 5; i++)
-  {
+  for (byte i = 0; i < 5; i++) {
     analogRead(WIND_DIRECTION_1_PIN);
     delay(1);
   }
@@ -433,8 +431,7 @@ void readAnemometer()
   Serial.print(F("windDirection1: ")); Serial.println(windDirection1);
 
   // Determine wind gust and direction 1
-  if ((windSpeed1 > 0) && (windSpeed1 > windGust1))
-  {
+  if ((windSpeed1 > 0) && (windSpeed1 > windGust1)) {
     windGust1 = windSpeed1;
     windGustDirection1 = windDirection1;
   }
@@ -461,22 +458,27 @@ void windVectors()
   float rvWindDirection1 = atan2(veStats1.average(), vnStats1.average()); // Resultant mean wind direction
   rvWindDirection1 *= RAD_TO_DEG;  // Convert from radians to degrees
 
-  if (rvWindDirection1 < 0)
+  if (rvWindDirection1 < 0) {
     rvWindDirection1 += 360;
+  }
 
   float rvWindSpeed1 = sqrt(sq(veStats1.average()) + sq(vnStats1.average())); // Resultant mean wind speed 1
 
-  if ((rvWindDirection1 == 0) && (rvWindSpeed1 != 0))
+  if ((rvWindDirection1 == 0) && (rvWindSpeed1 != 0)) {
     rvWindDirection1 = 360;
+  }
 
-  if (rvWindSpeed1 == 0)
+  if (rvWindSpeed1 == 0) {
     rvWindDirection1 = 0;
+  }
 
   // Wind direction "from" correction
-  if (rvWindDirection1 < 180)
+  if (rvWindDirection1 < 180) {
     rvWindDirection1 += 180;
-  else if (rvWindDirection1 > 180)
+  }
+  else if (rvWindDirection1 > 180) {
     rvWindDirection1 -= 180;
+  }
 
   // Write data to union
   message.windSpeed1 = rvWindSpeed1 * 100;      // Resultant mean wind speed 1 (m/s)
@@ -484,16 +486,14 @@ void windVectors()
 }
 
 // Wind speed 1 interrupt service routine (ISR)
-void windSpeedIsr1()
-{
+void windSpeedIsr1() {
   revolutions1++;
 }
 
 // Create log file
-void createLogFile()
-{
-  if (logFlag == true)
-  {
+void createLogFile() {
+  // Check if logging is enabled
+  if (logFlag == true) {
     if (file.isOpen())
       file.close();
 
@@ -501,23 +501,20 @@ void createLogFile()
     for (unsigned int i = 0; i < 999; i++) {
       snprintf(fileName, sizeof(fileName), "log%03d.csv", i);
       // If O_CREAT and O_EXCL are set, open() will fail if the file already exists
-      if (file.open(fileName, O_CREAT | O_EXCL | O_WRITE))
-      {
+      if (file.open(fileName, O_CREAT | O_EXCL | O_WRITE)) {
         break; // Break out of loop upon successful file creation
       }
     }
 
-    if (!file.isOpen())
-    {
+    if (!file.isOpen()) {
       Serial.println(F("Unable to open file"));
     }
 
-    // Read current date and time from the RTC
+    // Read RTC date and time
     myRTC.read(tm);
 
     // Set the file's creation date and time
-    if (!file.timestamp(T_CREATE, (tm.Year + 1970), tm.Month, tm.Day, tm.Hour, tm.Minute, tm.Second))
-    {
+    if (!file.timestamp(T_CREATE, (tm.Year + 1970), tm.Month, tm.Day, tm.Hour, tm.Minute, tm.Second)) {
       Serial.println("Set create time failed");
     }
 
@@ -605,29 +602,28 @@ void logData() {
 // Log file write and access timestamps
 void writeTimestamps() {
 
-  myRTC.read(tm); // Read current date and time from the RTC
+  // Read RTC date and time
+  myRTC.read(tm);
 
   // Set the file's last write/modification date and time
-  if (!file.timestamp(T_WRITE, (tm.Year + 1970), tm.Month, tm.Day, tm.Hour, tm.Minute, tm.Second))
-  {
+  if (!file.timestamp(T_WRITE, (tm.Year + 1970), tm.Month, tm.Day, tm.Hour, tm.Minute, tm.Second)) {
     Serial.println(F("Set write time failed"));
   }
 
   // Set the file's last access date and time
-  if (!file.timestamp(T_ACCESS, (tm.Year + 1970), tm.Month, tm.Day, tm.Hour, tm.Minute, tm.Second))
-  {
+  if (!file.timestamp(T_ACCESS, (tm.Year + 1970), tm.Month, tm.Day, tm.Hour, tm.Minute, tm.Second)) {
     Serial.println(F("Set access time failed"));
   }
 }
 
 // Calculate statistics and clear objects
-void calculateStatistics()
-{
+void calculateStatistics() {
+
   // Write data to union
-  message.voltage = batteryStats.minimum() * 1000;          // Minimum battery voltage (mV)
-  message.extTemperature = extTemperatureStats.average() * 100;   // Mean temperature (°C)
-  message.humidity = humidityStats.average() * 100;         // Mean humidity (%)
-  message.intTemperature = rtcStats.average() * 100;     // Mean RTC temperature (°C)
+  message.voltage = batteryStats.minimum() * 1000;              // Minimum battery voltage (mV)
+  message.extTemperature = extTemperatureStats.average() * 100; // Mean temperature (°C)
+  message.humidity = humidityStats.average() * 100;             // Mean humidity (%)
+  message.intTemperature = rtcStats.average() * 100;            // Mean RTC temperature (°C)
 
   // Clear statistics objects
   batteryStats.clear();
@@ -642,15 +638,15 @@ void calculateStatistics()
 }
 
 // Write
-void writeBuffer()
-{
+void writeBuffer() {
+
   messageCounter++;
   message.messageCounter = messageCounter;
 
   // Concatenate current message with existing message(s) stored in transmit buffer
   memcpy(transmitBuffer + (sizeof(message) * (transmitCounter + (retransmitCounter * transmitInterval) - 1)), message.bytes, sizeof(message)); // Copy message to transmit buffer
 
-  // Print data
+  // Print data to Serial Monitor
   printUnion();             // Print data stored in union
   //printUnionBinary();       // Print data stored in union in binary format
   //printTransmitBuffer();    // Print data stored transmit buffer array in binary format
@@ -795,8 +791,7 @@ void transmitData() {
 }
 
 // RockBLOCK callback function
-bool ISBDCallback()   // This function can be repeatedly called during data transmission or GPS signal acquisitionb
-{
+bool ISBDCallback() {  // This function can be repeatedly called during data transmission or GPS signal acquisitionn
 #if DEBUG
   pinMode(LED_BUILTIN, OUTPUT);
   digitalWrite(LED_BUILTIN, (millis() / 1000) % 2 == 1 ? HIGH : LOW);
@@ -804,10 +799,9 @@ bool ISBDCallback()   // This function can be repeatedly called during data tran
 #endif
 
   unsigned int currentMillis = millis();
-  if (currentMillis - previousMillis >= 2000)
-  {
+  if (currentMillis - previousMillis >= 2000) {
     previousMillis = currentMillis;
-    readBattery();    // Measure battery voltage
+    readBattery(); // Measure battery voltage
     petDog();  // Pet the dog
   }
   return true;
