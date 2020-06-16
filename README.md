@@ -1,7 +1,8 @@
 # Cryologger - Automatic Weather Station (AWS)
-A low-cost automatic weather station based on the open-source Arduino (www.arduino.cc) platform.
+![Image](https://github.com/adamgarbo/Cryologger_Automatic_Weather_Station/blob/master/Images/DSC_1877.JPG)
 
 ## Background
+A low-cost automatic weather station based on the open-source Arduino (www.arduino.cc) platform.
 
 ## Objective
 
