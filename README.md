@@ -71,9 +71,9 @@ Three different configurations of the Cryologger AWS were deployed in 2019.
 | Variable  | Unit | Comments |
 | --- | :---: | --- |
 | Datetime  |   | YYYY-MM-DD HH:MM:SS |
-| Temperature (ext) | °C  |  |
-| Temperature (int) | °C  |  |
-| Humidity | % |  |
+| Temperature (ext) | °C  | External air temperature |
+| Temperature (int) | °C  | Internal air temperature |
+| Humidity | % | External humidity  |
 | Wind speed | m s<sup>-1</sup> | Wind speed at 3 m height |
 | Wind direction | ° | Wind direction at 3 m height |
 | Wind gust | m s<sup>-1</sup>  | Wind gust speed at 3 m height |
