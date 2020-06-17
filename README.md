@@ -18,13 +18,80 @@ The Cryologger design is based on the open-source Arduino platform (www.arduino.
 
 The Cryologger relies on industrial rated components, IP67 rated enclosures and lithium thionyl chloride (LiSOCl2) batteries to withstand harsh the Arctic environment and ensure operation in temperatures as low as -50°C.
 
+## Deployments
+Three different configurations of the Cryologger AWS have were deployed in 2019.
+
+### Nain, Newfoundland and Labrador
+* Date: February, 2019
+* Coordinates:
+
+#### Measurements
+| Variable  | Unit | Comments |
+| --- | :---: | --- |
+| Datetime  |   | YYYY-MM-DD HH:MM:SS |
+| Temperature (ext) | °C  |  |
+| Temperature (int) | °C  |  |
+| Humidity | % |  |
+| Wind speed | m s<sup>-1</sup> | Wind speed at 3 m height |
+| Wind direction | ° | Wind direction at 3 m height |
+| Wind gust | m s<sup>-1</sup>  | Wind gust speed at 3 m height |
+| Wind gust Direction | ° | Wind gust direction at 3 m height |
+| Voltage | V | Battery voltage |
+| Transmit duration  | s | Length of Iridium transmission  |
+| Message counter |  | Number of transmitted messages |
+
+
+### Arctic Bay, Nunavut
+* Date: May, 2019
+* Coordinates: 73.31N, -86.25W
+
+#### Measurements
+| Variable  | Unit | Comments |
+| --- | :---: | --- |
+| Datetime  |   | YYYY-MM-DD HH:MM:SS |
+| Temperature  | °C  |  |
+| Humidity | % |  |
+| Wind speed 1 | m s<sup>-1</sup> | Wind speed at 1 m height |
+| Wind direction 1 | ° | Wind direction at 1 m height |
+| Wind gust 1 | m s<sup>-1</sup>  | Wind gust speed at 1 m height |
+| Wind gust Direction 1 | ° | Wind gust direction at 1 m height |
+| Wind speed 2 | m s<sup>-1</sup> | Wind speed at 3 m height |
+| Wind direction 2 | ° | Wind direction at 3 m height |
+| Wind gust 2 | m s<sup>-1</sup>  | Wind gust speed at 3 m height |
+| Wind gust Direction 2 | ° | Wind gust direction at 3 m height |
+| Voltage | V | Battery voltage |
+| Transmit duration  | s | Length of Iridium transmission  |
+| Message counter |  | Number of transmitted messages |
+
+### Milne Glacier, Nunavut
+* Date: July, 2019
+* Coordinates: 
+
+<img src="https://github.com/adamgarbo/Cryologger_Automatic_Weather_Station/blob/master/Images/DSC_1873.JPG" width="720">
+
+#### Measurements
+| Variable  | Unit | Comments |
+| --- | :---: | --- |
+| Datetime  |   | YYYY-MM-DD HH:MM:SS |
+| Temperature (ext) | °C  |  |
+| Temperature (int) | °C  |  |
+| Humidity | % |  |
+| Wind speed | m s<sup>-1</sup> | Wind speed at 3 m height |
+| Wind direction | ° | Wind direction at 3 m height |
+| Wind gust | m s<sup>-1</sup>  | Wind gust speed at 3 m height |
+| Wind gust Direction | ° | Wind gust direction at 3 m height |
+| Voltage | V | Battery voltage |
+| Transmit duration  | s | Length of Iridium transmission  |
+| Message counter |  | Number of transmitted messages |
+
+
 ## Repository Contents
 * **/Arduino**
 * **/Bill of Materials**
 * **/Images**
 
 ## Documentation
-* 
+* Work in progress.
 
 ## License Information
 This project is distributed under the GNU General Public License v3.0.
