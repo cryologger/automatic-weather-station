@@ -40,7 +40,8 @@ Three different configurations of the Cryologger AWS were deployed in 2019.
 
 
 ### Arctic Bay, Nunavut
-* Date: May, 2019
+* Data: https://cryologger.org/arctic-bay-2019/
+* Date: May 27, 2019
 * Coordinates: 73.31 N, -86.2 5W
 <img src="https://github.com/adamgarbo/Cryologger_Automatic_Weather_Station/blob/master/Images/DSC_0440.JPG" height="480">
 
@@ -63,6 +64,7 @@ Three different configurations of the Cryologger AWS were deployed in 2019.
 | Message counter |  | Number of transmitted messages |
 
 ### Milne Glacier, Nunavut
+* Data: https://cryologger.org/milne-glacier-2019/
 * Date: July, 2019
 * Coordinates: 82.45 N,	-80.40 W
 
