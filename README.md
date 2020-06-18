@@ -19,11 +19,11 @@ Data transmitted by the Cryologger is automatically displayed on the https://cry
 ## Deployments
 Three different configurations of the Cryologger AWS were deployed in 2019.
 
-### Nain, Newfoundland and Labrador
+## Nain, Newfoundland and Labrador
 * Date: February, 2019
 * Coordinates:
 
-#### Measurements
+### Recorded Measurements
 | Variable  | Unit | Comments |
 | --- | :---: | --- |
 | Datetime  |   | YYYY-MM-DD hh:mm:ss |
@@ -39,13 +39,13 @@ Three different configurations of the Cryologger AWS were deployed in 2019.
 | Message counter |  | Number of transmitted messages |
 
 
-### Arctic Bay, Nunavut
+## Arctic Bay, Nunavut
 * Data: https://cryologger.org/arctic-bay-2019/
 * Date: May 27, 2019
 * Coordinates: 73.31 N, -86.2 5W
 <img src="https://github.com/adamgarbo/Cryologger_Automatic_Weather_Station/blob/master/Images/DSC_0440.JPG" height="480">
 
-#### Measurements
+### Recorded Measurements
 | Variable  | Unit | Comments |
 | --- | :---: | --- |
 | Datetime  |   | YYYY-MM-DD hh:mm:ss |
@@ -63,14 +63,14 @@ Three different configurations of the Cryologger AWS were deployed in 2019.
 | Transmit duration  | s | Length of Iridium transmission  |
 | Message counter |  | Number of transmitted messages |
 
-### Milne Glacier, Nunavut
+## Milne Glacier, Nunavut
 * Data: https://cryologger.org/milne-glacier-2019/
 * Date: July, 2019
 * Coordinates: 82.45 N,	-80.40 W
 
 <img src="https://github.com/adamgarbo/Cryologger_Automatic_Weather_Station/blob/master/Images/DSC_1873.JPG" width="720">
 
-#### Measurements
+### Recorded Measurements
 | Variable  | Unit | Comments |
 | --- | :---: | --- |
 | Datetime  |   | YYYY-MM-DD hh:mm:ss |
