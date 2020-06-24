@@ -7,7 +7,10 @@ https://www.arduino.cc/en/main/software
 
 ### Custom Board Manager URLs:
 
-To make use of SparkFun and Adafruit flavoured boards, it is necessary to first add their Additional Boards Manager URLs to the Arduino IDE. These are JSON URLs that are added as a comma-separated list.
+To make use of SparkFun and Adafruit flavoured boards, it is necessary to first add their Additional Boards Manager URLs. These are JSON URLs added as a comma-separated list in Preferences of the Arduino IDE.
+
+[!Image](https://github.com/adamgarbo/Cryologger_Automatic_Weather_Station/blob/master/Documentation/Images/preferences.png)
+
 
 **Adafruit:** 
 * **Guide:** https://learn.adafruit.com/add-boards-arduino-v164/setup
