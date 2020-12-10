@@ -314,7 +314,7 @@ void readBattery()
 
   voltage *= ((330000.0 + 100000.0) / 100000.0); // Multiply back 100,000 / (330,000 + 100,000) kOhm
   //voltage *= 2;      // Multiply back
-  //voltage *= 3.3;   // Multiply by 3.3V reference voltage ***BUG: UNCOMMENT***
+  voltage *= 3.3;   // Multiply by 3.3V reference voltage *Bug in deployed code: this line was commented*
   voltage /= 4096;  // Convert to voltage
 
   // Add to statistics object
