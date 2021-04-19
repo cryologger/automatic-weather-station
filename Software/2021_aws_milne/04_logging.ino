@@ -78,23 +78,23 @@ void logData()
     {
       samplesSaved++;   //  Increment sample count of current file
       file.print(samplesSaved);
-      file.write(",");
+      file.print(",");
       file.print(unixtime);
-      file.write(",");
+      file.print(",");
       file.print(voltage);
-      file.write(",");
+      file.print(",");
       file.print(intTemperature);
-      file.write(",");
+      file.print(",");
       file.print(extTemperature);
-      file.write(",");
+      file.print(",");
       file.print(humidity);
-      file.write(",");
+      file.print(",");
       file.print(windSpeed1);
-      file.write(",");
+      file.print(",");
       file.print(windDirection1);
-      file.write(",");
+      file.print(",");
       file.print(windGust1);
-      file.write(",");
+      file.print(",");
       file.print(windGustDirection1);
       writeTimestamps();
       file.close();
@@ -137,7 +137,6 @@ void logData()
 // Log file write and access timestamps
 void writeTimestamps() 
 {
-
   // Read RTC date and time
   myRTC.read(tm);
 

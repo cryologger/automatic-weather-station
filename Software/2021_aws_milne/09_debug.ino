@@ -1,5 +1,6 @@
 // Print current time and date
-void printDateTime(time_t t) {
+void printDateTime(time_t t) 
+{
   Serial.print((day(t) < 10) ? "0" : ""); Serial.print(day(t), DEC); Serial.print('/');
   Serial.print((month(t) < 10) ? "0" : ""); Serial.print(month(t), DEC); Serial.print('/');
   Serial.print(year(t), DEC); Serial.print(' ');
@@ -9,7 +10,8 @@ void printDateTime(time_t t) {
 }
 
 // Print statisticsitre
-void printStatistics() {
+void printStatistics() 
+{
   Serial.println();
   Serial.println(F("Statistics"));
   Serial.println(F("============================================================================"));
@@ -51,7 +53,8 @@ void printStatistics() {
 }
 
 // Print union/structure
-void printUnion() {
+void printUnion() 
+{
   Serial.println();
   Serial.println(F("Union/structure"));
   Serial.println(F("==================================="));
@@ -69,7 +72,8 @@ void printUnion() {
 }
 
 // Print contents of union/structure
-void printUnionBinary() {
+void printUnionBinary() 
+{
   Serial.println();
   Serial.println(F("Union/structure"));
   Serial.println(F("========================="));
@@ -84,12 +88,14 @@ void printUnionBinary() {
 }
 
 // Print contents of transmiff buffer array
-void printTransmitBuffer() {
+void printTransmitBuffer() 
+{
   Serial.println();
   Serial.println(F("Transmit buffer"));
   Serial.println(F("========================="));
   Serial.println(F("Byte\tHex\tBinary"));
-  for (unsigned int i = 0; i < 340; i++) {
+  for (unsigned int i = 0; i < 340; i++) 
+  {
     Serial.print(i);
     Serial.print("\t");
     Serial.print(transmitBuffer[i], HEX);

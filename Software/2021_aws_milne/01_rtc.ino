@@ -71,3 +71,25 @@ void readRtc()
   message.unixtime = unixtime;
 
 }
+
+/*
+// Print the RTC's current date and time
+void printDateTime()
+{
+  char dateTimeBuffer[25];
+  sprintf(dateTimeBuffer, "%04d-%02d-%02d %02d:%02d:%02d",
+          rtc.getYear(), rtc.getMonth(), rtc.getDay(),
+          rtc.getHours(), rtc.getMinutes(), rtc.getSeconds());
+  Serial.println(dateTimeBuffer);
+}
+
+// Print the RTC's alarm
+void printAlarm()
+{
+  char alarmBuffer[25];
+  sprintf(alarmBuffer, "%04d-%02d-%02d %02d:%02d:00",
+          rtc.getAlarmYear(), rtc.getAlarmMonth(), rtc.getAlarmDay(),
+          rtc.getAlarmHours(), rtc.getAlarmMinutes(), rtc.getAlarmSeconds());
+  Serial.println(alarmBuffer);
+}
+*/

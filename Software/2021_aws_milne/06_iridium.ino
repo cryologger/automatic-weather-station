@@ -1,16 +1,11 @@
+// Configure RockBLOCK 9603
 void configureIridium()
 {
-  // RockBLOCK 9603 Configuration
-  if (modem.isConnected()) 
-  {
-    modem.setPowerProfile(IridiumSBD::DEFAULT_POWER_PROFILE); // Assume battery power
-    modem.adjustSendReceiveTimeout(120); // Default = 300 seconds
-    modem.adjustATTimeout(20);
-    Serial.println(F("RockBLOCK 9603 intialized."));
-  }
-  else {
-    Serial.println(F("Warning: RockBLOCK 9603N not detected. Please check wiring."));
-  }
+  modem.setPowerProfile(IridiumSBD::USB_POWER_PROFILE); // Assume USB power
+  //modem.setPowerProfile(IridiumSBD::DEFAULT_POWER_PROFILE); // Assume battery power
+  modem.adjustATTimeout(20); // Adjust timeout timer for serial AT commands (default = 20 s)
+  modem.adjustSendReceiveTimeout(180); // Adjust timeout timer for library send/receive commands (default = 300 s)
+  //modem.adjustStartupTimeout(30); // Adjust timeout for Iridium modem startup (default = 240 s)
 }
 
 // Write

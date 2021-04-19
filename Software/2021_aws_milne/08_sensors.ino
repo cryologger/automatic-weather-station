@@ -1,7 +1,7 @@
 
 // Read temperature and humidity from Davis Instruments 6830
-void readTrh() {
-
+void readTrh() 
+{
   // Enable power to temperature/relative humidity sensor
   //digitalWrite(GPIO_PWR_2_PIN, HIGH); // Always on due to bug
 
@@ -21,7 +21,8 @@ void readTrh() {
 }
 
 // Measure wind speed and direction from Davis Instruments 7911 anemometer
-void readAnemometer() {
+void readAnemometer() 
+{
   unsigned int startTime = millis();
   // Enable power to anemometer
   digitalWrite(GPIO_PWR_1_PIN, HIGH);
@@ -31,7 +32,8 @@ void readAnemometer() {
   revolutions1 = 0;
 
   // Measure wind speed for duration of samplePeriod
-  while (millis() < startTime + (samplePeriod * 1000)) {
+  while (millis() < startTime + (samplePeriod * 1000)) 
+  {
     petDog(); // Reset Watchdog Timer
   }
 
@@ -46,7 +48,8 @@ void readAnemometer() {
   windSpeed1 *= 0.44704;                                // Convert wind speed 1 to metres per second
 
   // Measure wind direction
-  for (byte i = 0; i < 5; i++) {
+  for (byte i = 0; i < 5; i++) 
+  {
     analogRead(WIND_DIRECTION_1_PIN);
     delay(1);
   }
@@ -67,7 +70,8 @@ void readAnemometer() {
   Serial.print(F("windDirection1: ")); Serial.println(windDirection1);
 
   // Determine wind gust and direction 1
-  if ((windSpeed1 > 0) && (windSpeed1 > windGust1)) {
+  if ((windSpeed1 > 0) && (windSpeed1 > windGust1)) 
+  {
     windGust1 = windSpeed1;
     windGustDirection1 = windDirection1;
   }
@@ -94,25 +98,30 @@ void windVectors()
   float rvWindDirection1 = atan2(veStats1.average(), vnStats1.average()); // Resultant mean wind direction
   rvWindDirection1 *= RAD_TO_DEG;  // Convert from radians to degrees
 
-  if (rvWindDirection1 < 0) {
+  if (rvWindDirection1 < 0) 
+  {
     rvWindDirection1 += 360;
   }
 
   float rvWindSpeed1 = sqrt(sq(veStats1.average()) + sq(vnStats1.average())); // Resultant mean wind speed 1
 
-  if ((rvWindDirection1 == 0) && (rvWindSpeed1 != 0)) {
+  if ((rvWindDirection1 == 0) && (rvWindSpeed1 != 0)) 
+  {
     rvWindDirection1 = 360;
   }
 
-  if (rvWindSpeed1 == 0) {
+  if (rvWindSpeed1 == 0) 
+  {
     rvWindDirection1 = 0;
   }
 
   // Wind direction "from" correction
-  if (rvWindDirection1 < 180) {
+  if (rvWindDirection1 < 180) 
+  {
     rvWindDirection1 += 180;
   }
-  else if (rvWindDirection1 > 180) {
+  else if (rvWindDirection1 > 180) 
+  {
     rvWindDirection1 -= 180;
   }
 
@@ -122,13 +131,14 @@ void windVectors()
 }
 
 // Wind speed 1 interrupt service routine (ISR)
-void windSpeedIsr1() {
+void windSpeedIsr1() 
+{
   revolutions1++;
 }
 
 // Calculate statistics and clear objects
-void calculateStatistics() {
-
+void calculateStatistics() 
+{
   // Write data to union
   message.voltage = batteryStats.minimum() * 1000;              // Minimum battery voltage (mV)
   message.extTemperature = extTemperatureStats.average() * 100; // Mean temperature (°C)

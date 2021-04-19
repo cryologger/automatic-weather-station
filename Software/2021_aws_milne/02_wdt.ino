@@ -1,4 +1,4 @@
-// Set up the WDT to perform a system reset if the loop() blocks for more than 16 seconds
+// Configure the Watchdog Timer to perform a system reset if loop() blocks for more than 8-16 seconds
 void configureWatchdog() 
 {
   // Set up the generic clock (GCLK2) used to clock the watchdog timer at 1.024kHz

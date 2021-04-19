@@ -12,23 +12,24 @@
   - 256 MB microSD card (Industrial rated)
 
   Comments:
-  - Automatic weather station deployed on the Arctic Bay, Nunavut in the summer of 2019.
+  - Automatic weather station to be deployed in the summer of 2021 on Ellesmere Island.
 */
 
 // ------------------------------------------------------------------------------------------------
 // Libraries
 // ------------------------------------------------------------------------------------------------
-#include <Arduino.h>            // https://github.com/arduino/ArduinoCore-samd (Required before wiring_private.h)
+#include <Arduino.h>            // Must be included before wiring_private.h
 #include <ArduinoLowPower.h>    // https://github.com/arduino-libraries/ArduinoLowPower
 #include <DS3232RTC.h>          // https://github.com/JChristensen/DS3232RTC
 #include <IridiumSBD.h>         // https://github.com/mikalhart/IridiumSBD
 #include <math.h>               // https://www.nongnu.org/avr-libc/user-manual/group__avr__math.html
 #include <sensirion.h>          // https://github.com/HydroSense/sensirion
-#include <Statistic.h>          // https://github.com/RobTillaart/Arduino/tree/master/libraries/Statistic
+#include <Statistic.h>          // https://github.com/RobTillaart/Statistic
 #include <SdFat.h>              // https://github.com/greiman/SdFat
+#include <TinyGPS++.h>          // https://github.com/mikalhart/TinyGPSPlus
 #include <SPI.h>                // https://www.arduino.cc/en/Reference/SPI
 #include <Wire.h>               // https://www.arduino.cc/en/Reference/Wire
-#include <wiring_private.h>     // pinPeripheral() function
+#include <wiring_private.h>     // Required for creating new Serial instance with pinPeripheral() function 
 
 // ------------------------------------------------------------------------------------------------
 // Pin definitions
