@@ -1,5 +1,5 @@
 # Cryologger - Automatic Weather Station (AWS)
-![Image](https://github.com/adamgarbo/Cryologger_Automatic_Weather_Station/blob/master/Images/DSC_1877.JPG)
+![Image](https://github.com/adamgarbo/Cryologger_Automatic_Weather_Station/blob/main/Images/DSC_1877.JPG)
 
 ## Background
 Polar environments are undergoing rapid environmental change, yet there is a lack of high spatial and temporal monitoring data available in these remote regions. Reliance on expensive and proprietary commercial data acquisition and telemetry systems can inhibit both researchers and citizen scientists and present a significant barrier to the establishment of widespread monitoring networks. 
@@ -66,7 +66,7 @@ Three different configurations of the Cryologger AWS were deployed in 2019.
 * Data: https://cryologger.org/arctic-bay-2019/
 * Deployed: May 27, 2019
 * Coordinates: 73.31 N, -86.2 5W
-<img src="https://github.com/adamgarbo/Cryologger_Automatic_Weather_Station/blob/master/Images/DSC_0440.JPG" height="480">
+<img src="https://github.com/adamgarbo/Cryologger_Automatic_Weather_Station/blob/main/Images/DSC_0440.JPG" height="480">
 
 #### Recorded Measurements
 | Variable  | Unit | Comments |
@@ -91,7 +91,7 @@ Three different configurations of the Cryologger AWS were deployed in 2019.
 * Deployed: July 18, 2019
 * Coordinates: 82.45 N,	-80.40 W
 
-<img src="https://github.com/adamgarbo/Cryologger_Automatic_Weather_Station/blob/master/Images/DSC_1873.JPG" width="720">
+<img src="https://github.com/adamgarbo/Cryologger_Automatic_Weather_Station/blob/main/Images/DSC_1873.JPG" width="720">
 
 #### Recorded Measurements
 | Variable  | Unit | Comments |
