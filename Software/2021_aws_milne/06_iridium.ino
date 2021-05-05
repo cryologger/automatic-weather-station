@@ -1,17 +1,14 @@
 // Configure RockBLOCK 9603
 void configureIridium()
 {
-  modem.setPowerProfile(IridiumSBD::USB_POWER_PROFILE); // Assume USB power
-  //modem.setPowerProfile(IridiumSBD::DEFAULT_POWER_PROFILE); // Assume battery power
-  modem.adjustATTimeout(20); // Adjust timeout timer for serial AT commands (default = 20 s)
-  modem.adjustSendReceiveTimeout(180); // Adjust timeout timer for library send/receive commands (default = 300 s)
-  //modem.adjustStartupTimeout(30); // Adjust timeout for Iridium modem startup (default = 240 s)
+  //modem.setPowerProfile(IridiumSBD::USB_POWER_PROFILE);     // Assume USB power
+  modem.setPowerProfile(IridiumSBD::DEFAULT_POWER_PROFILE); // Assume battery power
+  modem.adjustSendReceiveTimeout(180); // Adjust timeout for send/receive commands (default = 300 s)
 }
 
 // Write
 void writeBuffer() 
 {
-
   messageCounter++;
   message.messageCounter = messageCounter;
 
@@ -90,7 +87,7 @@ void transmitData()
 
         // Recompose variables using bitshift
         uint8_t  resetFlagBuffer            = (((uint8_t)inBuffer[10] << 0) & 0xFF);
-        uint16_t maxRetransmitCounterBuffer = (((uint16_t)inBuffer[9] << 0) & 0xFF) +
+        uint16_t retransmitLimitBuffer = (((uint16_t)inBuffer[9] << 0) & 0xFF) +
                                               (((uint16_t)inBuffer[8] << 8) & 0xFFFF);
         uint16_t transmitIntervalBuffer     = (((uint16_t)inBuffer[7] << 0) & 0xFF) +
                                               (((uint16_t)inBuffer[6] << 8) & 0xFFFF);
@@ -105,13 +102,13 @@ void transmitData()
         if ((sampleIntervalBuffer > 0  && sampleIntervalBuffer <= 86400) &&
             (averageIntervalBuffer > 0  && averageIntervalBuffer <= 24) &&
             (transmitIntervalBuffer > 0  && transmitIntervalBuffer <= 10) &&
-            (maxRetransmitCounterBuffer > 0  && maxRetransmitCounterBuffer <= 10) &&
+            (retransmitLimitBuffer > 0  && retransmitLimitBuffer <= 10) &&
             (resetFlagBuffer == 0 || resetFlagBuffer == 255))
         {
           sampleInterval = sampleIntervalBuffer;              // Update sample interval
           averageInterval = averageIntervalBuffer;            // Update average interval
           transmitInterval = transmitIntervalBuffer;          // Update transmit interval
-          maxRetransmitCounter = maxRetransmitCounterBuffer;  // Update max retransmit counter
+          retransmitLimit = retransmitLimitBuffer;  // Update max retransmit counter
           resetFlag = resetFlagBuffer;                        // Update force reset flag
         }
       }
@@ -137,7 +134,7 @@ void transmitData()
     retransmitCounter++;
 
     // Reset counter if retransmit counter is exceeded
-    if (retransmitCounter >= maxRetransmitCounter) 
+    if (retransmitCounter >= retransmitLimit) 
     {
       retransmitCounter = 0;
       memset(transmitBuffer, 0x00, sizeof(transmitBuffer));   // Clear transmitBuffer array

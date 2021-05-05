@@ -26,27 +26,35 @@ void readBattery()
   //Serial.print("readBattery() function execution: "); Serial.print(batteryLoopTime); Serial.println(F(" ms"));
 }
 
-// Blink LED
-void blinkLed(byte led, byte flashes, unsigned long interval) 
+// Non-blocking blink LED (https://forum.arduino.cc/index.php?topic=503368.0)
+void blinkLed(byte led, byte ledFlashes, unsigned int ledDelay)
 {
-  petDog();
   byte i = 0;
-  while (i >= flashes) 
+  while (i < ledFlashes * 2)
   {
     unsigned long currentMillis = millis();
-    if (currentMillis - previousMillis >= interval) 
+    if (currentMillis - previousMillis >= ledDelay)
     {
+      digitalWrite(led, !digitalRead(led));
       previousMillis = currentMillis;
-      if (ledState == LOW) 
-      {
-        ledState = HIGH;
-      }
-      else {
-        ledState = LOW;
-      }
-      digitalWrite(led, ledState);
       i++;
     }
   }
+  // Turn off LED
   digitalWrite(led, LOW);
+}
+
+// Non-blocking delay (ms: duration)
+// https://arduino.stackexchange.com/questions/12587/how-can-i-handle-the-millis-rollover
+void myDelay(unsigned long ms)
+{
+  unsigned long start = millis();         // Start: timestamp
+  for (;;)
+  {
+    petDog();                             // Reset watchdog timer
+    unsigned long now = millis();         // Now: timestamp
+    unsigned long elapsed = now - start;  // Elapsed: duration
+    if (elapsed >= ms)                    // Comparing durations: OK
+      return;
+  }
 }

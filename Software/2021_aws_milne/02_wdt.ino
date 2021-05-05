@@ -32,29 +32,33 @@ void configureWatchdog()
   NVIC_EnableIRQ(WDT_IRQn);
 }
 
-// Pet the Watchdog Timer
-void petDog() 
+// Reset the Watchdog Timer
+void petDog()
 {
-  watchdogCounter = 0;              // Clear Watchdog Timer trigger counter
-  WDT->CLEAR.bit.CLEAR = 0xA5;      // Clear the Watchdog Timer and restart time-out period //REG_WDT_CLEAR = WDT_CLEAR_CLEAR_KEY;
-  while (WDT->STATUS.bit.SYNCBUSY); // Await synchronization of registers between clock domains
+  //Serial.print("Watchdog interrupt: "); Serial.println(wdtCounter);
+  WDT->CLEAR.bit.CLEAR = 0xA5;        // Clear the Watchdog Timer and restart time-out period //REG_WDT_CLEAR = WDT_CLEAR_CLEAR_KEY;
+  while (WDT->STATUS.bit.SYNCBUSY);   // Await synchronization of registers between clock domains
+  wdtFlag = false;                    // Clear watchdog flag
+  wdtCounter = 0;                     // Reset watchdog interrupt counter
 }
 
 // Watchdog Timer interrupt service routine
-void WDT_Handler() 
+void WDT_Handler()
 {
-  // Check if system is asleep
-  if (sleepFlag) 
+  WDT->INTFLAG.bit.EW = 1;            // Clear the Early Warning interrupt flag //REG_WDT_INTFLAG = WDT_INTFLAG_EW;
+
+  // Perform system reset after 10 watchdog interrupts (should not occur)
+  if (wdtCounter < 10)
   {
-    // Permit a number Watchdog Timer triggers before forcing system reset.
-    if (watchdogCounter < 10) 
-    {
-      WDT->INTFLAG.bit.EW = 1;          // Clear the Early Warning interrupt flag //REG_WDT_INTFLAG = WDT_INTFLAG_EW;
-      WDT->CLEAR.bit.CLEAR = 0xA5;      // Clear the Watchdog Timer and restart time-out period //REG_WDT_CLEAR = WDT_CLEAR_CLEAR_KEY;
-      while (WDT->STATUS.bit.SYNCBUSY); // Await synchronization of registers between clock domains
-    }
+    WDT->CLEAR.bit.CLEAR = 0xA5;      // Clear the Watchdog Timer and restart time-out period //REG_WDT_CLEAR = WDT_CLEAR_CLEAR_KEY;
+    while (WDT->STATUS.bit.SYNCBUSY); // Await synchronization of registers between clock domains
   }
-  else {
+  else
+  {
+    //WDT->CTRL.bit.ENABLE = 0;         // Debugging only: Disable Watchdog
+    //digitalWrite(LED_BUILTIN, HIGH);  // Debugging only: Turn on LED to indicate Watchdog trigger
     while (true);                     // Force Watchdog Timer to reset the system
   }
+  wdtFlag = true; // Set the watchdog flag
+  wdtCounter++; // Increment watchdog interrupt counter
 }

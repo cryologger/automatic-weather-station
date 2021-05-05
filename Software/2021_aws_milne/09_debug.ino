@@ -1,31 +1,52 @@
-// Print current time and date
-void printDateTime(time_t t) 
+void printLine()
 {
-  Serial.print((day(t) < 10) ? "0" : ""); Serial.print(day(t), DEC); Serial.print('/');
-  Serial.print((month(t) < 10) ? "0" : ""); Serial.print(month(t), DEC); Serial.print('/');
-  Serial.print(year(t), DEC); Serial.print(' ');
-  Serial.print((hour(t) < 10) ? "0" : ""); Serial.print(hour(t), DEC); Serial.print(':');
-  Serial.print((minute(t) < 10) ? "0" : ""); Serial.print(minute(t), DEC); Serial.print(':');
-  Serial.print((second(t) < 10) ? "0" : ""); Serial.println(second(t), DEC);
+  for (byte i = 0; i < 80; i++)
+  {
+    Serial.print("-");
+  }
+  Serial.println();
 }
 
-// Print statisticsitre
-void printStatistics() 
+void printTab(byte _times)
+{
+  for (byte i = 0; i < _times; i++)
+  {
+    Serial.print("\t");
+  }
+}
+
+// Print user-defined beacon settings
+void printSettings()
+{
+  printLine();
+  Serial.println("Current Settings");
+  printLine();
+  Serial.print("sampleInterval: ");   printTab(1);  Serial.println(sampleInterval);
+  Serial.print("averageInterval: ");  printTab(1);  Serial.println(averageInterval);
+  Serial.print("transmitInterval: "); printTab(1);  Serial.println(transmitInterval);
+  Serial.print("retransmitLimit: ");  printTab(1);  Serial.println(retransmitLimit);
+  Serial.print("samplesPerFile: ");   printTab(1);  Serial.println(samplesPerFile);
+  printLine();
+}
+
+// Print statistics
+void printStatistics()
 {
   Serial.println();
+  printLine();
   Serial.println(F("Statistics"));
-  Serial.println(F("============================================================================"));
+  printLine();
   Serial.print(F("Voltage\t\t"));
   Serial.print(F("Samples: ")); Serial.print(batteryStats.count());
   Serial.print(F("\tMin: "));   Serial.print(batteryStats.minimum());
   Serial.print(F("\tMax: ")); Serial.print(batteryStats.maximum());
   Serial.print(F("\tMean: ")); Serial.println(batteryStats.average());
-  Serial.print(F("Temperature (RTC)\t"));
+  Serial.print(F("Temp Int\t"));
   Serial.print(F("Samples: ")); Serial.print(rtcStats.count());
   Serial.print(F("\tMin: ")); Serial.print(rtcStats.minimum());
   Serial.print(F("\tMax: ")); Serial.print(rtcStats.maximum());
   Serial.print(F("\tMean: ")); Serial.println(rtcStats.average());
-  Serial.print(F("Temperature\t"));
+  Serial.print(F("Temp Ext\t"));
   Serial.print(F("Samples: ")); Serial.print(extTemperatureStats.count());
   Serial.print(F("\tMin: ")); Serial.print(extTemperatureStats.minimum());
   Serial.print(F("\tMax: ")); Serial.print(extTemperatureStats.maximum());
@@ -53,30 +74,32 @@ void printStatistics()
 }
 
 // Print union/structure
-void printUnion() 
+void printUnion()
 {
   Serial.println();
+  printLine();
   Serial.println(F("Union/structure"));
-  Serial.println(F("==================================="));
-  Serial.print(F("unixtime:\t\t")); Serial.println(message.unixtime);
-  Serial.print(F("intTemperature:\t")); Serial.println(message.intTemperature);
-  Serial.print(F("extTemperature:\t\t")); Serial.println(message.extTemperature);
-  Serial.print(F("humidity:\t\t")); Serial.println(message.humidity);
-  Serial.print(F("windSpeed 1:\t\t")); Serial.println(message.windSpeed1);
-  Serial.print(F("windDirection 1:\t")); Serial.println(message.windDirection1);
-  Serial.print(F("windGust 1:\t\t")); Serial.println(message.windGust1);
-  Serial.print(F("windGustDirection 1:\t")); Serial.println(message.windGustDirection1);
-  Serial.print(F("voltage:\t\t")); Serial.println(message.voltage);
-  Serial.print(F("transmitDuration:\t\t")); Serial.println(message.transmitDuration);
-  Serial.print(F("messageCounter:\t\t")); Serial.println(message.messageCounter);
+  printLine();
+  Serial.print(F("unixtime:"));             printTab(2); Serial.println(message.unixtime);
+  Serial.print(F("intTemperature:"));       printTab(2); Serial.println(message.intTemperature);
+  Serial.print(F("extTemperature:"));       printTab(2); Serial.println(message.extTemperature);
+  Serial.print(F("humidity:"));             printTab(2); Serial.println(message.humidity);
+  Serial.print(F("windSpeed 1:"));          printTab(2); Serial.println(message.windSpeed1);
+  Serial.print(F("windDirection 1:"));      printTab(1); Serial.println(message.windDirection1);
+  Serial.print(F("windGust 1:"));           printTab(2); Serial.println(message.windGust1);
+  Serial.print(F("windGustDirection 1:"));  printTab(1); Serial.println(message.windGustDirection1);
+  Serial.print(F("voltage:"));              printTab(2); Serial.println(message.voltage);
+  Serial.print(F("transmitDuration:"));     printTab(1); Serial.println(message.transmitDuration);
+  Serial.print(F("messageCounter:"));       printTab(2); Serial.println(message.messageCounter);
+  printLine();
 }
 
 // Print contents of union/structure
-void printUnionBinary() 
+void printUnionBinary()
 {
   Serial.println();
   Serial.println(F("Union/structure"));
-  Serial.println(F("========================="));
+  printLine();
   Serial.println(F("Byte\tHex\tBinary"));
   for (unsigned int i = 0; i < sizeof(message); ++i) {
     Serial.print(i);
@@ -88,13 +111,13 @@ void printUnionBinary()
 }
 
 // Print contents of transmiff buffer array
-void printTransmitBuffer() 
+void printTransmitBuffer()
 {
   Serial.println();
   Serial.println(F("Transmit buffer"));
-  Serial.println(F("========================="));
+  printLine();
   Serial.println(F("Byte\tHex\tBinary"));
-  for (unsigned int i = 0; i < 340; i++) 
+  for (unsigned int i = 0; i < 340; i++)
   {
     Serial.print(i);
     Serial.print("\t");

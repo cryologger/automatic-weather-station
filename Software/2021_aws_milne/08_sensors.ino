@@ -1,4 +1,3 @@
-
 // Read temperature and humidity from Davis Instruments 6830
 void readTrh() 
 {

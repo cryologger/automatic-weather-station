@@ -1,6 +1,6 @@
 /*
   Title:    Cryologger Automatic Weather Station (AWS)
-  Date:     April 19, 2021
+  Date:     May 5, 2021
   Author:   Adam Garbo
 
   Components:
@@ -58,7 +58,7 @@ Uart Serial2 (&sercom1, ROCKBLOCK_RX_PIN, ROCKBLOCK_TX_PIN, SERCOM_RX_PAD_2, UAR
 #define IridiumSerial Serial2
 
 // Attach the interrupt handler to the SERCOM
-void SERCOM1_Handler() 
+void SERCOM1_Handler()
 {
   Serial2.IrqHandler();
 }
@@ -71,16 +71,14 @@ IridiumSBD      modem(IridiumSerial, ROCKBLOCK_SLEEP_PIN);
 SdFat           sd;                       // File system object
 SdFile          file;                     // Log file
 sensirion       sht(20, 21);              // sht(data pin, clock pin);
-time_t          t;
-unsigned long   unixtime;
-time_t          alarmTime;
-tmElements_t    tm;
 
+// ------------------------------------------------------------------------------------------------
 // Statistic objects
+// ------------------------------------------------------------------------------------------------
 Statistic batteryStats;         // Battery voltage statistics
 Statistic humidityStats;        // Humidity statistics
 Statistic rtcStats;             // Real-time clock statistics
-Statistic extTemperatureStats;  // Extermal temperature statistics
+Statistic extTemperatureStats;  // External temperature statistics
 Statistic windSpeedStats1;      // Anemometer wind speed statistics
 Statistic vnStats1;             // Anemometer north-south wind vector component (v) statistics
 Statistic veStats1;             // Anemometer east-west wind vector component (u) statistics
@@ -88,10 +86,10 @@ Statistic veStats1;             // Anemometer east-west wind vector component (u
 // ------------------------------------------------------------------------------------------------
 // User defined global variable declarations
 // ------------------------------------------------------------------------------------------------
-unsigned int          sampleInterval        = 300;          // Sleep duration (in seconds) between data sample acquisitions. Default = 5 minutes (300 seconds)
-unsigned int          averageInterval       = 12;           // Number of samples to be averaged for each RockBLOCK transmission. Default = 12 (Hourly)
-unsigned int          transmitInterval      = 1;            // Number of message to be included in a single transmission (340 byte limit). Default = 3 (Every 3 hours)
-unsigned int          maxRetransmitCounter  = 10;           // Maximum failed data transmissions to reattempt in a single message (340 byte limit). Default: 10
+unsigned int          sampleInterval        = 60;          // Sleep duration (in seconds) between data sample acquisitions. Default = 5 minutes (300 seconds)
+unsigned int          averageInterval       = 3;           // Number of samples to be averaged for each RockBLOCK transmission. Default = 12 (Hourly)
+unsigned int          transmitInterval      = 100;          // Number of message to be included in a single transmission (340 byte limit). Default = 3 (Every 3 hours)
+unsigned int          retransmitLimit       = 10;           // Maximum failed data transmissions to reattempt in a single message (340 byte limit). Default: 10
 unsigned int          samplesPerFile        = 8640;         // Maximum samples stored in a file before new log file creation (Default: 30 days * 288 samples per day)
 
 // ------------------------------------------------------------------------------------------------
@@ -100,8 +98,8 @@ unsigned int          samplesPerFile        = 8640;         // Maximum samples s
 const byte            chipSelect            = 4;            // MicroSD chip select pin
 const byte            samplesToAverage      = 10;           // Number of samples to average
 volatile bool         alarmFlag             = false;        // RTC interrupt service routine (ISR) flag
-volatile bool         sleepFlag             = false;        // Watchdog Timer Early Warning interrupt flag
-volatile byte         watchdogCounter       = 0;            // Watchdog Timer trigger counter
+volatile bool         wdtFlag               = false;        // Watchdog Timer Early Warning interrupt flag
+volatile byte         wdtCounter            = 0;            // Watchdog Timer trigger counter
 volatile unsigned int revolutions1          = 0;            // Wind speed 1 ISR revolutions counter
 volatile unsigned int contactBounceTime     = 0;            // Anemometer debouncing variable
 bool                  ledState              = LOW;          // Flag to toggle LED in blinkLed() function
@@ -125,14 +123,17 @@ unsigned int          previousMillis        = 0;            // RockBLOCK callbac
 unsigned int          transmitDuration      = 0;            // RockBLOCK data transmission time variable
 unsigned int          sampleCounter         = 0;            // Sensor measurement counter
 unsigned int          samplesSaved          = 0;            // Log file sample counter
+unsigned long         unixtime;
+time_t                t, alarmTime;
+tmElements_t          tm;
 
 // ------------------------------------------------------------------------------------------------
 // Data transmission unions/structures
 // ------------------------------------------------------------------------------------------------
 // Union to transmit Iridium Short Burst Data (SBD) Mobile Originated (MO) message
-typedef union 
+typedef union
 {
-  struct 
+  struct
   {
     uint32_t    unixtime;             // Date and time in time_t format           (4 bytes)
     int16_t     extTemperature;       // Mean external temperature (°C)           (2 bytes) (extTemperature * 100)
@@ -168,11 +169,11 @@ void setup()
 
   // Start Serial at 115200 baud
   Serial.begin(115200);
-  delay(5000); // Delay to allow user to open Serial Monitor
+  delay(4000); // Delay to allow user to open Serial Monitor
 
-  Serial.println(F("--------------------------------------"));
+  printLine();
   Serial.println(F("Cryologger - Automatic Weather Station"));
-  Serial.println(F("--------------------------------------"));
+  printLine();
 
   // I2C Configuration
   Wire.begin();           // Initialize I2C bus
@@ -181,29 +182,37 @@ void setup()
   // Analog-to-digital converter (ADC) Configuration
   analogReadResolution(12); // Change the ADC resolution to 12 bits
 
-  // Watchdog Timer Configuration
-  configureWatchdog();
-  configureSd();
-  configureIridium();
-  configureRtc(); // Configure RTC
+  // Configure devices
+  configureWatchdog();  // Configure Watchdog Timer (WDT)
+  //configureSd();        // Configure microSD
+  configureIridium();   // Configure Iridium 9603 transceiver
+  printSettings();      // Print configuration settings
+  configureRtc();       // Configure real-time clock (RTC)
+
+  // Print operating mode
+  Serial.print(F("Mode: "));
+#if DEBUG
+  Serial.println(F("DEBUG"));
+#else if DEPLOY
+  Serial.println(F("DEPLOY"));
+#endif
 
   // Blink LED to indicate setup has completed
-  blinkLed(LED_PIN, 10, 100);
+  blinkLed(LED_BUILTIN, 5, 100);
 }
 
 // ------------------------------------------------------------------------------------------------
 // Loop
 // ------------------------------------------------------------------------------------------------
-void loop() 
+void loop()
 {
-
   // Check if alarm interrupt service routine was triggered
-  if (alarmFlag) 
+  if (alarmFlag)
   {
     // Check to see if the alarm flag is set (also resets the flag if set)
-    if (myRTC.alarm(ALARM_1)) 
+    if (myRTC.alarm(ALARM_1))
     {
-      // Read the date, time and temperature from the RTC
+      // Read date, time and temperature from the RTC
       readRtc();
 
       // Increment the sample counter
@@ -217,12 +226,12 @@ void loop()
 
       // Perform measurements
       readBattery();    // Read battery voltage
-      readTrh();        // Read temperature and humidity
+      //readTrh();        // Read temperature and humidity
       readAnemometer(); // Read wind speed and direction
-      logData();        // Log data to microSD card
+      //logData();        // Log data to microSD card
 
       // Perform statistics on measurements
-      if (sampleCounter == averageInterval) 
+      if (sampleCounter == averageInterval)
       {
         transmitCounter++; // Increment transmit counter
         windVectors();
@@ -231,7 +240,7 @@ void loop()
         writeBuffer(); // Write message to transmit buffer array
 
         // Transmit data
-        if (transmitCounter == transmitInterval) 
+        if (transmitCounter == transmitInterval)
         {
           transmitData();
           transmitCounter = 0;
@@ -243,14 +252,14 @@ void loop()
       alarmTime = t + sampleInterval;   // Calculate next alarm
 
       // Check if alarm was set in the past
-      if (alarmTime <= myRTC.get()) 
+      if (alarmTime <= myRTC.get())
       {
         Serial.print(F("Warning! Alarm set in the past!"));
         t = myRTC.get(); // Read current date and time
         alarmTime = t + sampleInterval; // Calculate next alarm
         myRTC.setAlarm(ALM1_MATCH_MINUTES, 0, 0, 0, 1); // Set alarm to occur at minutes rolloever
       }
-      else 
+      else
       {
         myRTC.setAlarm(ALM1_MATCH_DATE, 0, minute(alarmTime), hour(alarmTime), day(alarmTime)); // Set alarm
       }
@@ -261,10 +270,15 @@ void loop()
     }
     alarmFlag = false; // Clear alarm interrupt service routine flag
   }
-  sleepFlag = true; // Clear sleep flag
+
+  // Check for Watchdog Timer interrupts
+  if (wdtFlag)
+  {
+    petDog(); // Reset the Watchdog Timer
+  }
 
 #if DEBUG
-  blinkLed(LED_BUILTIN, 1, 500);
+  blinkLed(LED_BUILTIN, 1, 100);
 #endif
 
 #if DEPLOY
