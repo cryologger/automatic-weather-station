@@ -7,7 +7,7 @@ void readBattery()
   analogReadResolution(12);
   for (byte i = 0; i < samplesToAverage; i++)
   {
-    voltage += analogRead(VBAT_PIN);
+    voltage += analogRead(PIN_VBAT);
     delay(10);
   }
   voltage /= samplesToAverage;
@@ -24,6 +24,67 @@ void readBattery()
 
   unsigned int batteryLoopTime = millis() - loopStartTime;
   //Serial.print("readBattery() function execution: "); Serial.print(batteryLoopTime); Serial.println(F(" ms"));
+}
+
+// Enable power to GPS
+void enableGpsPower()
+{
+  digitalWrite(PIN_GPS_EN, LOW);
+}
+
+// Disable power to GPS
+void disableGpsPower()
+{
+  digitalWrite(PIN_GPS_EN, HIGH);
+}
+
+// Enable power to RockBLOCK 9603
+void enableIridiumPower()
+{
+  digitalWrite(PIN_IRIDIUM_EN, HIGH);
+}
+
+// Disable power to RockBLOCK 9603
+void disableIridiumPower()
+{
+  digitalWrite(PIN_IRIDIUM_EN, LOW);
+}
+
+// Enable serial port
+void enableSerial()
+{
+#if DEBUG
+  USBDevice.attach(); // Re-attach USB
+  Serial.begin(115200);
+  //myDelay(4000); // Non-blocking delay to allow user to open Serial Monitor
+#endif
+}
+
+// Disable serial port
+void disableSerial()
+{
+#if DEBUG
+  Serial.end();   // Close serial port
+  USBDevice.detach();   // Safely detach USB prior to sleeping
+#endif
+}
+
+// Enter deep sleep
+void goToSleep()
+{
+#if DEPLOY
+  // Enter deep sleep
+  LowPower.deepSleep();
+#endif
+
+  /* Code sleeps here and awaits RTC or WDT interrupt */
+}
+
+// Wake from deep sleep
+void wakeUp()
+{
+  // Enable serial port
+  enableSerial();
 }
 
 // Non-blocking blink LED (https://forum.arduino.cc/index.php?topic=503368.0)

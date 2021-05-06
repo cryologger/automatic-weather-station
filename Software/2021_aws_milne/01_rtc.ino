@@ -12,8 +12,8 @@ void configureRtc()
   myRTC.squareWave(SQWAVE_NONE);
 
   // Configure an interrupt on the INT/SQW pin
-  pinMode(RTC_INT_PIN, INPUT_PULLUP);
-  LowPower.attachInterruptWakeup(RTC_INT_PIN, alarmIsr, FALLING);
+  pinMode(PIN_RTC_INT, INPUT_PULLUP);
+  LowPower.attachInterruptWakeup(PIN_RTC_INT, alarmIsr, FALLING);
 
   /*
     // Manually set the RTC time

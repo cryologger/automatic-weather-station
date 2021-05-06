@@ -5,7 +5,7 @@ void configureSd()
     Serial.println("SD card initialized.");
     logFlag = true;
     createLogFile(); // Create new log file
-    blinkLed(LED_PIN, 20, 100);
+    blinkLed(PIN_LED, 20, 100);
   }
   else {
     Serial.println("Warning: Unable to initialize SD card!");
@@ -89,13 +89,13 @@ void logData()
       file.print(",");
       file.print(humidity);
       file.print(",");
-      file.print(windSpeed1);
+      file.print(windSpeed);
       file.print(",");
-      file.print(windDirection1);
+      file.print(windDirection);
       file.print(",");
-      file.print(windGust1);
+      file.print(windGust);
       file.print(",");
-      file.print(windGustDirection1);
+      file.print(windGustDirection);
       writeTimestamps();
       file.close();
 
@@ -112,14 +112,14 @@ void logData()
       Serial.print(",");
       Serial.print(humidity);
       Serial.print(",");
-      Serial.print(windSpeed1);
+      Serial.print(windSpeed);
       Serial.print(",");
-      Serial.print(windDirection1);
+      Serial.print(windDirection);
       Serial.print(",");
-      Serial.print(windGust1);
+      Serial.print(windGust);
       Serial.print(",");
-      Serial.print(windGustDirection1);
-      blinkLed(LED_PIN, 2, 100);
+      Serial.print(windGustDirection);
+      blinkLed(PIN_LED, 2, 100);
     }
     else {
       Serial.println(F("Unable to open file"));

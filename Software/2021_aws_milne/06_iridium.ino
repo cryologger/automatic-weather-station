@@ -7,10 +7,10 @@ void configureIridium()
 }
 
 // Write
-void writeBuffer() 
+void writeBuffer()
 {
-  messageCounter++;
-  message.messageCounter = messageCounter;
+  iterationCounter++;
+  message.iterationCounter = iterationCounter;
 
   // Concatenate current message with existing message(s) stored in transmit buffer
   memcpy(transmitBuffer + (sizeof(message) * (transmitCounter + (retransmitCounter * transmitInterval) - 1)), message.bytes, sizeof(message)); // Copy message to transmit buffer
@@ -25,7 +25,7 @@ void writeBuffer()
 }
 
 // Transmit data via the RockBLOCK 9603 transceiver
-void transmitData() 
+void transmitData()
 {
 
   // Start loop timer
@@ -33,51 +33,38 @@ void transmitData()
   unsigned int err;
 
   // Start the serial power connected to the RockBLOCK modem
-  IridiumSerial.begin(19200);
+  IRIDIUM_PORT.begin(19200);
 
   // Assign pins 10 & 11 SERCOM functionality
-  pinPeripheral(ROCKBLOCK_RX_PIN, PIO_SERCOM);
-  pinPeripheral(ROCKBLOCK_TX_PIN, PIO_SERCOM);
+  pinPeripheral(PIN_IRIDIUM_RX, PIO_SERCOM);
+  pinPeripheral(PIN_IRIDIUM_TX, PIO_SERCOM);
 
   // Begin satellite modem operation
   Serial.println(F("Starting modem..."));
   err = modem.begin();
-  if (err == ISBD_SUCCESS) 
+  if (err == ISBD_SUCCESS)
   {
     byte inBuffer[240];  // Buffer to store incoming transmission (240 byte limit)
     size_t inBufferSize = sizeof(inBuffer);
     memset(inBuffer, 0x00, sizeof(inBuffer)); // Clear inBuffer array
-
-    /*
-        // Test the signal quality
-        int signalQuality = -1;
-        err = modem.getSignalQuality(signalQuality);
-        if (err != ISBD_SUCCESS) {
-          Serial.print(F("SignalQuality failed: error "));
-          Serial.println(err);
-          return;
-        }
-      Serial.print(F("On a scale of 0 to 5, signal quality is currently: "));
-      Serial.println(signalQuality);
-    */
 
     // Transmit and receieve data in binary format
     Serial.println(F("Attempting to transmit data..."));
     err = modem.sendReceiveSBDBinary(transmitBuffer, (sizeof(message) * (transmitCounter + (retransmitCounter * transmitInterval))), inBuffer, inBufferSize);
 
     // Check if transmission was successful
-    if (err == ISBD_SUCCESS) 
+    if (err == ISBD_SUCCESS)
     {
       retransmitCounter = 0;
       memset(transmitBuffer, 0x00, sizeof(transmitBuffer)); // Clear transmit buffer array
 
       // Check for incoming message. If no inbound message is available, inBufferSize will be zero
-      if (inBufferSize > 0) 
+      if (inBufferSize > 0)
       {
 
         // Print inBuffer size and values of each incoming byte of data
         Serial.print(F("Inbound buffer size is: ")); Serial.println(inBufferSize);
-        for (byte i = 0; i < inBufferSize; i++) 
+        for (byte i = 0; i < inBufferSize; i++)
         {
           Serial.print(F("Address: "));
           Serial.print(i);
@@ -88,7 +75,7 @@ void transmitData()
         // Recompose variables using bitshift
         uint8_t  resetFlagBuffer            = (((uint8_t)inBuffer[10] << 0) & 0xFF);
         uint16_t retransmitLimitBuffer = (((uint16_t)inBuffer[9] << 0) & 0xFF) +
-                                              (((uint16_t)inBuffer[8] << 8) & 0xFFFF);
+                                         (((uint16_t)inBuffer[8] << 8) & 0xFFFF);
         uint16_t transmitIntervalBuffer     = (((uint16_t)inBuffer[7] << 0) & 0xFF) +
                                               (((uint16_t)inBuffer[6] << 8) & 0xFFFF);
         uint16_t averageIntervalBuffer      = (((uint16_t)inBuffer[5] << 0) & 0xFF) +
@@ -118,7 +105,7 @@ void transmitData()
       Serial.println(err);
     }
   }
-  else 
+  else
   {
     Serial.print(F("Begin failed: error "));
     Serial.println(err);
@@ -129,12 +116,12 @@ void transmitData()
   }
 
   // If transmission or modem begin fails
-  if (err != ISBD_SUCCESS) 
+  if (err != ISBD_SUCCESS)
   {
     retransmitCounter++;
 
     // Reset counter if retransmit counter is exceeded
-    if (retransmitCounter >= retransmitLimit) 
+    if (retransmitCounter >= retransmitLimit)
     {
       retransmitCounter = 0;
       memset(transmitBuffer, 0x00, sizeof(transmitBuffer));   // Clear transmitBuffer array
@@ -144,14 +131,14 @@ void transmitData()
   // Power down the modem
   Serial.println(F("Putting the RockBLOCK 9603 to sleep."));
   err = modem.sleep();
-  if (err != ISBD_SUCCESS) 
+  if (err != ISBD_SUCCESS)
   {
     Serial.print(F("Sleep failed: error "));
     Serial.println(err);
   }
 
   // Close the serial port connected to the RockBLOCK modem
-  IridiumSerial.end();
+  IRIDIUM_PORT.end();
 
   // Stop loop timer
   unsigned long loopEndTime = millis() - loopStartTime;
@@ -163,43 +150,36 @@ void transmitData()
   Serial.print(F("retransmitCounter: ")); Serial.println(retransmitCounter);
 
   // Check if reset flag was transmitted
-  if (resetFlag == 255) 
+  if (resetFlag == 255)
   {
     while (1); // Wait for Watchdog Timer to reset system
   }
 }
 
-// RockBLOCK callback function
-// This function can be repeatedly called during data transmission or GPS signal acquisitionn
-bool ISBDCallback() 
-{  
-#if DEBUG
-  pinMode(LED_BUILTIN, OUTPUT);
-  digitalWrite(LED_BUILTIN, (millis() / 1000) % 2 == 1 ? HIGH : LOW);
-  pinMode(LED_BUILTIN, INPUT);
-#endif
-
-  unsigned int currentMillis = millis();
-  if (currentMillis - previousMillis >= 2000) {
+// Non-blocking RockBLOCK callback function can be called during transmit or GPS signal acquisition
+bool ISBDCallback()
+{
+  unsigned long currentMillis = millis();
+  if (currentMillis - previousMillis > 1000)
+  {
     previousMillis = currentMillis;
-    readBattery(); // Measure battery voltage
-    petDog();  // Pet the dog
+    petDog(); // Reset the Watchdog Timer
+    readBattery(); // Measure battery voltage during Iridium transmission
+    digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN)); // Blink LED
   }
   return true;
 }
 
+#if DEBUG_IRIDIUM
 // Callback to sniff the conversation with the Iridium modem
-void ISBDConsoleCallback(IridiumSBD * device, char c) 
+void ISBDConsoleCallback(IridiumSBD * device, char c)
 {
-#if DIAGNOSTICS
   Serial.write(c);
-#endif
 }
 
-// Callback to to monitor library's run state
-void ISBDDiagsCallback(IridiumSBD * device, char c) 
+// Callback to to monitor Iridium modem library's run state
+void ISBDDiagsCallback(IridiumSBD * device, char c)
 {
-#if DIAGNOSTICS
   Serial.write(c);
-#endif
 }
+#endif

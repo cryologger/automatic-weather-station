@@ -2,7 +2,7 @@
 void readTrh() 
 {
   // Enable power to temperature/relative humidity sensor
-  //digitalWrite(GPIO_PWR_2_PIN, HIGH); // Always on due to bug
+  //digitalWrite(PIN_TRH_PWR, HIGH); // Always on due to bug
 
   // Read sensor
   extTemperature = sht.readTemperatureC();
@@ -16,7 +16,7 @@ void readTrh()
   Serial.print("Humidity: "); Serial.print(humidity); Serial.println("%");
 
   // Disable power to temperature/relative humidity sensor
-  //digitalWrite(GPIO_PWR_2_PIN, LOW);
+  //digitalWrite(PIN_TRH_PWR, LOW);
 }
 
 // Measure wind speed and direction from Davis Instruments 7911 anemometer
@@ -24,11 +24,11 @@ void readAnemometer()
 {
   unsigned int startTime = millis();
   // Enable power to anemometer
-  digitalWrite(GPIO_PWR_1_PIN, HIGH);
+  digitalWrite(PIN_WIND_PWR, HIGH);
 
   // Attach interrupts to wind speed input pins
-  attachInterrupt(WIND_SPEED_1_PIN, windSpeedIsr1, FALLING);
-  revolutions1 = 0;
+  attachInterrupt(PIN_WIND_SPEED, windSpeedIsr, FALLING);
+  revolutions = 0;
 
   // Measure wind speed for duration of samplePeriod
   while (millis() < startTime + (samplePeriod * 1000)) 
@@ -37,102 +37,102 @@ void readAnemometer()
   }
 
   // Detach interrupts from wind speed input pins
-  detachInterrupt(WIND_SPEED_1_PIN);
+  detachInterrupt(PIN_WIND_SPEED);
 
   // Calculate wind speed according to Davis Instruments formula: V = P(2.25/T)
   // V = speed in miles per hour
   // P = no. of pulses in sample period
   // T = duration of sample period in seconds
-  windSpeed1 = revolutions1 * (2.25 / samplePeriod);    // Calculate wind speed 1 in miles per hour
-  windSpeed1 *= 0.44704;                                // Convert wind speed 1 to metres per second
+  windSpeed = revolutions * (2.25 / samplePeriod);    // Calculate wind speed 1 in miles per hour
+  windSpeed *= 0.44704;                                // Convert wind speed 1 to metres per second
 
   // Measure wind direction
   for (byte i = 0; i < 5; i++) 
   {
-    analogRead(WIND_DIRECTION_1_PIN);
+    analogRead(PIN_WIND_DIRECTION);
     delay(1);
   }
   analogReadResolution(12);
-  windDirection1 = analogRead(WIND_DIRECTION_1_PIN);        // Raw analog wind direction 1 value
-  windDirection1 = map(windDirection1, 0, 4095, 0, 359);    // Map wind direction 1 to degrees (0-360°)
+  windDirection = analogRead(PIN_WIND_DIRECTION);        // Raw analog wind direction 1 value
+  windDirection = map(windDirection, 0, 4095, 0, 359);    // Map wind direction 1 to degrees (0-360°)
 
   // Disable power to anemometer
-  digitalWrite(GPIO_PWR_1_PIN, LOW);
+  digitalWrite(PIN_WIND_PWR, LOW);
 
   // Correct for negative wind direction values
-  if (windDirection1 > 360)
-    windDirection1 -= 360;
-  if (windDirection1 < 0)
-    windDirection1 += 360;
+  if (windDirection > 360)
+    windDirection -= 360;
+  if (windDirection < 0)
+    windDirection += 360;
 
-  Serial.print(F("windSpeed1: ")); Serial.println(windSpeed1);
-  Serial.print(F("windDirection1: ")); Serial.println(windDirection1);
+  Serial.print(F("windSpeed: ")); Serial.println(windSpeed);
+  Serial.print(F("windDirection: ")); Serial.println(windDirection);
 
   // Determine wind gust and direction 1
-  if ((windSpeed1 > 0) && (windSpeed1 > windGust1)) 
+  if ((windSpeed > 0) && (windSpeed > windGust)) 
   {
-    windGust1 = windSpeed1;
-    windGustDirection1 = windDirection1;
+    windGust = windSpeed;
+    windGustDirection = windDirection;
   }
 
   // Calculate wind speed and direction 1 vectors
-  float windDirectionRadians1 = windDirection1 * DEG_TO_RAD;    // Convert wind direction from degrees to radians
-  float vn1 = -1.0 * windSpeed1 * cos(windDirectionRadians1);   // Magnitude of the north-south component (v) of the resultant vector mean wind
-  float ve1 = -1.0 * windSpeed1 * sin(windDirectionRadians1);   // Magnitude of the east-west component (u) of the resultant vector mean wind
+  float windDirectionRadians1 = windDirection * DEG_TO_RAD;    // Convert wind direction from degrees to radians
+  float vn1 = -1.0 * windSpeed * cos(windDirectionRadians1);   // Magnitude of the north-south component (v) of the resultant vector mean wind
+  float ve1 = -1.0 * windSpeed * sin(windDirectionRadians1);   // Magnitude of the east-west component (u) of the resultant vector mean wind
 
   // Write data to union
-  message.windGust1 = windGust1 * 100;
-  message.windGustDirection1 = windGustDirection1;
+  message.windGust = windGust * 100;
+  message.windGustDirection = windGustDirection;
 
   // Add to wind statistics 1
-  windSpeedStats1.add(windSpeed1);
-  vnStats1.add(vn1);
-  veStats1.add(ve1);
+  windSpeedStats.add(windSpeed);
+  vnStats.add(vn1);
+  veStats.add(ve1);
 }
 
 // Calculate resultant mean wind speed and direction vectors
 // For more information see: http://www.webmet.com/met_monitoring/622.html
 void windVectors()
 {
-  float rvWindDirection1 = atan2(veStats1.average(), vnStats1.average()); // Resultant mean wind direction
-  rvWindDirection1 *= RAD_TO_DEG;  // Convert from radians to degrees
+  float rvWindDirection = atan2(veStats.average(), vnStats.average()); // Resultant mean wind direction
+  rvWindDirection *= RAD_TO_DEG;  // Convert from radians to degrees
 
-  if (rvWindDirection1 < 0) 
+  if (rvWindDirection < 0) 
   {
-    rvWindDirection1 += 360;
+    rvWindDirection += 360;
   }
 
-  float rvWindSpeed1 = sqrt(sq(veStats1.average()) + sq(vnStats1.average())); // Resultant mean wind speed 1
+  float rvWindSpeed = sqrt(sq(veStats.average()) + sq(vnStats.average())); // Resultant mean wind speed 1
 
-  if ((rvWindDirection1 == 0) && (rvWindSpeed1 != 0)) 
+  if ((rvWindDirection == 0) && (rvWindSpeed != 0)) 
   {
-    rvWindDirection1 = 360;
+    rvWindDirection = 360;
   }
 
-  if (rvWindSpeed1 == 0) 
+  if (rvWindSpeed == 0) 
   {
-    rvWindDirection1 = 0;
+    rvWindDirection = 0;
   }
 
   // Wind direction "from" correction
-  if (rvWindDirection1 < 180) 
+  if (rvWindDirection < 180) 
   {
-    rvWindDirection1 += 180;
+    rvWindDirection += 180;
   }
-  else if (rvWindDirection1 > 180) 
+  else if (rvWindDirection > 180) 
   {
-    rvWindDirection1 -= 180;
+    rvWindDirection -= 180;
   }
 
   // Write data to union
-  message.windSpeed1 = rvWindSpeed1 * 100;      // Resultant mean wind speed 1 (m/s)
-  message.windDirection1 = rvWindDirection1;    // Resultant mean wind direction 1 (°)
+  message.windSpeed = rvWindSpeed * 100;      // Resultant mean wind speed 1 (m/s)
+  message.windDirection = rvWindDirection;    // Resultant mean wind direction 1 (°)
 }
 
-// Wind speed 1 interrupt service routine (ISR)
-void windSpeedIsr1() 
+// Wind speed interrupt service routine (ISR)
+void windSpeedIsr() 
 {
-  revolutions1++;
+  revolutions++;
 }
 
 // Calculate statistics and clear objects
@@ -149,9 +149,9 @@ void calculateStatistics()
   humidityStats.clear();
   rtcStats.clear();
   extTemperatureStats.clear();
-  windSpeedStats1.clear();
-  veStats1.clear();
-  vnStats1.clear();
-  windGust1 = 0.0;
-  windGustDirection1 = 0.0;
+  windSpeedStats.clear();
+  veStats.clear();
+  vnStats.clear();
+  windGust = 0.0;
+  windGustDirection = 0.0;
 }

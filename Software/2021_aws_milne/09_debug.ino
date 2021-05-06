@@ -57,20 +57,20 @@ void printStatistics()
   Serial.print(F("\tMax: ")); Serial.print(humidityStats.maximum());
   Serial.print(F("\tMean: ")); Serial.println(humidityStats.average());
   Serial.print(F("Wind speed 1\t"));
-  Serial.print(F("Samples: ")); Serial.print(windSpeedStats1.count());
-  Serial.print(F("\tMin: ")); Serial.print(windSpeedStats1.minimum());
-  Serial.print(F("\tMax: ")); Serial.print(windSpeedStats1.maximum());
-  Serial.print(F("\tMean: ")); Serial.println(windSpeedStats1.average());
+  Serial.print(F("Samples: ")); Serial.print(windSpeedStats.count());
+  Serial.print(F("\tMin: ")); Serial.print(windSpeedStats.minimum());
+  Serial.print(F("\tMax: ")); Serial.print(windSpeedStats.maximum());
+  Serial.print(F("\tMean: ")); Serial.println(windSpeedStats.average());
   Serial.print(F("vn 1\t\t"));
-  Serial.print(F("Samples: ")); Serial.print(vnStats1.count());
-  Serial.print(F("\tMin: ")); Serial.print(vnStats1.minimum());
-  Serial.print(F("\tMax: ")); Serial.print(vnStats1.maximum());
-  Serial.print(F("\tMean: ")); Serial.println(vnStats1.average());
+  Serial.print(F("Samples: ")); Serial.print(vnStats.count());
+  Serial.print(F("\tMin: ")); Serial.print(vnStats.minimum());
+  Serial.print(F("\tMax: ")); Serial.print(vnStats.maximum());
+  Serial.print(F("\tMean: ")); Serial.println(vnStats.average());
   Serial.print(F("ve 1\t\t"));
-  Serial.print(F("Samples: ")); Serial.print(veStats1.count());
-  Serial.print(F("\tMin: ")); Serial.print(veStats1.minimum());
-  Serial.print(F("\tMax: ")); Serial.print(veStats1.maximum());
-  Serial.print(F("\tMean: ")); Serial.println(veStats1.average());
+  Serial.print(F("Samples: ")); Serial.print(veStats.count());
+  Serial.print(F("\tMin: ")); Serial.print(veStats.minimum());
+  Serial.print(F("\tMax: ")); Serial.print(veStats.maximum());
+  Serial.print(F("\tMean: ")); Serial.println(veStats.average());
 }
 
 // Print union/structure
@@ -84,13 +84,13 @@ void printUnion()
   Serial.print(F("intTemperature:"));       printTab(2); Serial.println(message.intTemperature);
   Serial.print(F("extTemperature:"));       printTab(2); Serial.println(message.extTemperature);
   Serial.print(F("humidity:"));             printTab(2); Serial.println(message.humidity);
-  Serial.print(F("windSpeed 1:"));          printTab(2); Serial.println(message.windSpeed1);
-  Serial.print(F("windDirection 1:"));      printTab(1); Serial.println(message.windDirection1);
-  Serial.print(F("windGust 1:"));           printTab(2); Serial.println(message.windGust1);
-  Serial.print(F("windGustDirection 1:"));  printTab(1); Serial.println(message.windGustDirection1);
+  Serial.print(F("windSpeed:"));            printTab(2); Serial.println(message.windSpeed);
+  Serial.print(F("windDirection:"));        printTab(1); Serial.println(message.windDirection);
+  Serial.print(F("windGust:"));             printTab(2); Serial.println(message.windGust);
+  Serial.print(F("windGustDirection:"));    printTab(1); Serial.println(message.windGustDirection);
   Serial.print(F("voltage:"));              printTab(2); Serial.println(message.voltage);
   Serial.print(F("transmitDuration:"));     printTab(1); Serial.println(message.transmitDuration);
-  Serial.print(F("messageCounter:"));       printTab(2); Serial.println(message.messageCounter);
+  Serial.print(F("iterationCounter:"));     printTab(2); Serial.println(message.iterationCounter);
   printLine();
 }
 

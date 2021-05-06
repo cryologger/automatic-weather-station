@@ -1,6 +1,6 @@
 /*
   Title:    Cryologger Automatic Weather Station (AWS)
-  Date:     May 5, 2021
+  Date:     May 6, 2021
   Author:   Adam Garbo
 
   Components:
@@ -18,44 +18,51 @@
 // ------------------------------------------------------------------------------------------------
 // Libraries
 // ------------------------------------------------------------------------------------------------
-#include <Arduino.h>            // Must be included before wiring_private.h
-#include <ArduinoLowPower.h>    // https://github.com/arduino-libraries/ArduinoLowPower
-#include <DS3232RTC.h>          // https://github.com/JChristensen/DS3232RTC
-#include <IridiumSBD.h>         // https://github.com/mikalhart/IridiumSBD
-#include <math.h>               // https://www.nongnu.org/avr-libc/user-manual/group__avr__math.html
-#include <sensirion.h>          // https://github.com/HydroSense/sensirion
-#include <Statistic.h>          // https://github.com/RobTillaart/Statistic
-#include <SdFat.h>              // https://github.com/greiman/SdFat
-#include <TinyGPS++.h>          // https://github.com/mikalhart/TinyGPSPlus
-#include <SPI.h>                // https://www.arduino.cc/en/Reference/SPI
-#include <Wire.h>               // https://www.arduino.cc/en/Reference/Wire
-#include <wiring_private.h>     // Required for creating new Serial instance with pinPeripheral() function 
+#include <Arduino.h>                // Must be included before wiring_private.h
+#include <ArduinoLowPower.h>        // https://github.com/arduino-libraries/ArduinoLowPower
+#include <DS3232RTC.h>              // https://github.com/JChristensen/DS3232RTC
+#include <IridiumSBD.h>             // https://github.com/mikalhart/IridiumSBD
+#include <math.h>                   // https://www.nongnu.org/avr-libc/user-manual/group__avr__math.html
+#include <SAMD_AnalogCorrection.h>  // https://github.com/arduino/ArduinoCore-samd/tree/master/libraries/SAMD_AnalogCorrection
+#include <sensirion.h>              // https://github.com/HydroSense/sensirion
+#include <Statistic.h>              // https://github.com/RobTillaart/Statistic
+#include <SdFat.h>                  // https://github.com/greiman/SdFat
+#include <TinyGPS++.h>              // https://github.com/mikalhart/TinyGPSPlus
+#include <SPI.h>                    // https://www.arduino.cc/en/Reference/SPI
+#include <Wire.h>                   // https://www.arduino.cc/en/Reference/Wire
+#include <wiring_private.h>         // Required for creating new Serial instance with pinPeripheral() function 
 
 // ------------------------------------------------------------------------------------------------
 // Pin definitions
 // ------------------------------------------------------------------------------------------------
-#define RTC_INT_PIN             5
-#define LED_PIN                 8
-#define ROCKBLOCK_RX_PIN        10
-#define ROCKBLOCK_TX_PIN        11
-#define ROCKBLOCK_SLEEP_PIN     12
-#define WIND_SPEED_1_PIN        A0
-#define WIND_DIRECTION_1_PIN    A1
-#define GPIO_PWR_1_PIN          A2    // Anemometer GPIO power pin
-#define VBAT_PIN                A7
+#define PIN_RTC_INT           5
+#define PIN_LED               8
+#define PIN_IRIDIUM_EN        9
+#define PIN_IRIDIUM_RX        10
+#define PIN_IRIDIUM_TX        11
+#define PIN_IRIDIUM_SLEEP     12
+#define PIN_WIND_SPEED        A0
+#define PIN_WIND_DIRECTION    A1
+#define PIN_WIND_PWR          A2
+#define PIN_TRH_PWR           A4
+#define PIN_GPS_EN            A5
+#define PIN_VBAT              A7
 
 // Debugging constants
 #define DEBUG         true    // Output debug messages to Serial Monitor
-#define DIAGNOSTICS   true    // Output Iridium diagnostic messages to Serial Monitor
+#define DEBUG_GPS     true    // Output GPS debug information
+#define DEBUG_IRIDIUM true    // Output Iridium debug messages to Serial Monitor
 #define DEPLOY        false   // Disable debugging messages for deployment
 
 // ------------------------------------------------------------------------------------------------
-// Port configuration and definitions
+// Port configuration
 // ------------------------------------------------------------------------------------------------
-// Create a new UART instance assigning it to pin 10 and 11.
+// Create a new UART instance and assign it to pins 10 (RX) and 11 (TX).
 // For more information see: https://www.arduino.cc/en/Tutorial/SamdSercom
-Uart Serial2 (&sercom1, ROCKBLOCK_RX_PIN, ROCKBLOCK_TX_PIN, SERCOM_RX_PAD_2, UART_TX_PAD_0);
-#define IridiumSerial Serial2
+Uart Serial2 (&sercom1, PIN_IRIDIUM_RX, PIN_IRIDIUM_TX, SERCOM_RX_PAD_2, UART_TX_PAD_0);
+
+#define GPS_PORT      Serial1
+#define IRIDIUM_PORT  Serial2
 
 // Attach the interrupt handler to the SERCOM
 void SERCOM1_Handler()
@@ -67,7 +74,7 @@ void SERCOM1_Handler()
 // Object instantiations
 // ------------------------------------------------------------------------------------------------
 DS3232RTC       myRTC(false);             // Tell constructor not to initialize the I2C bus
-IridiumSBD      modem(IridiumSerial, ROCKBLOCK_SLEEP_PIN);
+IridiumSBD      modem(IRIDIUM_PORT, PIN_IRIDIUM_SLEEP);
 SdFat           sd;                       // File system object
 SdFile          file;                     // Log file
 sensirion       sht(20, 21);              // sht(data pin, clock pin);
@@ -79,9 +86,9 @@ Statistic batteryStats;         // Battery voltage statistics
 Statistic humidityStats;        // Humidity statistics
 Statistic rtcStats;             // Real-time clock statistics
 Statistic extTemperatureStats;  // External temperature statistics
-Statistic windSpeedStats1;      // Anemometer wind speed statistics
-Statistic vnStats1;             // Anemometer north-south wind vector component (v) statistics
-Statistic veStats1;             // Anemometer east-west wind vector component (u) statistics
+Statistic windSpeedStats;       // Anemometer wind speed statistics
+Statistic vnStats;              // Anemometer north-south wind vector component (v) statistics
+Statistic veStats;              // Anemometer east-west wind vector component (u) statistics
 
 // ------------------------------------------------------------------------------------------------
 // User defined global variable declarations
@@ -100,7 +107,7 @@ const byte            samplesToAverage      = 10;           // Number of samples
 volatile bool         alarmFlag             = false;        // RTC interrupt service routine (ISR) flag
 volatile bool         wdtFlag               = false;        // Watchdog Timer Early Warning interrupt flag
 volatile byte         wdtCounter            = 0;            // Watchdog Timer trigger counter
-volatile unsigned int revolutions1          = 0;            // Wind speed 1 ISR revolutions counter
+volatile unsigned int revolutions           = 0;            // Wind speed 1 ISR revolutions counter
 volatile unsigned int contactBounceTime     = 0;            // Anemometer debouncing variable
 bool                  ledState              = LOW;          // Flag to toggle LED in blinkLed() function
 bool                  logFlag               = true;         // MicroSD initilization flag
@@ -111,16 +118,16 @@ float                 humidity              = 0.0;          // SHT31 humidity (%
 float                 extTemperature        = 0.0;          // SHT31 temperature (°C)
 float                 intTemperature        = 0.0;          // Internal RTC temperature (°C)
 float                 voltage               = 0.0;          // Battery voltage in volts (V)
-float                 windSpeed1            = 0.0;          // Wind speed 1 in metres per second (m/s)
-float                 windGust1             = 0.0;          // Wind gust speed 1 in metres per second (m/s)
-float                 windGustDirection1    = 0.0;          // Wind gust direction 1 in degrees (°)
-unsigned int          windDirection1        = 0;            // Wind direction 1 in degrees (°)
+float                 windSpeed             = 0.0;          // Wind speed in metres per second (m/s)
+float                 windGust              = 0.0;          // Wind gust speed in metres per second (m/s)
+float                 windGustDirection     = 0.0;          // Wind gust direction in degrees (°)
+unsigned int          windDirection         = 0;            // Wind direction in degrees (°)
 unsigned int          samplePeriod          = 3;            // Wind speed sample period in seconds (s)
+unsigned int          iterationCounter      = 0;            // Counter to track total number of program iterations (zero indicates a reset)
 unsigned int          retransmitCounter     = 0;            // RockBLOCK failed data transmission counter
-unsigned int          messageCounter        = 0;            // RockBLOCK transmission counter
 unsigned int          transmitCounter       = 0;            // RockBLOCK transmission interval counter
-unsigned int          previousMillis        = 0;            // RockBLOCK callback function timer variable
 unsigned int          transmitDuration      = 0;            // RockBLOCK data transmission time variable
+unsigned long         previousMillis        = 0;            // Global millis() timer
 unsigned int          sampleCounter         = 0;            // Sensor measurement counter
 unsigned int          samplesSaved          = 0;            // Log file sample counter
 unsigned long         unixtime;
@@ -139,13 +146,13 @@ typedef union
     int16_t     extTemperature;       // Mean external temperature (°C)           (2 bytes) (extTemperature * 100)
     int16_t     intTemperature;       // Mean internal temperature (°C)           (2 bytes)
     uint16_t    humidity;             // Mean humidity (%)                        (2 bytes) (humidity * 100)
-    uint16_t    windSpeed1;           // Resultant mean wind speed 1 (m/s)        (2 bytes) (windSpeed * 100)
-    uint16_t    windDirection1;       // Resultant mean wind direction 1 (°)      (2 bytes)
-    uint16_t    windGust1;            // Wind gust speed 1 (m/s)                  (2 bytes) (windGust * 100)
-    uint16_t    windGustDirection1;   // Wind gust direction 1 (°)                (2 bytes)
+    uint16_t    windSpeed;           // Resultant mean wind speed 1 (m/s)        (2 bytes) (windSpeed * 100)
+    uint16_t    windDirection;       // Resultant mean wind direction 1 (°)      (2 bytes)
+    uint16_t    windGust;            // Wind gust speed 1 (m/s)                  (2 bytes) (windGust * 100)
+    uint16_t    windGustDirection;   // Wind gust direction 1 (°)                (2 bytes)
     uint16_t    voltage;              // Minimum battery voltage (mV)             (2 bytes) (voltage * 1000)
     uint16_t    transmitDuration;     // Debugging variable                       (2 bytes)
-    uint16_t    messageCounter;       // RockBLOCK data transmission counter      (2 bytes)
+    uint16_t    iterationCounter;       // RockBLOCK data transmission counter      (2 bytes)
   } __attribute__((packed));                                                      // Total = 24 bytes
   uint8_t bytes[24];
 } SBDMESSAGE;
@@ -159,13 +166,15 @@ size_t messageSize = sizeof(message); // Size (in bytes) of data to be stored an
 void setup()
 {
   // Pin assignments
-  pinMode(GPIO_PWR_1_PIN, OUTPUT);    // Anemometer GPIO power pin
-  pinMode(LED_PIN, OUTPUT);
   pinMode(LED_BUILTIN, OUTPUT);
-  pinMode(WIND_SPEED_1_PIN, INPUT);
-  digitalWrite(GPIO_PWR_1_PIN, LOW);
-  digitalWrite(LED_PIN, LOW);
+  pinMode(PIN_LED, OUTPUT);
+  pinMode(PIN_TRH_PWR, OUTPUT);
+  pinMode(PIN_WIND_PWR, OUTPUT);
+  pinMode(PIN_WIND_SPEED, INPUT);
   digitalWrite(LED_BUILTIN, LOW);
+  digitalWrite(PIN_LED, LOW);
+  digitalWrite(PIN_TRH_PWR, LOW);
+  digitalWrite(PIN_WIND_PWR, LOW);
 
   // Start Serial at 115200 baud
   Serial.begin(115200);
@@ -277,12 +286,9 @@ void loop()
     petDog(); // Reset the Watchdog Timer
   }
 
-#if DEBUG
+  // Blink LED to indicate WDT interrupt and nominal system operation
   blinkLed(LED_BUILTIN, 1, 100);
-#endif
 
-#if DEPLOY
-  blinkLed(LED_BUILTIN, 1, 10);
-  LowPower.deepSleep(); // Enter deep sleep
-#endif
+  // Enter deep sleep and wait for WDT or RTC alarm interrupt
+  goToSleep();
 }
