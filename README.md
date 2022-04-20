@@ -1,3 +1,9 @@
+<p align="left">
+<img alt="GitHub" src="https://img.shields.io/github/license/adamgarbo/Cryologger_Automatic_Weather_Station">
+<img alt="GitHub release (latest by date)" src="https://img.shields.io/github/v/release/adamgarbo/Cryologger_Automatic_Weather_Station">
+<img alt="GitHub issues" src="https://img.shields.io/github/issues/adamgarbo/Cryologger_Automatic_Weather_Station">
+</p>
+
 # Cryologger - Automatic Weather Station (AWS)
 ![Image](https://github.com/adamgarbo/Cryologger_Automatic_Weather_Station/blob/main/Images/DSC_1877.JPG)
 
