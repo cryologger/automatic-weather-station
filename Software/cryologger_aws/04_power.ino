@@ -48,27 +48,27 @@ void enableSerial()
 }
 
 // Enable power to IMU
-void enableImuPower()
+void enable5V()
 {
   digitalWrite(PIN_IMU_EN, HIGH);
   myDelay(500);
 }
 
 // Disable power to IMU
-void disableImuPower()
+void disable5V()
 {
   digitalWrite(PIN_IMU_EN, LOW);
 }
 
 // Enable power to sensors
-void enableSensorPower()
+void enable12V()
 {
   digitalWrite(PIN_12V_SW, HIGH);
   myDelay(500);
 }
 
 // Disable power to sensors
-void disableSensorPower()
+void disable12V()
 {
   digitalWrite(PIN_12V_SW, LOW);
 }
@@ -120,7 +120,7 @@ void goToSleep()
   }
 
   //disableGnssPower();
-  //disableSensorPower();
+  //disable12V();
   //disableImuPower();
 
   // Enter deep sleep

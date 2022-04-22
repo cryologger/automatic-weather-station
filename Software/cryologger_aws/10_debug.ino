@@ -35,8 +35,9 @@ void printTimers()
   DEBUG_PRINTLN("Function Execution Timers");
   printLine();
   DEBUG_PRINT("readRtc: ");       printTab(1);  DEBUG_PRINTLN(timer.rtc);
-  DEBUG_PRINT("readSensors: ");   printTab(1);  DEBUG_PRINTLN(timer.sensors);
-  DEBUG_PRINT("readImu: ");       printTab(1);  DEBUG_PRINTLN(timer.imu);
+  DEBUG_PRINT("readDps310: ");    printTab(1);  DEBUG_PRINTLN(timer.dps310);
+  DEBUG_PRINT("readLsm303: ");    printTab(1);  DEBUG_PRINTLN(timer.lsm303);
+  DEBUG_PRINT("readHmp60: ");     printTab(1);  DEBUG_PRINTLN(timer.hmp60);
   DEBUG_PRINT("readGnss: ");      printTab(1);  DEBUG_PRINTLN(timer.gnss);
   DEBUG_PRINT("transmitData: ");  printTab(1);  DEBUG_PRINTLN(timer.iridium);
   DEBUG_PRINT("freeRam(): ");     printTab(1);  DEBUG_PRINTLN(freeRam());

@@ -1,6 +1,6 @@
 /*
-    Title:    Cryologger Automatic Weather Station v1.0
-    Date:     April 18, 2022
+    Title:    Cryologger Automatic Weather Station v0.1
+    Date:     April 21, 2022
     Author:   Adam Garbo
 
     Description:
@@ -160,14 +160,13 @@ unsigned long unixtime          = 0;      // Global epoch time variable
 
 float         extTemperature    = 0.0;    // HMP60 temperature (°C)
 float         intTemperature    = 0.0;    // DPS310 temperature (°C)
-float         intHumidity       = 0.0;    // HMP60 humidity (%)
 float         windSpeed         = 0.0;    // Wind speed (m/s)
 float         windGust          = 0.0;    // Wind gust speed  (m/s)
 unsigned int  windDirection     = 0;      // Wind direction (°)
 float         windGustDirection = 0.0;    // Wind gust direction (°)
 float         voltage           = 0.0;    // Battery voltage (V)
 
-tmElements_t  tm;                             // Variable for converting time elements to time_t
+tmElements_t  tm;                         // Variable for converting time elements to time_t
 
 // ----------------------------------------------------------------------------
 // Unions/structures
@@ -179,9 +178,8 @@ typedef union
   struct
   {
     uint32_t  unixtime;           // UNIX Epoch time                (4 bytes)
-    int16_t   intTemperature;     // Temperature (°C)               (2 bytes)   * 100
-    uint16_t  intHumidity;        // HMP60 humidity (%)             (2 bytes)   - 850 * 100
-    uint16_t  intPressure;        // Pressure (hPa)                 (2 bytes)   - 850 * 100
+    int16_t   intTemperature;     // Internal temperature (°C)      (2 bytes)   * 100
+    uint16_t  intPressure;        // Interal pressure (hPa)         (2 bytes)   - 850 * 100
     int16_t   extTemperature;     // HMP60 temperature (°C)         (2 bytes)   * 100
     uint16_t  extHumidity;        // HMP60 humidity (%)             (2 bytes)   - 850 * 100
 
@@ -224,9 +222,9 @@ SBD_MT_MESSAGE mtSbdMessage;
 // Structure to store device online/offline states
 struct struct_online
 {
+  bool dps310 = false;
   bool lsm303 = false;
   bool gnss = false;
-  bool dps310 = false;
 } online;
 
 // Union to store loop timers`
@@ -234,8 +232,9 @@ struct struct_timer
 {
   unsigned long rtc;
   unsigned long battery;
-  unsigned long sensors;
-  unsigned long imu;
+  unsigned long dps310;
+  unsigned long lsm303;
+  unsigned long hmp60;
   unsigned long gnss;
   unsigned long iridium;
 } timer;
@@ -314,8 +313,10 @@ void loop()
     petDog();         // Reset the Watchdog Timer
     readBattery();    // Read the battery voltage
     syncRtc();        // Sync the RTC with the GNSS
-    readAccel();      // Read the acceleromter
-    readSensors();    // Read sensor(s)
+    readLsm303();     // Read the acceleromter
+    readDps310();     // Read sensor(s)
+    readHmp60();
+    //readWind();
     writeBuffer();    // Write the data to transmit buffer
     transmitData();   // Transmit data via Iridium transceiver
     printTimers();    // Print function execution timers

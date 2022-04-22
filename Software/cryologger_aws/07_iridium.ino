@@ -18,7 +18,7 @@ void writeBuffer()
   memcpy(moSbdBuffer + (sizeof(moSbdMessage) * (transmitCounter + (retransmitCounter * transmitInterval) - 1)), moSbdMessage.bytes, sizeof(moSbdMessage));
 
   // Print MO-SBD union/structure
-  //printMoSbd();
+  printMoSbd();
   //printMoSbdHex();
   //printMoSbdBuffer();
 

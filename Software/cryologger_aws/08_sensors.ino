@@ -1,8 +1,10 @@
-// Configure attached sensors
-void configureSensors()
+// ----------------------------------------------------------------------------
+// Adafruit DPS310 Precision Barometric Pressure Sensor
+// ----------------------------------------------------------------------------
+void configureDps310()
 {
-  // Enable power to sensor
-  enableSensorPower();
+  // Enable power
+  enable5V();
 
   DEBUG_PRINT("Info: Initializing DPS310...");
 
@@ -20,39 +22,36 @@ void configureSensors()
   }
 }
 
-// Read attached sensors
-void readSensors()
+// Read DPS310
+void readDps310()
 {
   // Start the loop timer
   unsigned long loopStartTime = millis();
 
   // Initialize sensor(s)
-  configureSensors();
+  void readDps310();
 
-  // Check if sensor(s) online
+  // Check if sensor initialized successfully
   if (online.dps310)
   {
     DEBUG_PRINT("Info: Reading DPS310...");
 
     sensors_event_t temp_event, pressure_event;
 
+    // Read sensor until value is returned or timeout is exceeded
     while ((!dps310.temperatureAvailable() || !dps310.pressureAvailable()) && millis() - loopStartTime < 5000UL)
     {
-      return; // Wait until there's something to read
+      return;
     }
 
-    dps310.getEvents(&temp_event, &pressure_event);
-
     // Record measurements
+    dps310.getEvents(&temp_event, &pressure_event);
     float temperature = temp_event.temperature;
     float pressure = pressure_event.pressure;
-
-    //DEBUG_PRINT(temperature); DEBUG_PRINT(","); DEBUG_PRINTLN(pressure);
 
     // Write data to union
     moSbdMessage.intTemperature = temperature * 100;
     moSbdMessage.intPressure = (pressure - 850) * 100;
-    moSbdMessage.intHumidity = humidity * 10;
 
     DEBUG_PRINTLN("done.");
   }
@@ -61,18 +60,19 @@ void readSensors()
     DEBUG_PRINTLN("Warning: DPS310 offline!");
   }
   // Stop the loop timer
-  timer.sensors = millis() - loopStartTime;
+  timer.dps310 = millis() - loopStartTime;
 
-  // Disable power to sensor
-  disableSensorPower();
+  // Disable power
+  disable5V();
 }
 
-
-// Configure the accelerometer
-void configureAccel()
+// ----------------------------------------------------------------------------
+// Adafruit LSM303AGR Accelerometer/Magnetomter
+// ----------------------------------------------------------------------------
+void configureLsm303()
 {
   // Enable power
-  enableImuPower();
+  enable5V();
 
   DEBUG_PRINT("Info: Initializing LSM303...");
 
@@ -84,48 +84,37 @@ void configureAccel()
   }
   else
   {
-    DEBUG_PRINTLN(F("Warning: Failed to initialize LSM303!"));
+    DEBUG_PRINTLN("failed!");
     online.lsm303 = false;
   }
 }
 
-// ------------------------------------------------------------------------------------------------
-// LSM303AGR
-// ------------------------------------------------------------------------------------------------
-void readAccel()
+void readLsm303()
 {
   // Start loop timer
   unsigned long loopStartTime = millis();
 
-  // Initialize IMU
-  configureAccel();
+  // Initialize accelerometer
+  configureLsm303();
 
-  // Centered and scaled accelerometer/magnetomer data initialized to zero
-  float Axyz[3] = {};
-
-  // Check if IMU initialized successfully
+  // Check if sensor initialized successfully
   if (online.lsm303)
   {
     DEBUG_PRINT("Info: Reading accelerometer...");
 
-    // Read normalized accelerometer data
+    // Read accelerometer data
     sensors_event_t accel;
     lsm303.getEvent(&accel);
 
-    Axyz[0] += accel.acceleration.x;
-    Axyz[1] += accel.acceleration.y;
-    Axyz[2] += accel.acceleration.z;
+    // Calculate pitch and roll
+    float pitch = atan2(-accel.acceleration.x, sqrt(accel.acceleration.y * accel.acceleration.y + accel.acceleration.z * accel.acceleration.z)) * 180 / PI;
+    float roll = atan2(accel.acceleration.y, accel.acceleration.z) * 180 / PI;
 
-    // Calculate pitch, roll and tilt-compensated heading
-    float pitch = atan2(-Axyz[0], sqrt(Axyz[1] * Axyz[1] + Axyz[2] * Axyz[2])) * 180 / PI;
-    float roll = atan2(Axyz[1], Axyz[2]) * 180 / PI;
-
-    // Write orientation data to union
+    // Write data to union
     moSbdMessage.pitch = pitch * 100;
     moSbdMessage.roll = roll * 100;
 
     DEBUG_PRINTLN("done.");
-
   }
   else
   {
@@ -133,19 +122,25 @@ void readAccel()
   }
 
   // Disable power to IMU
-  disableImuPower();
+  disable5V();
 
   // Stop loop timer
-  timer.imu = millis() - loopStartTime;
+  timer.lsm303 = millis() - loopStartTime;
 }
 
-// ------------------------------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 // Vaisala HMP60 Temperature/Relative Humidity
-// ------------------------------------------------------------------------------------------------
-void readTrh()
+// ----------------------------------------------------------------------------
+void readHmp60()
 {
+  // Start loop timer
+  unsigned long loopStartTime = millis();
+
   // Enable power
-  enableSensorPower();
+  enable12V();
+
+  // Note: A startup delay of 4 s is recommended at 13.5 V. 2 s for 5 V
+  myDelay(4000);
 
   // Perform analog readings
   float extTemperature = analogRead(A3);
@@ -155,15 +150,20 @@ void readTrh()
   extTemperature *= (3.3 / 4096.0);
   extHumidity *= (3.3 / 4096.0);
 
+  // Map voltages to sensor ranges
+  extTemperature = mapFloat(extTemperature, 0, 1240, -40, 60); // Map temperature from 0-1 V to -40-60°C
+  extHumidity = mapFloat(extHumidity, 0, 1240, 0, 100);        // Map humidity 0-1 V to 0-100%
+
   // Add to statistics object
   extTemperatureStats.add(extTemperature);
   extHumidityStats.add(extHumidity);
 
   // Disable power
-  //disableSensorPower();
+  //disable12V();
+
+  // Stop loop timer
+  timer.hmp60 = millis() - loopStartTime;
 }
-
-
 
 // ------------------------------------------------------------------------------------------------
 // R.M. Young Wind Monitor 5103L (4-20 mA)
@@ -173,16 +173,26 @@ void readAnemometer()
   unsigned int startTime = millis();
 
   // Enable power
-  enableSensorPower();
+  enable12V();
 
   // Measure wind speed
-  windDirection = analogRead(PIN_WIND_SPEED); // Raw analog wind speed value
+  // Calibration 6.250 x mA - 25
+  windSpeed = analogRead(PIN_WIND_SPEED); // Raw analog wind speed value
 
-  // Measure wind direction 
+  // Map wind speed to 0-100 m/s
+  windSpeed = map(windSpeed, 746, 2978, 0, 100);
+
+  // Calibration (22.5 x mA)-90
+  // Output Signal 4 to 20 mA = 0 to 360°
+
+  // Measure wind direction
   windDirection = analogRead(PIN_WIND_DIR); // Raw analog wind direction value
 
+  // Map wind direction to 0-360°
+  windDirection = map(windDirection, 746, 2978, 0, 360);
+
   // Disable power
-  disableSensorPower();
+  disable12V();
 
   // Correct for negative wind direction values
   if (windDirection > 360)
@@ -213,6 +223,10 @@ void readAnemometer()
   windSpeedStats.add(windSpeed);
   vnStats.add(vn1);
   veStats.add(ve1);
+
+  // Stop loop timer
+  //timer.Wm5103 = millis() - loopStartTime;
+
 }
 
 // Calculate resultant mean wind speed and direction vectors
