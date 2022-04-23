@@ -1540,7 +1540,7 @@
     (uuid a36c7a7f-9d6b-4ae0-9491-25b8e3de0e51)
   )
 
-  (wire (pts (xy 235.585 95.25) (xy 235.585 87.63))
+  (wire (pts (xy 235.585 95.25) (xy 235.585 88.265))
     (stroke (width 0) (type default) (color 0 0 0 0))
     (uuid a6e2d734-89c3-4562-97db-3cab1a1b3948)
   )
@@ -2936,17 +2936,17 @@
     (pin "1" (uuid ed70f97a-cc49-46a4-898f-2df5bd4509ef))
   )
 
-  (symbol (lib_id "power:+BATT") (at 235.585 87.63 0) (unit 1)
+  (symbol (lib_id "power:+BATT") (at 235.585 88.265 0) (unit 1)
     (in_bom yes) (on_board yes) (fields_autoplaced)
     (uuid 00000000-0000-0000-0000-000060889e30)
-    (property "Reference" "#PWR015" (id 0) (at 235.585 91.44 0)
+    (property "Reference" "#PWR015" (id 0) (at 235.585 92.075 0)
       (effects (font (size 1.27 1.27)) hide)
     )
-    (property "Value" "+BATT" (id 1) (at 235.585 82.55 0))
-    (property "Footprint" "" (id 2) (at 235.585 87.63 0)
+    (property "Value" "+BATT" (id 1) (at 235.585 83.185 0))
+    (property "Footprint" "" (id 2) (at 235.585 88.265 0)
       (effects (font (size 1.27 1.27)) hide)
     )
-    (property "Datasheet" "" (id 3) (at 235.585 87.63 0)
+    (property "Datasheet" "" (id 3) (at 235.585 88.265 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (pin "1" (uuid 0dd704b0-72b4-4a64-b5c8-f89e223e705f))
@@ -3251,7 +3251,7 @@
   (symbol (lib_id "power:GND") (at 160.655 105.41 0) (unit 1)
     (in_bom yes) (on_board yes)
     (uuid 6d8f1dc8-67a6-484e-bbfc-3427f989f5b4)
-    (property "Reference" "#PWR?" (id 0) (at 160.655 111.76 0)
+    (property "Reference" "#PWR0113" (id 0) (at 160.655 111.76 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "GND" (id 1) (at 160.782 109.8042 0))
@@ -3439,7 +3439,7 @@
   (symbol (lib_id "power:GND") (at 168.91 106.045 0) (unit 1)
     (in_bom yes) (on_board yes)
     (uuid fe839259-c60d-4b91-93e8-3532389c5946)
-    (property "Reference" "#PWR?" (id 0) (at 168.91 112.395 0)
+    (property "Reference" "#PWR0108" (id 0) (at 168.91 112.395 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Value" "GND" (id 1) (at 169.037 110.4392 0))
@@ -3529,6 +3529,9 @@
     (path "/b8abc21d-7fe0-4e88-8bca-1b531622869a"
       (reference "#PWR0107") (unit 1) (value "GND") (footprint "")
     )
+    (path "/fe839259-c60d-4b91-93e8-3532389c5946"
+      (reference "#PWR0108") (unit 1) (value "GND") (footprint "")
+    )
     (path "/38366ae1-7b05-4df4-b886-380218ad1cab"
       (reference "#PWR0109") (unit 1) (value "+12V") (footprint "")
     )
@@ -3540,6 +3543,9 @@
     )
     (path "/475de89b-be7b-4624-8a87-e55fea7e3474"
       (reference "#PWR0112") (unit 1) (value "+12V") (footprint "")
+    )
+    (path "/6d8f1dc8-67a6-484e-bbfc-3427f989f5b4"
+      (reference "#PWR0113") (unit 1) (value "GND") (footprint "")
     )
     (path "/46d61df5-6f9c-4adc-a561-3ee6eabf14c9"
       (reference "#PWR0114") (unit 1) (value "+12V") (footprint "")
@@ -3558,12 +3564,6 @@
     )
     (path "/2dced69f-e9e4-44ce-b925-0a4102b546fa"
       (reference "#PWR0119") (unit 1) (value "+5V") (footprint "")
-    )
-    (path "/6d8f1dc8-67a6-484e-bbfc-3427f989f5b4"
-      (reference "#PWR?") (unit 1) (value "GND") (footprint "")
-    )
-    (path "/fe839259-c60d-4b91-93e8-3532389c5946"
-      (reference "#PWR?") (unit 1) (value "GND") (footprint "")
     )
     (path "/00000000-0000-0000-0000-00006081e600"
       (reference "C1") (unit 1) (value "C") (footprint "Capacitor_THT:C_Disc_D3.8mm_W2.6mm_P2.50mm")
