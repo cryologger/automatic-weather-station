@@ -20,7 +20,7 @@
 | uint16_t | transmitDuration  | Previous transmission duration | 2     |                  |
 | uint8_t  | transmitStatus    | Iridium return code            | 1     |                  |
 | uint16_t | iterationCounter  | Message counter                | 2     |                  |
-
+|          |                   |                      **Total** | **29**|                  |
 
 ### MariaDB 
 
