@@ -73,20 +73,19 @@
 // ----------------------------------------------------------------------------
 // Pin definitions
 // ----------------------------------------------------------------------------
-#define PIN_VBAT            A0  //
-#define PIN_TEMP            0   //
-#define PIN_HUMID           0   //
-#define PIN_WIND_SPEED      0   //
-#define PIN_WIND_DIR        0   //
-#define PIN_IMU_EN          0   //
-#define PIN_SENSOR_EN       0   //   
-#define PIN_GNSS_EN         0   // 
-#define PIN_5V_SW           0   // 
-#define PIN_12V_SW          6   // 
+#define PIN_VBAT            A0
+#define PIN_WIND_SPEED      A1
+#define PIN_WIND_DIR        A2
+#define PIN_TEMP            0
+#define PIN_HUMID           0
+#define PIN_GNSS_EN         A5
+//#define PIN_MICROSD_CS      4   // MicroSD chip select pin
+#define PIN_12V_EN          5
+#define PIN_5V_EN           6
 #define PIN_IRIDIUM_RX      10  // Pin 1 RXD (Yellow)
 #define PIN_IRIDIUM_TX      11  // Pin 6 TXD (Orange)
 #define PIN_IRIDIUM_SLEEP   12  // Pin 7 OnOff (Grey)
-#define PIN_MICROSD_CS      4   // MicroSD chip select pin
+
 
 // ----------------------------------------------------------------------------
 // Port configuration
@@ -121,16 +120,18 @@ Statistic batteryStats;         // Battery voltage
 Statistic extTemperatureStats;  // External temperature
 Statistic extHumidityStats;     // External humidity
 Statistic intTemperatureStats;  // Internal temperature
-Statistic intHumidityStats;     // Internal humidity 
-Statistic intPressureStats;     // Internal pressure 
+Statistic intHumidityStats;     // Internal humidity
+Statistic intPressureStats;     // Internal pressure
 Statistic windSpeedStats;       // Wind speed
 Statistic vnStats;              // Wind north-south wind vector component (v)
-Statistic veStats;              // Wind east-west wind vector component (u) 
+Statistic veStats;              // Wind east-west wind vector component (u)
 
 // ----------------------------------------------------------------------------
 // User defined global variable declarations
 // ----------------------------------------------------------------------------
 unsigned int  sampleInterval    = 60;   // Sleep duration (in seconds) between data sample acquisitions. Default = 5 minutes (300 seconds)
+unsigned int  averageInterval   = 3;    // Number of samples to be averaged for each RockBLOCK transmission. Default = 12 (Hourly)
+
 unsigned long alarmInterval     = 60;   // Sleep duration in seconds
 unsigned int  transmitInterval  = 3;    // Messages to transmit in each Iridium transmission (340 byte limit)
 unsigned int  retransmitLimit   = 2;    // Failed data transmission reattempt (340 byte limit)
@@ -189,7 +190,7 @@ typedef union
     uint16_t  windDirection;      // Mean wind direction (°)        (2 bytes)
     uint16_t  windGust;           // Wind gust speed (m/s)          (2 bytes) (windGust * 100)
     uint16_t  windGustDirection;  // Wind gust direction (°)        (2 bytes)
-    
+
     int32_t   latitude;           // Latitude (DD)                  (4 bytes)   * 1000000
     int32_t   longitude;          // Longitude (DD)                 (4 bytes)   * 1000000
     uint8_t   satellites;         // # of satellites                (1 byte)
@@ -212,6 +213,7 @@ typedef union
     uint32_t  alarmInterval;      // 4 bytes
     uint8_t   transmitInterval;   // 1 byte
     uint8_t   retransmitLimit;    // 1 byte
+
     uint8_t   resetFlag;          // 1 byte
   };
   uint8_t bytes[7]; // Size of message to be received in bytes
@@ -246,15 +248,16 @@ void setup()
 {
   // Pin assignments
   pinMode(LED_BUILTIN, OUTPUT);
-  pinMode(PIN_5V_SW, OUTPUT);
-  pinMode(PIN_12V_SW, OUTPUT);
+  pinMode(PIN_5V_EN, OUTPUT);
+  pinMode(PIN_12V_EN, OUTPUT);
   pinMode(PIN_GNSS_EN, OUTPUT);
-  pinMode(PIN_SENSOR_EN, OUTPUT);
   digitalWrite(LED_BUILTIN, LOW);
-  digitalWrite(PIN_SENSOR_EN, LOW);   // Disable power to sensors
+  digitalWrite(PIN_5V_EN, LOW);       // Disable power to Iridium 9603
+  digitalWrite(PIN_12V_EN, LOW);      // Disable power
   digitalWrite(PIN_GNSS_EN, HIGH);    // Disable power to GNSS
-  digitalWrite(PIN_5V_SW, LOW);       // Disable power to Iridium 9603
-  digitalWrite(PIN_12V_SW, LOW);      // Disable power to Iridium 9603
+
+  pinMode(A3, OUTPUT);
+  pinMode(A4, OUTPUT);
   
   // Configure analog-to-digital (ADC) converter
   configureAdc();
@@ -301,26 +304,50 @@ void loop()
     // Read the RTC
     readRtc();
 
+    // Increment the sample counter
+    sampleCounter++;
+
     // Check if program is running for the first time
     if (!firstTimeFlag)
     {
       wakeUp();
     }
 
+    // Print date and time
     DEBUG_PRINT("Info: Alarm trigger "); printDateTime();
 
     // Perform measurements
-    petDog();         // Reset the Watchdog Timer
-    readBattery();    // Read the battery voltage
-    syncRtc();        // Sync the RTC with the GNSS
-    readLsm303();     // Read the acceleromter
-    readDps310();     // Read sensor(s)
+    petDog();         // Reset Watchdog Timer
+    readBattery();    // Read battery voltage
+
+    readLsm303();     // Read LSM303 acceleromter
+    readDps310();     // Read DPS310 sensor
     readHmp60();
     //readWind();
-    writeBuffer();    // Write the data to transmit buffer
-    transmitData();   // Transmit data via Iridium transceiver
+
+
+    syncRtc();        // Sync RTC with the GNSS
+
+    // Perform statistics on measurements
+    if (sampleCounter == averageInterval)
+    {
+      transmitCounter++; // Increment transmit counter
+      
+      printStats();
+      calculateStats(); 
+      writeBuffer();    // Write data to transmit buffer
+
+      // Transmit data
+      if (transmitCounter == transmitInterval)
+      {
+        transmitData(); // Transmit data via Iridium transceiver
+        transmitCounter = 0; // Reset transmit counter
+      }
+      sampleCounter = 0; // Reset sample counter
+    }
+
     printTimers();    // Print function execution timers
-    setRtcAlarm();    // Set the RTC alarm
+    setRtcAlarm();    // Set RTC alarm
 
     DEBUG_PRINTLN("Info: Entering deep sleep...");
     DEBUG_PRINTLN();
@@ -329,10 +356,10 @@ void loop()
     prepareForSleep();
   }
 
-  // Check for Watchdog Timer interrupts
+  // Check for WDT interrupts
   if (wdtFlag)
   {
-    petDog(); // Reset the Watchdog Timer
+    petDog(); // Reset the WDT
   }
 
   // Blink LED to indicate WDT interrupt and nominal system operation

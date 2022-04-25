@@ -10,15 +10,15 @@ void configureDps310()
 
   if (dps310.begin_I2C())
   {
-    dps310.configurePressure(DPS310_64HZ, DPS310_64SAMPLES);
-    dps310.configureTemperature(DPS310_64HZ, DPS310_64SAMPLES);
     online.dps310 = true;
     DEBUG_PRINTLN("success!");
+    dps310.configurePressure(DPS310_64HZ, DPS310_64SAMPLES);
+    dps310.configureTemperature(DPS310_64HZ, DPS310_64SAMPLES);
   }
   else
   {
-    DEBUG_PRINTLN("failed!");
     online.dps310 = false;
+    DEBUG_PRINTLN("failed!");
   }
 }
 
@@ -29,7 +29,7 @@ void readDps310()
   unsigned long loopStartTime = millis();
 
   // Initialize sensor(s)
-  void readDps310();
+  configureDps310();
 
   // Check if sensor initialized successfully
   if (online.dps310)
@@ -44,7 +44,7 @@ void readDps310()
       return;
     }
 
-    // Record measurements
+    // Read sensor data
     dps310.getEvents(&temp_event, &pressure_event);
     float temperature = temp_event.temperature;
     float pressure = pressure_event.pressure;
@@ -84,8 +84,8 @@ void configureLsm303()
   }
   else
   {
-    DEBUG_PRINTLN("failed!");
     online.lsm303 = false;
+    DEBUG_PRINTLN("failed!");
   }
 }
 
@@ -100,8 +100,9 @@ void readLsm303()
   // Check if sensor initialized successfully
   if (online.lsm303)
   {
-    DEBUG_PRINT("Info: Reading accelerometer...");
+    DEBUG_PRINT("Info: Reading LSM303...");
 
+    myDelay(500);
     // Read accelerometer data
     sensors_event_t accel;
     lsm303.getEvent(&accel);
@@ -114,6 +115,10 @@ void readLsm303()
     moSbdMessage.pitch = pitch * 100;
     moSbdMessage.roll = roll * 100;
 
+    // Add to statistics object
+    //.add();
+    //.add();
+
     DEBUG_PRINTLN("done.");
   }
   else
@@ -122,14 +127,20 @@ void readLsm303()
   }
 
   // Disable power to IMU
-  disable5V();
+  //disable5V();
+  disableSensorPower();
 
   // Stop loop timer
   timer.lsm303 = millis() - loopStartTime;
 }
 
 // ----------------------------------------------------------------------------
+
 // Vaisala HMP60 Temperature/Relative Humidity
+// Brown  5-28 VDC
+// White  Channel 1 RH 0-1V
+// Blue   GND
+// Black  Channel 2 T 0-1V
 // ----------------------------------------------------------------------------
 void readHmp60()
 {
@@ -139,16 +150,12 @@ void readHmp60()
   // Enable power
   enable12V();
 
-  // Note: A startup delay of 4 s is recommended at 13.5 V. 2 s for 5 V
+  // Note: A startup delay of 4 s is recommended at 13.5 V and 2 s at 5 V
   myDelay(4000);
 
   // Perform analog readings
-  float extTemperature = analogRead(A3);
-  float extHumidity = analogRead(A4);
-
-  // Convert analog reading to voltage
-  extTemperature *= (3.3 / 4096.0);
-  extHumidity *= (3.3 / 4096.0);
+  float extTemperature = analogRead(PIN_TEMP);
+  float extHumidity = analogRead(PIN_HUMID);
 
   // Map voltages to sensor ranges
   extTemperature = mapFloat(extTemperature, 0, 1240, -40, 60); // Map temperature from 0-1 V to -40-60°C
@@ -159,15 +166,15 @@ void readHmp60()
   extHumidityStats.add(extHumidity);
 
   // Disable power
-  //disable12V();
+  disable12V();
 
   // Stop loop timer
   timer.hmp60 = millis() - loopStartTime;
 }
 
-// ------------------------------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 // R.M. Young Wind Monitor 5103L (4-20 mA)
-// ------------------------------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 void readAnemometer()
 {
   unsigned int startTime = millis();
@@ -177,7 +184,7 @@ void readAnemometer()
 
   // Measure wind speed
   // Calibration 6.250 x mA - 25
-  windSpeed = analogRead(PIN_WIND_SPEED); // Raw analog wind speed value
+  float windSpeed = analogRead(PIN_WIND_SPEED); // Raw analog wind speed value
 
   // Map wind speed to 0-100 m/s
   windSpeed = map(windSpeed, 746, 2978, 0, 100);
@@ -186,19 +193,13 @@ void readAnemometer()
   // Output Signal 4 to 20 mA = 0 to 360°
 
   // Measure wind direction
-  windDirection = analogRead(PIN_WIND_DIR); // Raw analog wind direction value
+  float windDirection = analogRead(PIN_WIND_DIR); // Raw analog wind direction value
 
   // Map wind direction to 0-360°
   windDirection = map(windDirection, 746, 2978, 0, 360);
 
   // Disable power
   disable12V();
-
-  // Correct for negative wind direction values
-  if (windDirection > 360)
-    windDirection -= 360;
-  if (windDirection < 0)
-    windDirection += 360;
 
   Serial.print(F("windSpeed: ")); Serial.println(windSpeed);
   Serial.print(F("windDirection: ")); Serial.println(windDirection);
@@ -226,7 +227,6 @@ void readAnemometer()
 
   // Stop loop timer
   //timer.Wm5103 = millis() - loopStartTime;
-
 }
 
 // Calculate resultant mean wind speed and direction vectors

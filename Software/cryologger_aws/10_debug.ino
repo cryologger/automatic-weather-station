@@ -31,7 +31,7 @@ void printSettings()
 
 void printTimers()
 {
-  //printLine();
+  printLine();
   DEBUG_PRINTLN("Function Execution Timers");
   printLine();
   DEBUG_PRINT("readRtc: ");       printTab(1);  DEBUG_PRINTLN(timer.rtc);
@@ -52,13 +52,14 @@ void printMoSbd()
   printLine();
   DEBUG_PRINTLN("MO-SBD Message Data");
   printLine();
-  /*
+  
     DEBUG_PRINT("unixtime:");         printTab(2);  DEBUG_PRINTLN(moSbdMessage.unixtime);
-    DEBUG_PRINT("temperature:");      printTab(2);  DEBUG_PRINTLN(moSbdMessage.temperature);
-    DEBUG_PRINT("pressure:");         printTab(2);  DEBUG_PRINTLN(moSbdMessage.pressure);
+    DEBUG_PRINT("intTemperature:");   printTab(2);  DEBUG_PRINTLN(moSbdMessage.intTemperature);
+    DEBUG_PRINT("intPressure:");      printTab(2);  DEBUG_PRINTLN(moSbdMessage.intPressure);
+    DEBUG_PRINT("extTemperature:");   printTab(2);  DEBUG_PRINTLN(moSbdMessage.extTemperature);
+    DEBUG_PRINT("extHumidity:");      printTab(2);  DEBUG_PRINTLN(moSbdMessage.extHumidity);
     DEBUG_PRINT("pitch:");            printTab(3);  DEBUG_PRINTLN(moSbdMessage.pitch);
     DEBUG_PRINT("roll:");             printTab(3);  DEBUG_PRINTLN(moSbdMessage.roll);
-    DEBUG_PRINT("heading:");          printTab(2);  DEBUG_PRINTLN(moSbdMessage.heading);
     DEBUG_PRINT("latitude:");         printTab(2);  DEBUG_PRINTLN(moSbdMessage.latitude);
     DEBUG_PRINT("longitude:");        printTab(2);  DEBUG_PRINTLN(moSbdMessage.longitude);
     DEBUG_PRINT("satellites:");       printTab(2);  DEBUG_PRINTLN(moSbdMessage.satellites);
@@ -67,7 +68,7 @@ void printMoSbd()
     DEBUG_PRINT("transmitDuration:"); printTab(1);  DEBUG_PRINTLN(moSbdMessage.transmitDuration);
     DEBUG_PRINT("transmitStatus:");   printTab(2);  DEBUG_PRINTLN(moSbdMessage.transmitStatus);
     DEBUG_PRINT("iterationCounter:"); printTab(1);  DEBUG_PRINTLN(moSbdMessage.iterationCounter);
-  */
+  
   printLine();
 
 }

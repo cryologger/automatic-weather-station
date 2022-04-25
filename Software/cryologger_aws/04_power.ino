@@ -4,26 +4,20 @@ void readBattery()
   // Start loop timer
   unsigned long loopStartTime = millis();
 
-  // Measure external battery voltage across 2/1 MΩ resistor divider (1/3 divider)
-  int reading = analogRead(PIN_VBAT);
-  float voltage = reading * 3.3 * 3 / 4096.0; 
+  // Measure external battery voltage across 4/1 MΩ resistor divider (1/5 divider)
+  float voltage = analogRead(PIN_VBAT);
+  voltage = voltage * 3.3 * 5 / 4096.0; 
   
   // Measure LiPo battery voltage across 100 kΩ/100 kΩ onboard resistor divider (1/2 divider)
-  //float voltage = (float)reading / samples * 3.3 * 2 / 4096.0;
+  //float voltage = analogRead(A7);
+  //voltage = voltage / samples * 3.3 * 2 / 4096.0;
 
   // Write data to union
   moSbdMessage.voltage = voltage * 100;
 
-  /*
-    // Write minimum battery voltage value to union
-    if (moSbdMessage.voltage == 0)
-    {
-    moSbdMessage.voltage = voltage * 1000;
-    } else if ((voltage * 1000) < moSbdMessage.voltage)
-    {
-    moSbdMessage.voltage = voltage * 1000;
-    }
-  */
+  // Add to statistics object
+  batteryStats.add(voltage);
+  
   // Stop loop timer
   timer.battery = millis() - loopStartTime;
 }
@@ -50,27 +44,27 @@ void enableSerial()
 // Enable power to IMU
 void enable5V()
 {
-  digitalWrite(PIN_IMU_EN, HIGH);
+  digitalWrite(PIN_5V_EN, HIGH);
   myDelay(500);
 }
 
 // Disable power to IMU
 void disable5V()
 {
-  digitalWrite(PIN_IMU_EN, LOW);
+  digitalWrite(PIN_5V_EN, LOW);
 }
 
 // Enable power to sensors
 void enable12V()
 {
-  digitalWrite(PIN_12V_SW, HIGH);
+  digitalWrite(PIN_12V_EN, HIGH);
   myDelay(500);
 }
 
 // Disable power to sensors
 void disable12V()
 {
-  digitalWrite(PIN_12V_SW, LOW);
+  digitalWrite(PIN_12V_EN, LOW);
 }
 
 // Enable power to GNSS
@@ -88,13 +82,13 @@ void disableGnssPower()
 // Enable power to RockBLOCK 9603
 void enableIridiumPower()
 {
-  digitalWrite(PIN_5V_SW, HIGH);
+  digitalWrite(PIN_5V_EN, HIGH);
 }
 
 // Disable power to RockBLOCK 9603
 void disableIridiumPower()
 {
-  digitalWrite(PIN_5V_SW, LOW);
+  digitalWrite(PIN_5V_EN, LOW);
 }
 
 //
@@ -119,10 +113,6 @@ void goToSleep()
     firstTimeFlag = false;
   }
 
-  //disableGnssPower();
-  //disable12V();
-  //disableImuPower();
-
   // Enter deep sleep
   LowPower.deepSleep();
 
@@ -137,6 +127,7 @@ void wakeUp()
 {
   // Enable serial port
   enableSerial();
+  blinkLed(4, 1000);
 }
 
 // Non-blocking blink LED (https://forum.arduino.cc/index.php?topic=503368.0)

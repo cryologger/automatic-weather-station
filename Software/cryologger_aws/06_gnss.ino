@@ -22,13 +22,13 @@ void syncRtc()
   // Configure GNSS
   GNSS_PORT.println("$PMTK220,1000*1F"); // Set NMEA update rate to 1 Hz
   myDelay(100);
-  GNSS_PORT.println("$PMTK314,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0*28"); // Set NMEA sentence output frequencies to GGA and RMC
+  GNSS_PORT.println("$PMTK314,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0*28"); // Set NMEA sentence output to GGA and RMC
   myDelay(100);
-  //GNSS_PORT.println("$PGCMD,33,1*6C"); // Enable antenna updates
-  //GNSS_PORT.println("$PGCMD,33,0*6D"); // Disable antenna updates
+  //GNSS_PORT.println("$CDCMD,33,1*7C"); // Enable antenna updates
+  //GNSS_PORT.println("$CDCMD,33,0*7D"); // Disable antenna updates
 
   // Attempt to acquire a valid GNSS position fix for up to specified timeout period
-  while (!fixFound && millis() - loopStartTime < gnssTimeout * 60UL * 1000UL)
+  while (!fixFound && millis() - loopStartTime < gnssTimeout * 10UL * 1000UL)
   {
     if (GNSS_PORT.available())
     {
@@ -47,7 +47,7 @@ void syncRtc()
           fixCounter++; // Increment fix counter
 
           // Wait until a specified number of GNSS fixes have been collected
-          if ((fixCounter >= 50) && (gnss.satellites.value() > 0))
+          if ((fixCounter >= 5) && (gnss.satellites.value() > 0))
           {
             fixFound = true;
 
