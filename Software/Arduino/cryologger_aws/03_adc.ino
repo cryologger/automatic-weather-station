@@ -16,7 +16,9 @@ void configureAdc()
   while (ADC->STATUS.bit.SYNCBUSY);               // Wait for synchronization
 
   // Apply ADC gain and offset error calibration correction
-  analogReadCorrection(12, 2059); // Test unit
+  analogReadCorrection(30, 2064); // #1
+  //analogReadCorrection(17, 2057); // #2
+  
 }
 
 // Map raw ADC values to floats
