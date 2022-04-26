@@ -2,11 +2,10 @@
 void calculateStats()
 {
   // Write data to union
-  moSbdMessage.voltage = batteryStats.minimum() * 1000;               // Mean battery voltage (mV)
-  moSbdMessage.extTemperature = extTemperatureStats.average() * 100;  // Mean temperature (°C)
-  moSbdMessage.extHumidity = extHumidityStats.average() * 100;        // Mean humidity (%)
-  moSbdMessage.intTemperature = intTemperatureStats.average() * 100;  // Mean temperature (°C)
-  moSbdMessage.intPressure = intPressureStats.average() * 100;        // Mean pressure (hPa)
+  moSbdMessage.temperatureExt = extTemperatureStats.average() * 100;  // Mean temperature (°C)
+  moSbdMessage.humidityExt = extHumidityStats.average() * 100;        // Mean humidity (%)
+  moSbdMessage.temperatureInt = intTemperatureStats.average() * 100;  // Mean temperature (°C)
+  moSbdMessage.voltage = batteryStats.minimum() * 100;               // Mean battery voltage (V)
 
 
   windVectors();  // Calculate mean wind speed and direction vectors

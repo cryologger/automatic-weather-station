@@ -54,16 +54,15 @@ void printMoSbd()
   printLine();
   
     DEBUG_PRINT("unixtime:");         printTab(2);  DEBUG_PRINTLN(moSbdMessage.unixtime);
-    DEBUG_PRINT("intTemperature:");   printTab(2);  DEBUG_PRINTLN(moSbdMessage.intTemperature);
-    DEBUG_PRINT("intPressure:");      printTab(2);  DEBUG_PRINTLN(moSbdMessage.intPressure);
-    DEBUG_PRINT("extTemperature:");   printTab(2);  DEBUG_PRINTLN(moSbdMessage.extTemperature);
-    DEBUG_PRINT("extHumidity:");      printTab(2);  DEBUG_PRINTLN(moSbdMessage.extHumidity);
+    DEBUG_PRINT("temperatureInt:");   printTab(2);  DEBUG_PRINTLN(moSbdMessage.temperatureInt);
+    DEBUG_PRINT("temperatureExt:");   printTab(2);  DEBUG_PRINTLN(moSbdMessage.temperatureExt);
+    DEBUG_PRINT("humidityExt:");      printTab(2);  DEBUG_PRINTLN(moSbdMessage.humidityExt);
     DEBUG_PRINT("pitch:");            printTab(3);  DEBUG_PRINTLN(moSbdMessage.pitch);
     DEBUG_PRINT("roll:");             printTab(3);  DEBUG_PRINTLN(moSbdMessage.roll);
-    DEBUG_PRINT("latitude:");         printTab(2);  DEBUG_PRINTLN(moSbdMessage.latitude);
-    DEBUG_PRINT("longitude:");        printTab(2);  DEBUG_PRINTLN(moSbdMessage.longitude);
-    DEBUG_PRINT("satellites:");       printTab(2);  DEBUG_PRINTLN(moSbdMessage.satellites);
-    DEBUG_PRINT("hdop:");             printTab(3);  DEBUG_PRINTLN(moSbdMessage.hdop);
+    //DEBUG_PRINT("latitude:");         printTab(2);  DEBUG_PRINTLN(moSbdMessage.latitude);
+    //DEBUG_PRINT("longitude:");        printTab(2);  DEBUG_PRINTLN(moSbdMessage.longitude);
+    //DEBUG_PRINT("satellites:");       printTab(2);  DEBUG_PRINTLN(moSbdMessage.satellites);
+    //DEBUG_PRINT("hdop:");             printTab(3);  DEBUG_PRINTLN(moSbdMessage.hdop);
     DEBUG_PRINT("voltage:");          printTab(2);  DEBUG_PRINTLN(moSbdMessage.voltage);
     DEBUG_PRINT("transmitDuration:"); printTab(1);  DEBUG_PRINTLN(moSbdMessage.transmitDuration);
     DEBUG_PRINT("transmitStatus:");   printTab(2);  DEBUG_PRINTLN(moSbdMessage.transmitStatus);

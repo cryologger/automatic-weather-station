@@ -50,8 +50,7 @@ void readDps310()
     float pressure = pressure_event.pressure;
 
     // Write data to union
-    moSbdMessage.intTemperature = temperature * 100;
-    moSbdMessage.intPressure = (pressure - 850) * 100;
+    moSbdMessage.temperatureInt = temperature * 100;
 
     DEBUG_PRINTLN("done.");
   }
@@ -126,9 +125,8 @@ void readLsm303()
     DEBUG_PRINTLN("Warning: LSM303 offline!");
   }
 
-  // Disable power to IMU
-  //disable5V();
-  disableSensorPower();
+  // Disable power
+  disable5V();
 
   // Stop loop timer
   timer.lsm303 = millis() - loopStartTime;

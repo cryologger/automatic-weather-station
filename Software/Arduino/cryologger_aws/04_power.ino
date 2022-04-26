@@ -4,9 +4,11 @@ void readBattery()
   // Start loop timer
   unsigned long loopStartTime = millis();
 
-  // Measure external battery voltage across 4/1 MΩ resistor divider (1/5 divider)
+  // Measure external battery voltage across 10/1 MΩ resistor divider (1/10 divider)
   float voltage = analogRead(PIN_VBAT);
-  voltage = voltage * 3.3 * 5 / 4096.0; 
+  voltage  *=  ((10000000.0 + 1000000.0) / 1000000.0); // Multiply back 1 MOhm / (10 MOhm + 1 MOhm)
+  voltage *= 3.3;   // Multiply by 3.3V reference voltage
+  voltage /= 4096;  // Convert to voltage
   
   // Measure LiPo battery voltage across 100 kΩ/100 kΩ onboard resistor divider (1/2 divider)
   //float voltage = analogRead(A7);

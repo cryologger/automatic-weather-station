@@ -158,6 +158,7 @@ unsigned int  failureCounter    = 0;      // Counter of consecutive failed Iridi
 unsigned long previousMillis    = 0;      // Global millis() timer
 unsigned long alarmTime         = 0;      // Global epoch alarm time variable
 unsigned long unixtime          = 0;      // Global epoch time variable
+unsigned int  sampleCounter     = 0;      // Sensor measurement counter
 
 float         extTemperature    = 0.0;    // HMP60 temperature (°C)
 float         intTemperature    = 0.0;    // DPS310 temperature (°C)
@@ -179,22 +180,19 @@ typedef union
   struct
   {
     uint32_t  unixtime;           // UNIX Epoch time                (4 bytes)
-    int16_t   intTemperature;     // Internal temperature (°C)      (2 bytes)   * 100
-    uint16_t  intPressure;        // Interal pressure (hPa)         (2 bytes)   - 850 * 100
-    int16_t   extTemperature;     // HMP60 temperature (°C)         (2 bytes)   * 100
-    uint16_t  extHumidity;        // HMP60 humidity (%)             (2 bytes)   - 850 * 100
-
+    int16_t   temperatureInt;     // Internal temperature (°C)      (2 bytes)   * 100
+    int16_t   temperatureExt;     // HMP60 temperature (°C)         (2 bytes)   * 100
+    uint16_t  humidityExt;        // HMP60 humidity (%)             (2 bytes)   - 850 * 100
     int16_t   pitch;              // Pitch (°)                      (2 bytes)   * 100
     int16_t   roll;               // Roll (°)                       (2 bytes)   * 100
     uint16_t  windSpeed;          // Mean wind speed (m/s)          (2 bytes) (windSpeed * 100)
     uint16_t  windDirection;      // Mean wind direction (°)        (2 bytes)
     uint16_t  windGust;           // Wind gust speed (m/s)          (2 bytes) (windGust * 100)
     uint16_t  windGustDirection;  // Wind gust direction (°)        (2 bytes)
-
-    int32_t   latitude;           // Latitude (DD)                  (4 bytes)   * 1000000
-    int32_t   longitude;          // Longitude (DD)                 (4 bytes)   * 1000000
-    uint8_t   satellites;         // # of satellites                (1 byte)
-    uint16_t  hdop;               // HDOP                           (2 bytes)
+    //int32_t   latitude;           // Latitude (DD)                  (4 bytes)   * 1000000
+    //int32_t   longitude;          // Longitude (DD)                 (4 bytes)   * 1000000
+    //uint8_t   satellites;         // # of satellites                (1 byte)
+    //uint16_t  hdop;               // HDOP                           (2 bytes)
     uint16_t  voltage;            // Battery voltage (V)            (2 bytes)   * 100
     uint16_t  transmitDuration;   // Previous transmission duration (2 bytes)
     uint8_t   transmitStatus;     // Iridium return code            (1 byte)
