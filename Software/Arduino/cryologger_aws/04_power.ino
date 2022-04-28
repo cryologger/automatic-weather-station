@@ -4,12 +4,14 @@ void readBattery()
   // Start loop timer
   unsigned long loopStartTime = millis();
 
+  myDelay(1000);
+
   // Measure external battery voltage across 10/1 MΩ resistor divider (1/10 divider)
-  float voltage = analogRead(PIN_VBAT);
+  voltage = analogRead(PIN_VBAT);
   voltage  *=  ((10000000.0 + 1000000.0) / 1000000.0); // Multiply back 1 MOhm / (10 MOhm + 1 MOhm)
   voltage *= 3.3;   // Multiply by 3.3V reference voltage
   voltage /= 4096;  // Convert to voltage
-  
+
   // Measure LiPo battery voltage across 100 kΩ/100 kΩ onboard resistor divider (1/2 divider)
   //float voltage = analogRead(A7);
   //voltage = voltage / samples * 3.3 * 2 / 4096.0;
@@ -19,7 +21,7 @@ void readBattery()
 
   // Add to statistics object
   batteryStats.add(voltage);
-  
+
   // Stop loop timer
   timer.battery = millis() - loopStartTime;
 }
@@ -47,7 +49,7 @@ void enableSerial()
 void enable5V()
 {
   digitalWrite(PIN_5V_EN, HIGH);
-  myDelay(500);
+  myDelay(1000);
 }
 
 // Disable power to IMU
@@ -60,7 +62,7 @@ void disable5V()
 void enable12V()
 {
   digitalWrite(PIN_12V_EN, HIGH);
-  myDelay(500);
+  myDelay(1000);
 }
 
 // Disable power to sensors

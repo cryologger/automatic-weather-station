@@ -3,9 +3,6 @@
 // ----------------------------------------------------------------------------
 void configureDps310()
 {
-  // Enable power
-  enable5V();
-
   DEBUG_PRINT("Info: Initializing DPS310...");
 
   if (dps310.begin_I2C())
@@ -46,11 +43,14 @@ void readDps310()
 
     // Read sensor data
     dps310.getEvents(&temp_event, &pressure_event);
-    float temperature = temp_event.temperature;
-    float pressure = pressure_event.pressure;
+    float temperatureInt = temp_event.temperature;
+
+    // Add to statistics object
+    temperatureIntStats.add(temperatureInt);
+    //.add();
 
     // Write data to union
-    moSbdMessage.temperatureInt = temperature * 100;
+    moSbdMessage.temperatureInt = temperatureInt * 100;
 
     DEBUG_PRINTLN("done.");
   }
@@ -62,7 +62,7 @@ void readDps310()
   timer.dps310 = millis() - loopStartTime;
 
   // Disable power
-  disable5V();
+  //disable5V();
 }
 
 // ----------------------------------------------------------------------------
@@ -70,9 +70,6 @@ void readDps310()
 // ----------------------------------------------------------------------------
 void configureLsm303()
 {
-  // Enable power
-  enable5V();
-
   DEBUG_PRINT("Info: Initializing LSM303...");
 
   // Initialize LSM303 accelerometer
@@ -102,6 +99,7 @@ void readLsm303()
     DEBUG_PRINT("Info: Reading LSM303...");
 
     myDelay(500);
+
     // Read accelerometer data
     sensors_event_t accel;
     lsm303.getEvent(&accel);
@@ -125,9 +123,6 @@ void readLsm303()
     DEBUG_PRINTLN("Warning: LSM303 offline!");
   }
 
-  // Disable power
-  disable5V();
-
   // Stop loop timer
   timer.lsm303 = millis() - loopStartTime;
 }
@@ -145,26 +140,23 @@ void readHmp60()
   // Start loop timer
   unsigned long loopStartTime = millis();
 
-  // Enable power
-  enable12V();
-
   // Note: A startup delay of 4 s is recommended at 13.5 V and 2 s at 5 V
   myDelay(4000);
 
   // Perform analog readings
-  float extTemperature = analogRead(PIN_TEMP);
-  float extHumidity = analogRead(PIN_HUMID);
+  float temperatureExt = analogRead(PIN_TEMP);
+  float humidityExt = analogRead(PIN_HUMID);
 
   // Map voltages to sensor ranges
-  extTemperature = mapFloat(extTemperature, 0, 1240, -40, 60); // Map temperature from 0-1 V to -40-60°C
-  extHumidity = mapFloat(extHumidity, 0, 1240, 0, 100);        // Map humidity 0-1 V to 0-100%
+  temperatureExt = mapFloat(temperatureExt, 0, 1240, -40, 60); // Map temperature from 0-1 V to -40-60°C
+  humidityExt = mapFloat(humidityExt, 0, 1240, 0, 100);        // Map humidity 0-1 V to 0-100
+
+  Serial.print(F("temperatureExt: ")); Serial.println(temperatureExt);
+  Serial.print(F("humidityExt: ")); Serial.println(humidityExt);
 
   // Add to statistics object
-  extTemperatureStats.add(extTemperature);
-  extHumidityStats.add(extHumidity);
-
-  // Disable power
-  disable12V();
+  temperatureExtStats.add(temperatureExt);
+  humidityExtStats.add(humidityExt);
 
   // Stop loop timer
   timer.hmp60 = millis() - loopStartTime;
@@ -172,13 +164,22 @@ void readHmp60()
 
 // ----------------------------------------------------------------------------
 // R.M. Young Wind Monitor 5103L (4-20 mA)
+
+
+// WS+  Black
+// WS-  Red
+// WD+  White
+// WD-  Green
+
 // ----------------------------------------------------------------------------
 void readAnemometer()
 {
   unsigned int startTime = millis();
 
   // Enable power
-  enable12V();
+  //enable12V();
+
+  myDelay(4000);
 
   // Measure wind speed
   // Calibration 6.250 x mA - 25
@@ -197,7 +198,7 @@ void readAnemometer()
   windDirection = map(windDirection, 746, 2978, 0, 360);
 
   // Disable power
-  disable12V();
+  //disable12V();
 
   Serial.print(F("windSpeed: ")); Serial.println(windSpeed);
   Serial.print(F("windDirection: ")); Serial.println(windDirection);

@@ -2,28 +2,25 @@
 void calculateStats()
 {
   // Write data to union
-  moSbdMessage.temperatureExt = extTemperatureStats.average() * 100;  // Mean temperature (°C)
-  moSbdMessage.humidityExt = extHumidityStats.average() * 100;        // Mean humidity (%)
-  moSbdMessage.temperatureInt = intTemperatureStats.average() * 100;  // Mean temperature (°C)
+  moSbdMessage.temperatureExt = temperatureExtStats.average() * 100;  // Mean temperature (°C)
+  moSbdMessage.humidityExt = humidityExtStats.average() * 100;        // Mean humidity (%)
+  moSbdMessage.temperatureInt = temperatureIntStats.average() * 100;  // Mean temperature (°C)
   moSbdMessage.voltage = batteryStats.minimum() * 100;               // Mean battery voltage (V)
 
+  // Calculate mean wind speed and direction vectors
+  windVectors();
 
-  windVectors();  // Calculate mean wind speed and direction vectors
-
-  clearStats(); // Clear all statistics objects
-
+  // Clear all statistics objects
+  clearStats();
 }
-
 
 // Clear all statistics objects
 void clearStats()
 {
   // Clear statistics objects
   batteryStats.clear();
-  intTemperatureStats.clear();
-  intHumidityStats.clear();
-  intPressureStats.clear();
-  extTemperatureStats.clear();
+  temperatureIntStats.clear();
+  temperatureExtStats.clear();
   windSpeedStats.clear();
   veStats.clear();
   vnStats.clear();
@@ -42,20 +39,20 @@ void printStats()
   DEBUG_PRINT(F("Max: "));        DEBUG_PRINT(batteryStats.maximum());          printTab(1);
   DEBUG_PRINT(F("Mean: "));       DEBUG_PRINTLN(batteryStats.average());
   DEBUG_PRINT(F("Temp Int"));     printTab(1);
-  DEBUG_PRINT(F("Samples: "));    DEBUG_PRINT(intTemperatureStats.count());     printTab(1);
-  DEBUG_PRINT(F("Min: "));        DEBUG_PRINT(intTemperatureStats.minimum());   printTab(1);
-  DEBUG_PRINT(F("Max: "));        DEBUG_PRINT(intTemperatureStats.maximum());   printTab(1);
-  DEBUG_PRINT(F("Mean: "));       DEBUG_PRINTLN(intTemperatureStats.average());
+  DEBUG_PRINT(F("Samples: "));    DEBUG_PRINT(temperatureIntStats.count());     printTab(1);
+  DEBUG_PRINT(F("Min: "));        DEBUG_PRINT(temperatureIntStats.minimum());   printTab(1);
+  DEBUG_PRINT(F("Max: "));        DEBUG_PRINT(temperatureIntStats.maximum());   printTab(1);
+  DEBUG_PRINT(F("Mean: "));       DEBUG_PRINTLN(temperatureIntStats.average());
   DEBUG_PRINT(F("Temp Ext"));     printTab(1);
-  DEBUG_PRINT(F("Samples: "));    DEBUG_PRINT(extTemperatureStats.count());     printTab(1);
-  DEBUG_PRINT(F("Min: "));        DEBUG_PRINT(extTemperatureStats.minimum());   printTab(1);
-  DEBUG_PRINT(F("Max: "));        DEBUG_PRINT(extTemperatureStats.maximum());   printTab(1);
-  DEBUG_PRINT(F("Mean: "));       DEBUG_PRINTLN(extTemperatureStats.average());
+  DEBUG_PRINT(F("Samples: "));    DEBUG_PRINT(temperatureExtStats.count());     printTab(1);
+  DEBUG_PRINT(F("Min: "));        DEBUG_PRINT(temperatureExtStats.minimum());   printTab(1);
+  DEBUG_PRINT(F("Max: "));        DEBUG_PRINT(temperatureExtStats.maximum());   printTab(1);
+  DEBUG_PRINT(F("Mean: "));       DEBUG_PRINTLN(temperatureExtStats.average());
   DEBUG_PRINT(F("Humidity"));     printTab(1);
-  DEBUG_PRINT(F("Samples: "));    DEBUG_PRINT(extHumidityStats.count());        printTab(1);
-  DEBUG_PRINT(F("Min: "));        DEBUG_PRINT(extHumidityStats.minimum());      printTab(1);
-  DEBUG_PRINT(F("Max: "));        DEBUG_PRINT(extHumidityStats.maximum());      printTab(1);
-  DEBUG_PRINT(F("Mean: "));       DEBUG_PRINTLN(extHumidityStats.average());
+  DEBUG_PRINT(F("Samples: "));    DEBUG_PRINT(humidityExtStats.count());        printTab(1);
+  DEBUG_PRINT(F("Min: "));        DEBUG_PRINT(humidityExtStats.minimum());      printTab(1);
+  DEBUG_PRINT(F("Max: "));        DEBUG_PRINT(humidityExtStats.maximum());      printTab(1);
+  DEBUG_PRINT(F("Mean: "));       DEBUG_PRINTLN(humidityExtStats.average());
   DEBUG_PRINT(F("Wind speed"));   printTab(1);
   DEBUG_PRINT(F("Samples: "));    DEBUG_PRINT(windSpeedStats.count());          printTab(1);
   DEBUG_PRINT(F("Min: "));        DEBUG_PRINT(windSpeedStats.minimum());        printTab(1);

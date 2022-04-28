@@ -76,8 +76,8 @@
 #define PIN_VBAT            A0
 #define PIN_WIND_SPEED      A1
 #define PIN_WIND_DIR        A2
-#define PIN_TEMP            0
-#define PIN_HUMID           0
+#define PIN_TEMP            A3
+#define PIN_HUMID           A4
 #define PIN_GNSS_EN         A5
 //#define PIN_MICROSD_CS      4   // MicroSD chip select pin
 #define PIN_12V_EN          5
@@ -85,7 +85,6 @@
 #define PIN_IRIDIUM_RX      10  // Pin 1 RXD (Yellow)
 #define PIN_IRIDIUM_TX      11  // Pin 6 TXD (Orange)
 #define PIN_IRIDIUM_SLEEP   12  // Pin 7 OnOff (Grey)
-
 
 // ----------------------------------------------------------------------------
 // Port configuration
@@ -117,11 +116,9 @@ TinyGPSPlus                     gnss;
 // Statistics objects
 // ----------------------------------------------------------------------------
 Statistic batteryStats;         // Battery voltage
-Statistic extTemperatureStats;  // External temperature
-Statistic extHumidityStats;     // External humidity
-Statistic intTemperatureStats;  // Internal temperature
-Statistic intHumidityStats;     // Internal humidity
-Statistic intPressureStats;     // Internal pressure
+Statistic temperatureExtStats;  // External temperature
+Statistic humidityExtStats;     // External humidity
+Statistic temperatureIntStats;  // Internal temperature
 Statistic windSpeedStats;       // Wind speed
 Statistic vnStats;              // Wind north-south wind vector component (v)
 Statistic veStats;              // Wind east-west wind vector component (u)
@@ -133,15 +130,15 @@ unsigned int  sampleInterval    = 60;   // Sleep duration (in seconds) between d
 unsigned int  averageInterval   = 3;    // Number of samples to be averaged for each RockBLOCK transmission. Default = 12 (Hourly)
 
 unsigned long alarmInterval     = 60;   // Sleep duration in seconds
-unsigned int  transmitInterval  = 3;    // Messages to transmit in each Iridium transmission (340 byte limit)
+unsigned int  transmitInterval  = 1;    // Messages to transmit in each Iridium transmission (340 byte limit)
 unsigned int  retransmitLimit   = 2;    // Failed data transmission reattempt (340 byte limit)
 unsigned int  gnssTimeout       = 1;    // Timeout for GNSS signal acquisition (minutes
 unsigned int  iridiumTimeout    = 10;   // Timeout for Iridium transmission (s)
 bool          firstTimeFlag     = true; // Flag to determine if the program is running for the first time
 
-// ------------------------------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 // Global variable declarations
-// ------------------------------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 volatile bool alarmFlag         = false;  // Flag for alarm interrupt service routine
 volatile bool wdtFlag           = false;  // Flag for Watchdog Timer interrupt service routine
 volatile int  wdtCounter        = 0;      // Watchdog Timer interrupt counter
@@ -182,12 +179,12 @@ typedef union
     uint32_t  unixtime;           // UNIX Epoch time                (4 bytes)
     int16_t   temperatureInt;     // Internal temperature (°C)      (2 bytes)   * 100
     int16_t   temperatureExt;     // HMP60 temperature (°C)         (2 bytes)   * 100
-    uint16_t  humidityExt;        // HMP60 humidity (%)             (2 bytes)   - 850 * 100
+    uint16_t  humidityExt;        // HMP60 humidity (%)             (2 bytes)   * 10
     int16_t   pitch;              // Pitch (°)                      (2 bytes)   * 100
     int16_t   roll;               // Roll (°)                       (2 bytes)   * 100
-    uint16_t  windSpeed;          // Mean wind speed (m/s)          (2 bytes) (windSpeed * 100)
+    uint16_t  windSpeed;          // Mean wind speed (m/s)          (2 bytes)   * 100
     uint16_t  windDirection;      // Mean wind direction (°)        (2 bytes)
-    uint16_t  windGust;           // Wind gust speed (m/s)          (2 bytes) (windGust * 100)
+    uint16_t  windGust;           // Wind gust speed (m/s)          (2 bytes)   * 100
     uint16_t  windGustDirection;  // Wind gust direction (°)        (2 bytes)
     //int32_t   latitude;           // Latitude (DD)                  (4 bytes)   * 1000000
     //int32_t   longitude;          // Longitude (DD)                 (4 bytes)   * 1000000
@@ -197,7 +194,7 @@ typedef union
     uint16_t  transmitDuration;   // Previous transmission duration (2 bytes)
     uint8_t   transmitStatus;     // Iridium return code            (1 byte)
     uint16_t  iterationCounter;   // Message counter                (2 bytes)
-  } __attribute__((packed));                              // Total: (32 bytes)
+  } __attribute__((packed));                              // Total: (29 bytes)
   uint8_t bytes[70];
 } SBD_MO_MESSAGE;
 
@@ -249,14 +246,12 @@ void setup()
   pinMode(PIN_5V_EN, OUTPUT);
   pinMode(PIN_12V_EN, OUTPUT);
   pinMode(PIN_GNSS_EN, OUTPUT);
+  pinMode(PIN_VBAT, INPUT);
   digitalWrite(LED_BUILTIN, LOW);
   digitalWrite(PIN_5V_EN, LOW);       // Disable power to Iridium 9603
   digitalWrite(PIN_12V_EN, LOW);      // Disable power
   digitalWrite(PIN_GNSS_EN, HIGH);    // Disable power to GNSS
 
-  pinMode(A3, OUTPUT);
-  pinMode(A4, OUTPUT);
-  
   // Configure analog-to-digital (ADC) converter
   configureAdc();
 
@@ -277,6 +272,7 @@ void setup()
   configureRtc();       // Configure real-time clock (RTC)
   readRtc();            // Read date and time from RTC
   configureWdt();       // Configure Watchdog Timer (WDT)
+  readBattery();        // Read battery voltage
   printSettings();      // Print configuration settings
   syncRtc();            // Synch RTC with GNSS
   configureIridium();   // Configure Iridium 9603 transceiver
@@ -318,11 +314,15 @@ void loop()
     petDog();         // Reset Watchdog Timer
     readBattery();    // Read battery voltage
 
+    enable5V();
     readLsm303();     // Read LSM303 acceleromter
     readDps310();     // Read DPS310 sensor
-    readHmp60();
-    //readWind();
+    disable5V();
 
+    enable12V();
+    readHmp60();
+    readAnemometer();
+    disable12V();
 
     syncRtc();        // Sync RTC with the GNSS
 
@@ -330,9 +330,9 @@ void loop()
     if (sampleCounter == averageInterval)
     {
       transmitCounter++; // Increment transmit counter
-      
+
       printStats();
-      calculateStats(); 
+      calculateStats();
       writeBuffer();    // Write data to transmit buffer
 
       // Transmit data
@@ -343,7 +343,7 @@ void loop()
       }
       sampleCounter = 0; // Reset sample counter
     }
-
+    printStats();
     printTimers();    // Print function execution timers
     setRtcAlarm();    // Set RTC alarm
 

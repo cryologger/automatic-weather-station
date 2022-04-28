@@ -26,6 +26,7 @@ void printSettings()
   DEBUG_PRINT("retransmitCounter: "); printTab(1);  DEBUG_PRINTLN(retransmitCounter);
   DEBUG_PRINT("retransmitLimit: ");   printTab(1);  DEBUG_PRINTLN(retransmitLimit);
   DEBUG_PRINT("resetFlag: ");         printTab(2);  DEBUG_PRINTLN(resetFlag);
+  DEBUG_PRINT("voltage: ");           printTab(2);  DEBUG_PRINTLN(voltage);
   printLine();
 }
 
