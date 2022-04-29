@@ -1,11 +1,6 @@
 // Configure analog-to-digital converter (ADC)
 void configureAdc()
 {
-  // Apply ADC gain and offset error calibration correction
-  //analogReadCorrection(30, 2064); // #1
-  analogReadCorrection(17, 2057); // #2
-  //analogReadCorrection(1, 2049); // #3
-
   // Sample time: 45,056 us
   // Conversion time: 45,141.33 us
   // Max input impedance: 5,571,413 Ohm
@@ -20,6 +15,11 @@ void configureAdc()
   ADC->CTRLA.bit.ENABLE = 1;                      // Enable ADC
   while (ADC->STATUS.bit.SYNCBUSY);               // Wait for synchronization
 
+  // Apply ADC gain and offset error calibration correction
+  analogReadCorrection(30, 2064); // #1
+  //analogReadCorrection(17, 2057); // #2
+  //analogReadCorrection(1, 2049); // #3
+  
 }
 
 // Map raw ADC values to floats

@@ -127,7 +127,7 @@ Statistic veStats;              // Wind east-west wind vector component (u)
 // User defined global variable declarations
 // ----------------------------------------------------------------------------
 unsigned int  sampleInterval    = 60;   // Sleep duration (in seconds) between data sample acquisitions. Default = 5 minutes (300 seconds)
-unsigned int  averageInterval   = 3;    // Number of samples to be averaged for each RockBLOCK transmission. Default = 12 (Hourly)
+unsigned int  averageInterval   = 1;    // Number of samples to be averaged for each RockBLOCK transmission. Default = 12 (Hourly)
 
 unsigned long alarmInterval     = 60;   // Sleep duration in seconds
 unsigned int  transmitInterval  = 1;    // Messages to transmit in each Iridium transmission (340 byte limit)
@@ -178,8 +178,8 @@ typedef union
   {
     uint32_t  unixtime;           // UNIX Epoch time                (4 bytes)
     int16_t   temperatureInt;     // Internal temperature (°C)      (2 bytes)   * 100
-    int16_t   temperatureExt;     // HMP60 temperature (°C)         (2 bytes)   * 100
-    uint16_t  humidityExt;        // HMP60 humidity (%)             (2 bytes)   * 10
+    int16_t   temperatureExt;     // External temperature (°C)      (2 bytes)   * 100
+    uint16_t  humidityExt;        // External humidity (%)          (2 bytes)   * 10
     int16_t   pitch;              // Pitch (°)                      (2 bytes)   * 100
     int16_t   roll;               // Roll (°)                       (2 bytes)   * 100
     uint16_t  windSpeed;          // Mean wind speed (m/s)          (2 bytes)   * 100
@@ -208,7 +208,7 @@ typedef union
     uint32_t  alarmInterval;      // 4 bytes
     uint8_t   transmitInterval;   // 1 byte
     uint8_t   retransmitLimit;    // 1 byte
-
+    //uint16_t  
     uint8_t   resetFlag;          // 1 byte
   };
   uint8_t bytes[7]; // Size of message to be received in bytes
