@@ -35,13 +35,14 @@ void printTimers()
   printLine();
   DEBUG_PRINTLN("Function Execution Timers");
   printLine();
-  DEBUG_PRINT("readRtc: ");       printTab(1);  DEBUG_PRINTLN(timer.rtc);
-  DEBUG_PRINT("readDps310: ");    printTab(1);  DEBUG_PRINTLN(timer.dps310);
-  DEBUG_PRINT("readLsm303: ");    printTab(1);  DEBUG_PRINTLN(timer.lsm303);
-  DEBUG_PRINT("readHmp60: ");     printTab(1);  DEBUG_PRINTLN(timer.hmp60);
-  DEBUG_PRINT("readGnss: ");      printTab(1);  DEBUG_PRINTLN(timer.gnss);
-  DEBUG_PRINT("transmitData: ");  printTab(1);  DEBUG_PRINTLN(timer.iridium);
-  DEBUG_PRINT("freeRam(): ");     printTab(1);  DEBUG_PRINTLN(freeRam());
+  DEBUG_PRINT("readRtc: ");         printTab(1);  DEBUG_PRINTLN(timer.rtc);
+  DEBUG_PRINT("readDps310: ");      printTab(1);  DEBUG_PRINTLN(timer.dps310);
+  DEBUG_PRINT("readLsm303: ");      printTab(1);  DEBUG_PRINTLN(timer.lsm303);
+  DEBUG_PRINT("readHmp60: ");       printTab(1);  DEBUG_PRINTLN(timer.hmp60);
+  DEBUG_PRINT("read5103L: ");       printTab(1);  DEBUG_PRINTLN(timer.anemometer);
+  DEBUG_PRINT("readGnss: ");        printTab(1);  DEBUG_PRINTLN(timer.gnss);
+  DEBUG_PRINT("transmitData: ");    printTab(1);  DEBUG_PRINTLN(timer.iridium);
+  DEBUG_PRINT("freeRam(): ");       printTab(1);  DEBUG_PRINTLN(freeRam());
 
   printLine();
 }
@@ -53,22 +54,22 @@ void printMoSbd()
   printLine();
   DEBUG_PRINTLN("MO-SBD Message Data");
   printLine();
-  
-    DEBUG_PRINT("unixtime:");         printTab(2);  DEBUG_PRINTLN(moSbdMessage.unixtime);
-    DEBUG_PRINT("temperatureInt:");   printTab(2);  DEBUG_PRINTLN(moSbdMessage.temperatureInt);
-    DEBUG_PRINT("temperatureExt:");   printTab(2);  DEBUG_PRINTLN(moSbdMessage.temperatureExt);
-    DEBUG_PRINT("humidityExt:");      printTab(2);  DEBUG_PRINTLN(moSbdMessage.humidityExt);
-    DEBUG_PRINT("pitch:");            printTab(3);  DEBUG_PRINTLN(moSbdMessage.pitch);
-    DEBUG_PRINT("roll:");             printTab(3);  DEBUG_PRINTLN(moSbdMessage.roll);
-    //DEBUG_PRINT("latitude:");         printTab(2);  DEBUG_PRINTLN(moSbdMessage.latitude);
-    //DEBUG_PRINT("longitude:");        printTab(2);  DEBUG_PRINTLN(moSbdMessage.longitude);
-    //DEBUG_PRINT("satellites:");       printTab(2);  DEBUG_PRINTLN(moSbdMessage.satellites);
-    //DEBUG_PRINT("hdop:");             printTab(3);  DEBUG_PRINTLN(moSbdMessage.hdop);
-    DEBUG_PRINT("voltage:");          printTab(2);  DEBUG_PRINTLN(moSbdMessage.voltage);
-    DEBUG_PRINT("transmitDuration:"); printTab(1);  DEBUG_PRINTLN(moSbdMessage.transmitDuration);
-    DEBUG_PRINT("transmitStatus:");   printTab(2);  DEBUG_PRINTLN(moSbdMessage.transmitStatus);
-    DEBUG_PRINT("iterationCounter:"); printTab(1);  DEBUG_PRINTLN(moSbdMessage.iterationCounter);
-  
+
+  DEBUG_PRINT("unixtime:");         printTab(2);  DEBUG_PRINTLN(moSbdMessage.unixtime);
+  DEBUG_PRINT("temperatureInt:");   printTab(2);  DEBUG_PRINTLN(moSbdMessage.temperatureInt);
+  DEBUG_PRINT("temperatureExt:");   printTab(2);  DEBUG_PRINTLN(moSbdMessage.temperatureExt);
+  DEBUG_PRINT("humidityExt:");      printTab(2);  DEBUG_PRINTLN(moSbdMessage.humidityExt);
+  DEBUG_PRINT("pitch:");            printTab(3);  DEBUG_PRINTLN(moSbdMessage.pitch);
+  DEBUG_PRINT("roll:");             printTab(3);  DEBUG_PRINTLN(moSbdMessage.roll);
+  //DEBUG_PRINT("latitude:");         printTab(2);  DEBUG_PRINTLN(moSbdMessage.latitude);
+  //DEBUG_PRINT("longitude:");        printTab(2);  DEBUG_PRINTLN(moSbdMessage.longitude);
+  //DEBUG_PRINT("satellites:");       printTab(2);  DEBUG_PRINTLN(moSbdMessage.satellites);
+  //DEBUG_PRINT("hdop:");             printTab(3);  DEBUG_PRINTLN(moSbdMessage.hdop);
+  DEBUG_PRINT("voltage:");          printTab(2);  DEBUG_PRINTLN(moSbdMessage.voltage);
+  DEBUG_PRINT("transmitDuration:"); printTab(1);  DEBUG_PRINTLN(moSbdMessage.transmitDuration);
+  DEBUG_PRINT("transmitStatus:");   printTab(2);  DEBUG_PRINTLN(moSbdMessage.transmitStatus);
+  DEBUG_PRINT("iterationCounter:"); printTab(1);  DEBUG_PRINTLN(moSbdMessage.iterationCounter);
+
   printLine();
 
 }

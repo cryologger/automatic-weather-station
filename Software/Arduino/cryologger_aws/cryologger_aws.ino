@@ -107,7 +107,7 @@ void SERCOM1_Handler()
 // Object instantiations
 // ----------------------------------------------------------------------------
 Adafruit_DPS310                 dps310;   // I2C address: 0x77
-Adafruit_LSM303_Accel_Unified   lsm303 = Adafruit_LSM303_Accel_Unified(54321); // I2C address: 0x??
+Adafruit_LSM303_Accel_Unified   lsm303 = Adafruit_LSM303_Accel_Unified(54321); // I2C address: 0x1E
 IridiumSBD                      modem(IRIDIUM_PORT, PIN_IRIDIUM_SLEEP);
 RTCZero                         rtc;
 TinyGPSPlus                     gnss;
@@ -126,15 +126,15 @@ Statistic veStats;              // Wind east-west wind vector component (u)
 // ----------------------------------------------------------------------------
 // User defined global variable declarations
 // ----------------------------------------------------------------------------
-unsigned int  sampleInterval    = 60;   // Sleep duration (in seconds) between data sample acquisitions. Default = 5 minutes (300 seconds)
-unsigned int  averageInterval   = 1;    // Number of samples to be averaged for each RockBLOCK transmission. Default = 12 (Hourly)
+unsigned int  sampleInterval    = 300;    // Sleep duration (in seconds) between data sample acquisitions. Default = 5 minutes (300 seconds)
+unsigned int  averageInterval   = 1;      // Number of samples to be averaged for each RockBLOCK transmission. Default = 12 (Hourly)
 
-unsigned long alarmInterval     = 60;   // Sleep duration in seconds
-unsigned int  transmitInterval  = 1;    // Messages to transmit in each Iridium transmission (340 byte limit)
-unsigned int  retransmitLimit   = 2;    // Failed data transmission reattempt (340 byte limit)
-unsigned int  gnssTimeout       = 1;    // Timeout for GNSS signal acquisition (minutes
-unsigned int  iridiumTimeout    = 10;   // Timeout for Iridium transmission (s)
-bool          firstTimeFlag     = true; // Flag to determine if the program is running for the first time
+unsigned long alarmInterval     = 60;     // Sleep duration in seconds
+unsigned int  transmitInterval  = 1;      // Messages to transmit in each Iridium transmission (340 byte limit)
+unsigned int  retransmitLimit   = 10;     // Failed data transmission reattempt (340 byte limit)
+unsigned int  gnssTimeout       = 1;      // Timeout for GNSS signal acquisition (minutes
+unsigned int  iridiumTimeout    = 120;    // Timeout for Iridium transmission (s)
+bool          firstTimeFlag     = true;   // Flag to determine if program is running for the first time
 
 // ----------------------------------------------------------------------------
 // Global variable declarations
@@ -156,7 +156,6 @@ unsigned long previousMillis    = 0;      // Global millis() timer
 unsigned long alarmTime         = 0;      // Global epoch alarm time variable
 unsigned long unixtime          = 0;      // Global epoch time variable
 unsigned int  sampleCounter     = 0;      // Sensor measurement counter
-
 float         extTemperature    = 0.0;    // HMP60 temperature (°C)
 float         intTemperature    = 0.0;    // DPS310 temperature (°C)
 float         windSpeed         = 0.0;    // Wind speed (m/s)
@@ -164,7 +163,6 @@ float         windGust          = 0.0;    // Wind gust speed  (m/s)
 unsigned int  windDirection     = 0;      // Wind direction (°)
 float         windGustDirection = 0.0;    // Wind gust direction (°)
 float         voltage           = 0.0;    // Battery voltage (V)
-
 tmElements_t  tm;                         // Variable for converting time elements to time_t
 
 // ----------------------------------------------------------------------------
@@ -195,7 +193,7 @@ typedef union
     uint8_t   transmitStatus;     // Iridium return code            (1 byte)
     uint16_t  iterationCounter;   // Message counter                (2 bytes)
   } __attribute__((packed));                              // Total: (29 bytes)
-  uint8_t bytes[70];
+  uint8_t bytes[29];
 } SBD_MO_MESSAGE;
 
 SBD_MO_MESSAGE moSbdMessage;
@@ -208,7 +206,7 @@ typedef union
     uint32_t  alarmInterval;      // 4 bytes
     uint8_t   transmitInterval;   // 1 byte
     uint8_t   retransmitLimit;    // 1 byte
-    //uint16_t  
+    //uint16_t batteryThreshold   // 2 bytes
     uint8_t   resetFlag;          // 1 byte
   };
   uint8_t bytes[7]; // Size of message to be received in bytes
@@ -232,6 +230,7 @@ struct struct_timer
   unsigned long dps310;
   unsigned long lsm303;
   unsigned long hmp60;
+  unsigned long anemometer;  
   unsigned long gnss;
   unsigned long iridium;
 } timer;
@@ -314,36 +313,32 @@ void loop()
     petDog();         // Reset Watchdog Timer
     readBattery();    // Read battery voltage
 
-    enable5V();
-    readLsm303();     // Read LSM303 acceleromter
-    readDps310();     // Read DPS310 sensor
-    disable5V();
+    enable5V();       // Enable 5V power
+    readLsm303();     // Read acceleromter
+    readDps310();     // Read sensor
+    disable5V();      // Disable 5V power
 
-    enable12V();
-    readHmp60();
-    readAnemometer();
-    disable12V();
+    enable12V();      // Enable 12V power
+    readHmp60();      // Read temperature/relative humidity sensor
+    readAnemometer(); // Read anemometer
+    disable12V();     // Disable 12V power
 
-    syncRtc();        // Sync RTC with the GNSS
-
+    printStats();     // Print summary of statistics 
+    
     // Perform statistics on measurements
     if (sampleCounter == averageInterval)
     {
-      transmitCounter++; // Increment transmit counter
-
-      printStats();
-      calculateStats();
+      calculateStats(); // Calculate statistics of variables to be transmitted
       writeBuffer();    // Write data to transmit buffer
-
-      // Transmit data
+      
+      // Check if data should be transmitted
       if (transmitCounter == transmitInterval)
       {
-        transmitData(); // Transmit data via Iridium transceiver
-        transmitCounter = 0; // Reset transmit counter
+        syncRtc();        // Sync RTC with the GNSS
+        transmitData();   // Transmit data via Iridium transceiver
       }
       sampleCounter = 0; // Reset sample counter
     }
-    printStats();
     printTimers();    // Print function execution timers
     setRtcAlarm();    // Set RTC alarm
 

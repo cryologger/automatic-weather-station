@@ -49,7 +49,7 @@ void enableSerial()
 void enable5V()
 {
   digitalWrite(PIN_5V_EN, HIGH);
-  myDelay(1000);
+  myDelay(500);
 }
 
 // Disable power to IMU
@@ -62,7 +62,7 @@ void disable5V()
 void enable12V()
 {
   digitalWrite(PIN_12V_EN, HIGH);
-  myDelay(1000);
+  myDelay(500);
 }
 
 // Disable power to sensors

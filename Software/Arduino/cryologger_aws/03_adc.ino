@@ -19,7 +19,6 @@ void configureAdc()
   analogReadCorrection(30, 2064); // #1
   //analogReadCorrection(17, 2057); // #2
   //analogReadCorrection(1, 2049); // #3
-  
 }
 
 // Map raw ADC values to floats

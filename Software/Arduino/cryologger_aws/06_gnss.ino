@@ -28,7 +28,7 @@ void syncRtc()
   //GNSS_PORT.println("$CDCMD,33,0*7D"); // Disable antenna updates
 
   // Attempt to acquire a valid GNSS position fix for up to specified timeout period
-  while (!fixFound && millis() - loopStartTime < gnssTimeout * 10UL * 1000UL)
+  while (!fixFound && millis() - loopStartTime < gnssTimeout * 60UL * 1000UL)
   {
     if (GNSS_PORT.available())
     {
@@ -72,7 +72,7 @@ void syncRtc()
             DEBUG_PRINT(F("unixtime: ")); DEBUG_PRINTLN(unixtime);
 
             // Sync RTC with GNSS date and time only if gnssEpoch is in the future
-            if (((gnssEpoch > 1630368000) && (gnssEpoch > unixtime)) || firstTimeFlag)
+            if (((gnssEpoch > unixtime)) || firstTimeFlag)
             {
               rtc.setEpoch(gnssEpoch);
               DEBUG_PRINT(F("Info: RTC synced ")); printDateTime();

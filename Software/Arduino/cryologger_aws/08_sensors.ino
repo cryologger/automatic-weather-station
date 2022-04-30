@@ -61,8 +61,6 @@ void readDps310()
   // Stop the loop timer
   timer.dps310 = millis() - loopStartTime;
 
-  // Disable power
-  //disable5V();
 }
 
 // ----------------------------------------------------------------------------
@@ -164,40 +162,28 @@ void readHmp60()
 
 // ----------------------------------------------------------------------------
 // R.M. Young Wind Monitor 5103L (4-20 mA)
-
+// 150 Ohm 0.1% resistor
+// Voltage range: 0.5995 - 2.9675 V
 // WS+  Black
 // WS-  Red
 // WD+  White
 // WD-  Green
-
 // ----------------------------------------------------------------------------
 void readAnemometer()
 {
-  unsigned int startTime = millis();
-
-  // Enable power
-  //enable12V();
-
-  myDelay(4000);
+  unsigned int loopStartTime = millis();
 
   // Measure wind speed
-  // Calibration 6.250 x mA - 25
   float windSpeed = analogRead(PIN_WIND_SPEED); // Raw analog wind speed value
 
   // Map wind speed to 0-100 m/s
-  windSpeed = map(windSpeed, 746, 2978, 0, 100);
-
-  // Calibration (22.5 x mA)-90
-  // Output Signal 4 to 20 mA = 0 to 360°
+  windSpeed = mapFloat(windSpeed, 719, 3665, 0, 100);
 
   // Measure wind direction
   float windDirection = analogRead(PIN_WIND_DIR); // Raw analog wind direction value
 
   // Map wind direction to 0-360°
-  windDirection = map(windDirection, 746, 2978, 0, 360);
-
-  // Disable power
-  //disable12V();
+  windDirection = mapFloat(windDirection, 719, 3665, 0, 360);
 
   Serial.print(F("windSpeed: ")); Serial.println(windSpeed);
   Serial.print(F("windDirection: ")); Serial.println(windDirection);
@@ -224,7 +210,7 @@ void readAnemometer()
   veStats.add(ve1);
 
   // Stop loop timer
-  //timer.Wm5103 = millis() - loopStartTime;
+  timer.anemometer = millis() - loopStartTime;
 }
 
 // Calculate resultant mean wind speed and direction vectors
