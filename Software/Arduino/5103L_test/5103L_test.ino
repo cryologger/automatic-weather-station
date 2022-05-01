@@ -22,14 +22,14 @@ void setup()
 
 void loop() 
 {
-  float sensorValue1 = analogRead(A3); // HMP60 temperature (CH2)
-  float sensorValue2 = analogRead(A4); // HMP60 humidity (CH1)
+  float sensorValue1 = analogRead(A1); // 5103L wind speed
+  float sensorValue2 = analogRead(A2); // 5103L wind direction
   
-  float extTemperature = mapFloat(sensorValue1, 0, 1222, -40, 60);  // Map temperature from 0-1 V to -40-60°C
-  float extHumidity = mapFloat(sensorValue2, 0, 1222, 0, 100);      // Map humidity 0-1 V to 0-100%
+  float windSpeed = mapFloat(sensorValue1, 717, 3665, 0, 100);      // Map wind speed from 0.6-3.0 V to 0-100 m/s
+  float windDirection = mapFloat(sensorValue2, 717, 3665, 0, 360);  // Map wind direction from 0.6-3.0 V to 0-360°
 
-  Serial.print(F("extTemperature: ")); Serial.print(sensorValue1); Serial.print(F(",")); Serial.println(extTemperature, 4);
-  Serial.print(F("extHumidity: ")); Serial.print(sensorValue2); Serial.print(F(",")); Serial.println(extHumidity, 4);
+  Serial.print(F("windSpeed: ")); Serial.print(sensorValue1); Serial.print(F(",")); Serial.println(windSpeed, 2);
+  Serial.print(F("windDirection: ")); Serial.print(sensorValue2); Serial.print(F(",")); Serial.println(windDirection, 2);
   delay(500);
 }
 
