@@ -32,8 +32,8 @@ void loop()
   float sensorValue1 = analogRead(A3); // HMP60 temperature (CH2)
   float sensorValue2 = analogRead(A4); // HMP60 humidity (CH1)
 
-  float extTemperature = mapFloat(sensorValue1, 0, 1222, -40, 60);  // Map temperature from 0-1 V to -40-60°C
-  float extHumidity = mapFloat(sensorValue2, 0, 1222, 0, 100);      // Map humidity 0-1 V to 0-100%
+  float extTemperature = mapFloat(sensorValue1, 0, 1240, -40, 60);  // Map temperature from 0-1 V to -40-60°C
+  float extHumidity = mapFloat(sensorValue2, 0, 1240, 0, 100);      // Map humidity 0-1 V to 0-100%
 
   float voltage1 = sensorValue1 * (3.3 / 4095.0);
   float voltage2 = sensorValue2 * (3.3 / 4095.0);
