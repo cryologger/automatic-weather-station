@@ -1,14 +1,18 @@
-// Configure analog-to-digital converter (ADC)
-void configureAdc()
+/*
+   Code to test battery voltage 10/1 MOhm resistor divider
+*/
+
+void setup()
 {
-  // Sample time: 45,056 us
-  // Conversion time: 45,141.33 us
-  // Max input impedance: 5,571,413 Ohm
+  Serial.begin(115200);
+  while (!Serial);
+
+  // Configure ADC
   ADC->CTRLA.bit.ENABLE = 0;                      // Disable ADC
   ADC->CTRLB.reg = ADC_CTRLB_PRESCALER_DIV512 |   // Divide Clock ADC GCLK by 512 (48MHz/512 = 93.7kHz)
                    ADC_CTRLB_RESSEL_16BIT;        // Set ADC resolution to 12-bit
   while (ADC->STATUS.bit.SYNCBUSY);               // Wait for synchronization
-  ADC->SAMPCTRL.reg = ADC_SAMPCTRL_SAMPLEN(32);   // Set Sampling Time Length (341.33 us)
+  ADC->SAMPCTRL.reg = ADC_SAMPCTRL_SAMPLEN(64);   // Set Sampling Time Length (341.33 us)
   ADC->AVGCTRL.reg = ADC_AVGCTRL_SAMPLENUM_512 |  // Configure multisampling
                      ADC_AVGCTRL_ADJRES(4);       // Configure averaging
   while (ADC->STATUS.bit.SYNCBUSY);               // Wait for synchronization
@@ -16,23 +20,21 @@ void configureAdc()
   while (ADC->STATUS.bit.SYNCBUSY);               // Wait for synchronization
 
   // Apply ADC gain and offset error calibration correction
-  // For more information see: https://blog.thea.codes/getting-the-most-out-of-the-samd21-adc/
-  // Offset:
-  // #1 = 2
-  // #2 = 
-  // #3 =
-  // Gain:
-  // #1 = 2059
-  // #2 =
-  // #3 =
-
   ADC->OFFSETCORR.reg = ADC_OFFSETCORR_OFFSETCORR(2);
   ADC->GAINCORR.reg = ADC_GAINCORR_GAINCORR(2059);
   ADC->CTRLB.bit.CORREN = true;
+  while (ADC->STATUS.bit.SYNCBUSY);               // Wait for synchronization
 }
 
-// Map raw ADC values to floats
-float mapFloat(float x, float in_min, float in_max, float out_min, float out_max)
+void loop()
 {
-  return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+  float sensorValue = analogRead(A0);
+
+  float voltage1 = sensorValue * (3.3 / 4095.0);
+  float voltage2 = sensorValue * ((10000000.0 + 1000000.0) / 1000000.0); // Multiply back 1 MOhm / (10 MOhm + 1 MOhm)
+  voltage2 *= 3.3;   // Multiply by 3.3V reference voltage
+  voltage2 /= 4096;  // Convert to voltage
+  Serial.print(F("sensorValue: ")); Serial.print(sensorValue); Serial.print(F(",")); Serial.print(voltage1, 4); Serial.print(F(",")); Serial.println(voltage2, 4);
+
+  delay(500);
 }

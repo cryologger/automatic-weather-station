@@ -1,10 +1,12 @@
-#include <SAMD_AnalogCorrection.h>  // https://github.com/arduino/ArduinoCore-samd/tree/master/libraries/SAMD_AnalogCorrection
+/*
+   Code to test 4-20 mA/analog measurements of RM Young 5103L Wind Monitor
+*/
 
-void setup() 
+void setup()
 {
   Serial.begin(115200);
   while (!Serial);
- 
+
   // Configure ADC
   ADC->CTRLA.bit.ENABLE = 0;                      // Disable ADC
   ADC->CTRLB.reg = ADC_CTRLB_PRESCALER_DIV512 |   // Divide Clock ADC GCLK by 512 (48MHz/512 = 93.7kHz)
@@ -17,19 +19,27 @@ void setup()
   ADC->CTRLA.bit.ENABLE = 1;                      // Enable ADC
   while (ADC->STATUS.bit.SYNCBUSY);               // Wait for synchronization
 
-  analogReadCorrection(30, 2064);
+  // Apply ADC gain and offset error calibration correction
+  ADC->OFFSETCORR.reg = ADC_OFFSETCORR_OFFSETCORR(2);
+  ADC->GAINCORR.reg = ADC_GAINCORR_GAINCORR(2059);
+  ADC->CTRLB.bit.CORREN = true;
+  while (ADC->STATUS.bit.SYNCBUSY);               // Wait for synchronization
+
 }
 
-void loop() 
+void loop()
 {
   float sensorValue1 = analogRead(A1); // 5103L wind speed
   float sensorValue2 = analogRead(A2); // 5103L wind direction
-  
+
   float windSpeed = mapFloat(sensorValue1, 717, 3665, 0, 100);      // Map wind speed from 0.6-3.0 V to 0-100 m/s
   float windDirection = mapFloat(sensorValue2, 717, 3665, 0, 360);  // Map wind direction from 0.6-3.0 V to 0-360°
 
-  Serial.print(F("windSpeed: ")); Serial.print(sensorValue1); Serial.print(F(",")); Serial.println(windSpeed, 2);
-  Serial.print(F("windDirection: ")); Serial.print(sensorValue2); Serial.print(F(",")); Serial.println(windDirection, 2);
+  float voltage1 = sensorValue1 * (3.3 / 4095.0);
+  float voltage2 = sensorValue2 * (3.3 / 4095.0);
+
+  Serial.print(F("windSpeed: ")); Serial.print(voltage1, 4); Serial.print(F(",")); Serial.print(sensorValue1); Serial.print(F(",")); Serial.println(windSpeed, 2);
+  Serial.print(F("windDirection: ")); Serial.print(voltage2, 4); Serial.print(F(",")); Serial.print(sensorValue2); Serial.print(F(",")); Serial.println(windDirection, 2);
   delay(500);
 }
 
