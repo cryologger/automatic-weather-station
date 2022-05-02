@@ -19,8 +19,8 @@
 |-----|-------|-------|-----------------|-----------|
 | 1   | WD+   | White | 12-30 VDC Input | 12V       |
 | 2   | WD-   | Green | 4-20 mA Output  | A2        |
-| 3   | WS+   | Black | 12-30 VDC Input | A1        |
-| 4   | WS-   | Red   | 4-20 mA Output  | 12V       |
+| 3   | WS+   | Black | 12-30 VDC Input | 12V       |
+| 4   | WS-   | Red   | 4-20 mA Output  | A1        |
 | 5   | Earth |       |                 | GND       |
 
 ### LSM303AGR
