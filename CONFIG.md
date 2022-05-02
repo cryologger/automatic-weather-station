@@ -8,8 +8,8 @@
 |-----|-------|---------------|------------------------------|-----------|
 | 1   | Brown | VDC           | Voltage Input (5-28V)        | 12V       |
 | 2   | White | Channel 1: RH | Relative Humidity (%) (0-1V) | A4        |
-| 3   | Blue  | GND           | Ground                       | A3        |
-| 4   | Black | Channel 2: T  | Temperature (°C) (0-1V)      | GND       |
+| 3   | Blue  | GND           | Ground                       | GND       |
+| 4   | Black | Channel 2: T  | Temperature (°C) (0-1V)      | A3        |
 
 <img width="240" alt="image" src="https://user-images.githubusercontent.com/22924092/166289749-5f874318-572a-4545-b4d9-ad0d5a73522e.png">
 
