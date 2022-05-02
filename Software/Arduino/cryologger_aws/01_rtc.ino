@@ -22,8 +22,8 @@ void configureRtc()
   rtc.setAlarmTime(0, 0, 0); // hours, minutes, seconds
 
   // Enable alarm for hour rollover match
-  //rtc.enableAlarm(rtc.MATCH_MMSS);
-  rtc.enableAlarm(rtc.MATCH_SS);
+  rtc.enableAlarm(rtc.MATCH_MMSS);
+  //rtc.enableAlarm(rtc.MATCH_SS);
 
   // Attach alarm interrupt service routine (ISR)
   rtc.attachInterrupt(alarmIsr);
@@ -54,14 +54,10 @@ void readRtc()
 // Set RTC alarm
 void setRtcAlarm()
 {
-  // Set RTC alarm according to number of consecutive failed transmissions
-  if (failureCounter <= 8)
-  {
-    // Calculate next alarm
-    alarmTime = unixtime + alarmInterval;
-    DEBUG_PRINT(F("Info: unixtime ")); DEBUG_PRINTLN(unixtime);
-    DEBUG_PRINT(F("Info: alarmTime ")); DEBUG_PRINTLN(alarmTime);
-  }
+  // Calculate next alarm
+  alarmTime = unixtime + alarmInterval;
+  DEBUG_PRINT(F("Info: unixtime ")); DEBUG_PRINTLN(unixtime);
+  DEBUG_PRINT(F("Info: alarmTime ")); DEBUG_PRINTLN(alarmTime);
 
   // Check if alarm was set in the past
   if ((rtc.getEpoch() >= alarmTime) || firstTimeFlag)
@@ -72,13 +68,14 @@ void setRtcAlarm()
     rtc.setAlarmTime(0, 0, 0); // hours, minutes, seconds
 
     // Enable alarm for hour rollover match
-    //rtc.enableAlarm(rtc.MATCH_MMSS);
-    rtc.enableAlarm(rtc.MATCH_SS);
+    rtc.enableAlarm(rtc.MATCH_MMSS);
+    //rtc.enableAlarm(rtc.MATCH_SS);
 
     DEBUG_PRINT("Info: "); printDateTime();
     DEBUG_PRINT("Info: Next alarm "); printAlarm();
     DEBUG_PRINT("Info: Alarm match "); DEBUG_PRINTLN(rtc.MATCH_MMSS);
   }
+  
   // Check if alarm is set too far into the future
   else if ((alarmTime - unixtime) > 86400)
   {

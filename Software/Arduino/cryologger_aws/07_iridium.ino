@@ -1,10 +1,9 @@
 // Configure RockBLOCK 9603
 void configureIridium()
 {
-  //modem.setPowerProfile(IridiumSBD::USB_POWER_PROFILE);     // Assume USB power
-  modem.setPowerProfile(IridiumSBD::DEFAULT_POWER_PROFILE); // Assume battery power
+  modem.setPowerProfile(IridiumSBD::DEFAULT_POWER_PROFILE); // Assume battery power (USB power: IridiumSBD::USB_POWER_PROFILE)
   modem.adjustSendReceiveTimeout(iridiumTimeout);           // Timeout for Iridium send/receive commands (default = 300 s)
-  modem.adjustStartupTimeout(120);                           // Timeout for Iridium startup (default = 240 s)
+  modem.adjustStartupTimeout(120);                          // Timeout for Iridium startup (default = 240 s)
 }
 
 // Write data from structure to transmit buffer
@@ -88,7 +87,7 @@ void transmitData()
           DEBUG_PRINT(mtSbdBufferSize); DEBUG_PRINTLN(" bytes.");
 
           // Check if MT-SBD message is the correct size
-          if (mtSbdBufferSize == 7)
+          if (mtSbdBufferSize == 8)
           {
             DEBUG_PRINTLN("Info: MT-SBD message correct size.");
 
@@ -103,17 +102,21 @@ void transmitData()
             printMtSbd(); // Print MT-SBD message stored in union/structure
 
             // Check if MT-SBD message data is valid and update variables
-            if ((mtSbdMessage.alarmInterval      >= 300  && mtSbdMessage.alarmInterval    <= 1209600) &&
-                (mtSbdMessage.transmitInterval   >= 1    && mtSbdMessage.transmitInterval <= 24) &&
-                (mtSbdMessage.retransmitLimit    >= 0    && mtSbdMessage.retransmitLimit  <= 24) &&
-                (mtSbdMessage.resetFlag          == 0    || mtSbdMessage.resetFlag        == 255))
+            if ((mtSbdMessage.alarmInterval     >= 60   && mtSbdMessage.alarmInterval     <= 1209600) &&
+                (mtSbdMessage.averageInterval   >= 1    && mtSbdMessage.averageInterval   <= 24) &&
+                (mtSbdMessage.transmitInterval  >= 1    && mtSbdMessage.transmitInterval  <= 24) &&
+                (mtSbdMessage.retransmitLimit   >= 0    && mtSbdMessage.retransmitLimit   <= 24) &&
+                (mtSbdMessage.batteryCutoff     >= 100  && mtSbdMessage.batteryCutoff     <= 180) &&
+                (mtSbdMessage.resetFlag         == 0    || mtSbdMessage.resetFlag         == 255))
             {
               DEBUG_PRINTLN("Info: All received values within accepted ranges.");
 
-              alarmInterval = mtSbdMessage.alarmInterval;        // Update alarm interval
-              transmitInterval = mtSbdMessage.transmitInterval;  // Update transmit interval
-              retransmitLimit = mtSbdMessage.retransmitLimit;    // Update retransmit limit
-              resetFlag = mtSbdMessage.resetFlag;                // Update force reset flag
+              alarmInterval = mtSbdMessage.alarmInterval;       // Update alarm interval
+              averageInterval = mtSbdMessage.averageInterval;   // Update sample average interval
+              transmitInterval = mtSbdMessage.transmitInterval; // Update transmit interval
+              retransmitLimit = mtSbdMessage.retransmitLimit;   // Update retransmit limit
+              batteryCutoff = mtSbdMessage.batteryCutoff / 10;  // Update battery voltage cutoff
+              resetFlag = mtSbdMessage.resetFlag;               // Update force reset flag
             }
             else
             {

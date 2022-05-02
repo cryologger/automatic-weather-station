@@ -138,6 +138,8 @@ void readHmp60()
   // Start loop timer
   unsigned long loopStartTime = millis();
 
+  DEBUG_PRINTLN("Info: Reading HMP60...");
+
   // Note: A startup delay of 4 s is recommended at 13.5 V and 2 s at 5 V
   myDelay(4000);
 
@@ -149,8 +151,8 @@ void readHmp60()
   temperatureExt = mapFloat(temperatureExt, 0, 1240, -40, 60); // Map temperature from 0-1 V to -40-60°C
   humidityExt = mapFloat(humidityExt, 0, 1240, 0, 100);        // Map humidity 0-1 V to 0-100
 
-  Serial.print(F("temperatureExt: ")); Serial.println(temperatureExt);
-  Serial.print(F("humidityExt: ")); Serial.println(humidityExt);
+  //DEBUG_PRINT(F("temperatureExt: ")); DEBUG_PRINTLN(temperatureExt);
+  //DEBUG_PRINT(F("humidityExt: ")); DEBUG_PRINTLN(humidityExt);
 
   // Add to statistics object
   temperatureExtStats.add(temperatureExt);
@@ -173,20 +175,30 @@ void readAnemometer()
 {
   unsigned int loopStartTime = millis();
 
-  // Measure wind speed
-  float windSpeed = analogRead(PIN_WIND_SPEED); // Raw analog wind speed value
+  DEBUG_PRINTLN("Info: Reading anemometer...");
 
-  // Map wind speed to 0-100 m/s
-  windSpeed = mapFloat(windSpeed, 719, 3665, 0, 100);
+  for (int i = 0; i < 5; i++)
+  {
+    // Measure wind speed
+    float sensorValue1 = analogRead(PIN_WIND_SPEED); // Raw analog wind speed value
 
-  // Measure wind direction
-  float windDirection = analogRead(PIN_WIND_DIR); // Raw analog wind direction value
+    // Map wind speed to 0-100 m/s
+    windSpeed = mapFloat(sensorValue1, 741, 3671, 0, 100);
 
-  // Map wind direction to 0-360°
-  windDirection = mapFloat(windDirection, 719, 3665, 0, 360);
+    // Measure wind direction
+    float sensorValue2 = analogRead(PIN_WIND_DIR); // Raw analog wind direction value
 
-  Serial.print(F("windSpeed: ")); Serial.println(windSpeed);
-  Serial.print(F("windDirection: ")); Serial.println(windDirection);
+    // Map wind direction to 0-360°
+    windDirection = mapFloat(sensorValue2, 741, 3671, 0, 360);
+
+    float voltage1 = sensorValue1 * (3.3 / 4095.0);
+    float voltage2 = sensorValue2 * (3.3 / 4095.0);
+
+    DEBUG_PRINT(F("windSpeed: ")); DEBUG_PRINT(voltage1, 4); DEBUG_PRINT(F(",")); DEBUG_PRINT(sensorValue1); DEBUG_PRINT(F(",")); DEBUG_PRINTLN(windSpeed, 2);
+    DEBUG_PRINT(F("windDirection: ")); DEBUG_PRINT(voltage2, 4); DEBUG_PRINT(F(",")); DEBUG_PRINT(sensorValue2); DEBUG_PRINT(F(",")); DEBUG_PRINTLN(windDirection, 2);
+    myDelay(500);
+  }
+
 
   // Determine wind gust and direction
   if ((windSpeed > 0) && (windSpeed > windGust))

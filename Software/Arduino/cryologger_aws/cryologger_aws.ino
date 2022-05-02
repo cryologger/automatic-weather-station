@@ -125,15 +125,14 @@ Statistic veStats;              // Wind east-west wind vector component (u)
 // ----------------------------------------------------------------------------
 // User defined global variable declarations
 // ----------------------------------------------------------------------------
-unsigned int  sampleInterval    = 300;    // Sleep duration (in seconds) between data sample acquisitions. Default = 5 minutes (300 seconds)
-unsigned int  averageInterval   = 1;      // Number of samples to be averaged for each RockBLOCK transmission. Default = 12 (Hourly)
-
-unsigned long alarmInterval     = 60;     // Sleep duration in seconds
+unsigned long alarmInterval     = 300;     // Sleep duration (in seconds) between data sample acquisitions. Default = 5 minutes (300 seconds)
+unsigned int  averageInterval   = 12;      // Number of samples to be averaged for each RockBLOCK transmission. Default = 12 (Hourly)
 unsigned int  transmitInterval  = 1;      // Messages to transmit in each Iridium transmission (340 byte limit)
 unsigned int  retransmitLimit   = 10;     // Failed data transmission reattempt (340 byte limit)
-unsigned int  gnssTimeout       = 1;      // Timeout for GNSS signal acquisition (minutes
-unsigned int  iridiumTimeout    = 120;    // Timeout for Iridium transmission (s)
+unsigned int  gnssTimeout       = 1;      // Timeout for GNSS signal acquisition (minutes)
+unsigned int  iridiumTimeout    = 180;    // Timeout for Iridium transmission (s)
 bool          firstTimeFlag     = true;   // Flag to determine if program is running for the first time
+float         batteryCutoff     = 10.5;   // Battery voltage cutoff threshold (V)
 
 // ----------------------------------------------------------------------------
 // Global variable declarations
@@ -159,7 +158,7 @@ float         extTemperature    = 0.0;    // HMP60 temperature (°C)
 float         intTemperature    = 0.0;    // DPS310 temperature (°C)
 float         windSpeed         = 0.0;    // Wind speed (m/s)
 float         windGust          = 0.0;    // Wind gust speed  (m/s)
-unsigned int  windDirection     = 0;      // Wind direction (°)
+float         windDirection     = 0.0;    // Wind direction (°)
 float         windGustDirection = 0.0;    // Wind gust direction (°)
 float         voltage           = 0.0;    // Battery voltage (V)
 tmElements_t  tm;                         // Variable for converting time elements to time_t
@@ -203,9 +202,10 @@ typedef union
   struct
   {
     uint32_t  alarmInterval;      // 4 bytes
+    uint8_t   averageInterval;    // 1 byte
     uint8_t   transmitInterval;   // 1 byte
     uint8_t   retransmitLimit;    // 1 byte
-    //uint16_t batteryThreshold   // 2 bytes
+    uint8_t   batteryCutoff;      // 1 bytes
     uint8_t   resetFlag;          // 1 byte
   };
   uint8_t bytes[7]; // Size of message to be received in bytes
@@ -229,7 +229,7 @@ struct struct_timer
   unsigned long dps310;
   unsigned long lsm303;
   unsigned long hmp60;
-  unsigned long anemometer;  
+  unsigned long anemometer;
   unsigned long gnss;
   unsigned long iridium;
 } timer;
@@ -263,7 +263,8 @@ void setup()
 
   DEBUG_PRINTLN();
   printLine();
-  DEBUG_PRINTLN("Cryologger - Automatic Weather Station v1.0");
+  DEBUG_PRINTLN("Cryologger - Automatic Weather Station v0.1");
+
   printLine();
 
   // Configure devices
@@ -274,6 +275,8 @@ void setup()
   printSettings();      // Print configuration settings
   syncRtc();            // Synch RTC with GNSS
   configureIridium();   // Configure Iridium 9603 transceiver
+
+  DEBUG_PRINT("Voltage: "); DEBUG_PRINTLN(voltage);
 
   // Close serial port if immediately entering deep sleep
   if (!firstTimeFlag)
@@ -308,38 +311,59 @@ void loop()
     // Print date and time
     DEBUG_PRINT("Info: Alarm trigger "); printDateTime();
 
-    // Perform measurements
-    petDog();         // Reset Watchdog Timer
-    readBattery();    // Read battery voltage
+    // Reset WDT
+    petDog();
 
-    enable5V();       // Enable 5V power
-    readLsm303();     // Read acceleromter
-    readDps310();     // Read sensor
-    disable5V();      // Disable 5V power
+    // Read battery voltage
+    readBattery();
 
-    enable12V();      // Enable 12V power
-    readHmp60();      // Read temperature/relative humidity sensor
-    readAnemometer(); // Read anemometer
-    disable12V();     // Disable 12V power
-
-    printStats();     // Print summary of statistics 
-    
-    // Perform statistics on measurements
-    if (sampleCounter == averageInterval)
+    // Check if battery voltage is above cutoff threshold
+    if (voltage < batteryCutoff)
     {
-      calculateStats(); // Calculate statistics of variables to be transmitted
-      writeBuffer();    // Write data to transmit buffer
+
+      DEBUG_PRINTLN("Warning: Battery voltage too low. Entering deep sleep...");
+
       
-      // Check if data should be transmitted
-      if (transmitCounter == transmitInterval)
-      {
-        syncRtc();        // Sync RTC with the GNSS
-        transmitData();   // Transmit data via Iridium transceiver
-      }
       sampleCounter = 0; // Reset sample counter
+
+      // Go to sleep
+
+      
     }
-    printTimers();    // Print function execution timers
-    setRtcAlarm();    // Set RTC alarm
+    else
+    {
+      DEBUG_PRINT("Info: Battery voltage good: "); DEBUG_PRINTLN(voltage);
+
+      // Perform measurements
+      enable5V();       // Enable 5V power
+      readLsm303();     // Read acceleromter
+      readDps310();     // Read sensor
+      disable5V();      // Disable 5V power
+      enable12V();      // Enable 12V power
+      readHmp60();      // Read temperature/relative humidity sensor
+      readAnemometer(); // Read anemometer
+      disable12V();     // Disable 12V power
+
+      printStats();     // Print summary of statistics
+
+      // Perform statistics on measurements
+      if ((sampleCounter == averageInterval) || firstTimeFlag)
+      {
+        calculateStats(); // Calculate statistics of variables to be transmitted
+        writeBuffer();    // Write data to transmit buffer
+
+        // Check if data should be transmitted
+        if (transmitCounter == transmitInterval)
+        {
+          syncRtc();        // Sync RTC with the GNSS
+          transmitData();   // Transmit data via Iridium transceiver
+        }
+        sampleCounter = 0; // Reset sample counter
+      }
+      printTimers();    // Print function execution timers
+      setRtcAlarm();    // Set RTC alarm
+    }
+
 
     DEBUG_PRINTLN("Info: Entering deep sleep...");
     DEBUG_PRINTLN();
