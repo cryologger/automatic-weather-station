@@ -4,25 +4,24 @@
 ### Vaisala HMP60
 
 
-| Pin | Wire  | Description   | Description                  |
-|-----|-------|---------------|------------------------------|
-| 1   | Brown | VDC           | Voltage Input (5-28V)        |
-| 2   | White | Channel 1: RH | Relative Humidity (%) (0-1V) |
-| 3   | Blue  | GND           | Ground                       |
-| 4   | Black | Channel 2: T  | Temperature (°C) (0-1V)      |
+| Pin | Wire  | Description   | Description                  | Connector |
+|-----|-------|---------------|------------------------------|-----------|
+| 1   | Brown | VDC           | Voltage Input (5-28V)        | 12V       |
+| 2   | White | Channel 1: RH | Relative Humidity (%) (0-1V) | A4        |
+| 3   | Blue  | GND           | Ground                       | A3        |
+| 4   | Black | Channel 2: T  | Temperature (°C) (0-1V)      | GND       |
 
 <img width="240" alt="image" src="https://user-images.githubusercontent.com/22924092/166289749-5f874318-572a-4545-b4d9-ad0d5a73522e.png">
 
 
 ### RM Young 5103L Wind Monitor
-
-| Pin | Pin   | Wire  | Description     |
-|-----|-------|-------|-----------------|
-| 1   | WD+   | White | 12-30 VDC Input |
-| 2   | WD-   | Green | 4-20 mA Output  |
-| 3   | WS+   | Black | 12-30 VDC Input |
-| 4   | WS-   | Red   | 4-20 mA Output  |
-| 5   | Earth |       |                 |
+| Pin | Pin   | Wire  | Description     | Connector |
+|-----|-------|-------|-----------------|-----------|
+| 1   | WD+   | White | 12-30 VDC Input | 12V       |
+| 2   | WD-   | Green | 4-20 mA Output  | A2        |
+| 3   | WS+   | Black | 12-30 VDC Input | A1        |
+| 4   | WS-   | Red   | 4-20 mA Output  | 12V       |
+| 5   | Earth |       |                 | GND       |
 
 ### LSM303AGR
 Orientation of sensor, when viewing enclosure from the front:
