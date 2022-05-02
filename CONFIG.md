@@ -1,3 +1,20 @@
+
+## Sensor Configuration
+
+
+### LSM303AGR
+Orientation of sensor, when viewing enclosure from the front:
+
+**Pitch:**
+* Positive values (+) = Upwards (↑)
+* Negative values (-) = Downwards (↓)
+
+**Roll:**
+* Positive values (+) = Left (←)
+* Negative values (-) = Right (→)
+
+
+
 ## Amazon Web Services (AWS) Configuration
 
 
