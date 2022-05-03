@@ -87,7 +87,7 @@ void transmitData()
           DEBUG_PRINT(mtSbdBufferSize); DEBUG_PRINTLN(" bytes.");
 
           // Check if MT-SBD message is the correct size
-          if (mtSbdBufferSize == 8)
+          if (mtSbdBufferSize == 9)
           {
             DEBUG_PRINTLN("Info: MT-SBD message correct size.");
 
@@ -106,7 +106,7 @@ void transmitData()
                 (mtSbdMessage.averageInterval   >= 1    && mtSbdMessage.averageInterval   <= 24) &&
                 (mtSbdMessage.transmitInterval  >= 1    && mtSbdMessage.transmitInterval  <= 24) &&
                 (mtSbdMessage.retransmitLimit   >= 0    && mtSbdMessage.retransmitLimit   <= 24) &&
-                (mtSbdMessage.batteryCutoff     >= 100  && mtSbdMessage.batteryCutoff     <= 180) &&
+                (mtSbdMessage.batteryCutoff     >= 8  && mtSbdMessage.batteryCutoff       <= 12) &&
                 (mtSbdMessage.resetFlag         == 0    || mtSbdMessage.resetFlag         == 255))
             {
               DEBUG_PRINTLN("Info: All received values within accepted ranges.");
@@ -115,7 +115,7 @@ void transmitData()
               averageInterval = mtSbdMessage.averageInterval;   // Update sample average interval
               transmitInterval = mtSbdMessage.transmitInterval; // Update transmit interval
               retransmitLimit = mtSbdMessage.retransmitLimit;   // Update retransmit limit
-              batteryCutoff = mtSbdMessage.batteryCutoff / 10;  // Update battery voltage cutoff
+              batteryCutoff = mtSbdMessage.batteryCutoff;  // Update battery voltage cutoff
               resetFlag = mtSbdMessage.resetFlag;               // Update force reset flag
             }
             else
@@ -183,7 +183,7 @@ void transmitData()
     // Write duration of last transmission to union
     moSbdMessage.transmitDuration = timer.iridium / 1000;
 
-    //printSettings(); // Print current settings
+    printSettings(); // Print current settings
 
     // Check if reset flag was transmitted
     if (resetFlag)
@@ -203,7 +203,7 @@ bool ISBDCallback()
   {
     previousMillis = currentMillis;
     petDog(); // Reset the Watchdog Timer
-    //readBattery(); // Measure battery voltage during Iridium transmission
+    //readBattery(); // Measure battery voltage during Iridium transmission. Warning: Will crash GNSS
     digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN)); // Blink LED
   }
   return true;
