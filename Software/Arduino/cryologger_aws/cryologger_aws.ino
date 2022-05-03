@@ -130,7 +130,7 @@ unsigned int  averageInterval   = 12;      // Number of samples to be averaged f
 unsigned int  transmitInterval  = 1;      // Messages to transmit in each Iridium transmission (340 byte limit)
 unsigned int  retransmitLimit   = 10;     // Failed data transmission reattempt (340 byte limit)
 unsigned int  gnssTimeout       = 2;      // Timeout for GNSS signal acquisition (minutes)
-unsigned int  iridiumTimeout    = 10;    // Timeout for Iridium transmission (s)
+unsigned int  iridiumTimeout    = 180;    // Timeout for Iridium transmission (s)
 bool          firstTimeFlag     = true;   // Flag to determine if program is running for the first time
 float         batteryCutoff     = 10.5;   // Battery voltage cutoff threshold (V)
 
@@ -154,6 +154,7 @@ unsigned long previousMillis    = 0;      // Global millis() timer
 unsigned long alarmTime         = 0;      // Global epoch alarm time variable
 unsigned long unixtime          = 0;      // Global epoch time variable
 unsigned int  sampleCounter     = 0;      // Sensor measurement counter
+unsigned int  cutoffCounter     = 0;      // Battery voltage cutoff sleep cycle counter
 float         extTemperature    = 0.0;    // HMP60 temperature (°C)
 float         intTemperature    = 0.0;    // DPS310 temperature (°C)
 float         windSpeed         = 0.0;    // Wind speed (m/s)
@@ -272,6 +273,7 @@ void setup()
   readRtc();            // Read date and time from RTC
   configureWdt();       // Configure Watchdog Timer (WDT)
   readBattery();        // Read battery voltage
+  DEBUG_PRINT("Info: Battery voltage: "); DEBUG_PRINTLN(voltage);
   printSettings();      // Print configuration settings
   syncRtc();            // Synch RTC with GNSS
   configureIridium();   // Configure Iridium 9603 transceiver
@@ -318,7 +320,8 @@ void loop()
     // Check if battery voltage is above cutoff threshold
     if (voltage < batteryCutoff)
     {
-
+      cutoffCounter++;
+      
       DEBUG_PRINTLN("Warning: Battery voltage cutoff exceeded. Entering deep sleep...");
 
       sampleCounter = 0; // Reset sample counter
@@ -331,10 +334,6 @@ void loop()
       DEBUG_PRINT("Info: Battery voltage good: "); DEBUG_PRINTLN(voltage);
 
       // Perform measurements
-      enable5V();       // Enable 5V power
-      readLsm303();     // Read acceleromter
-      readDps310();     // Read sensor
-      disable5V();      // Disable 5V power
       enable12V();      // Enable 12V power
       readHmp60();      // Read temperature/relative humidity sensor
       readAnemometer(); // Read anemometer
@@ -345,6 +344,12 @@ void loop()
       // Perform statistics on measurements
       if ((sampleCounter == averageInterval) || firstTimeFlag)
       {
+        // Measure internal temperature and orientiation
+        enable5V();       // Enable 5V power
+        readLsm303();     // Read acceleromter
+        readDps310();     // Read sensor
+        disable5V();      // Disable 5V power
+
         calculateStats(); // Calculate statistics of variables to be transmitted
         writeBuffer();    // Write data to transmit buffer
 
