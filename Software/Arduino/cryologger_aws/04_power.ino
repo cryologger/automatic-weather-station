@@ -16,6 +16,7 @@ void readBattery()
   //float voltage = analogRead(A7);
   //voltage = voltage / samples * 3.3 * 2 / 4096.0;
 
+  DEBUG_PRINT("Info: Battery voltage: "); DEBUG_PRINTLN(voltage);
   // Write data to union
   moSbdMessage.voltage = voltage * 100;
 
@@ -131,7 +132,7 @@ void wakeUp()
 {
   // Enable serial port
   enableSerial();
-  blinkLed(4, 1000);
+  blinkLed(4, 100);
 }
 
 // Non-blocking blink LED (https://forum.arduino.cc/index.php?topic=503368.0)

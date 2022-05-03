@@ -60,31 +60,15 @@ void setRtcAlarm()
   DEBUG_PRINT(F("Info: alarmTime ")); DEBUG_PRINTLN(alarmTime);
 
   // Check if alarm was set in the past
-  if ((rtc.getEpoch() >= alarmTime) || firstTimeFlag)
+  if ((rtc.getEpoch() >= alarmTime) || ((alarmTime - unixtime) > 86400) || firstTimeFlag)
   {
-    DEBUG_PRINTLN(F("Warning: RTC alarm set in the past or program running for the first time."));
+    DEBUG_PRINTLN(F("Warning: RTC alarm set in the past, too far in the future, or program running for the first time."));
 
     // Set alarm for hour rollover match
     rtc.setAlarmTime(0, 0, 0); // hours, minutes, seconds
 
     // Enable alarm for hour rollover match
-    rtc.enableAlarm(rtc.MATCH_MMSS);
-    //rtc.enableAlarm(rtc.MATCH_SS);
-
-    DEBUG_PRINT("Info: "); printDateTime();
-    DEBUG_PRINT("Info: Next alarm "); printAlarm();
-    DEBUG_PRINT("Info: Alarm match "); DEBUG_PRINTLN(rtc.MATCH_MMSS);
-  }
-  
-  // Check if alarm is set too far into the future
-  else if ((alarmTime - unixtime) > 86400)
-  {
-    DEBUG_PRINTLN(F("Warning: RTC alarm set too far in the future!"));
-
-    // Set alarm for hour rollover match
-    rtc.setAlarmTime(0, 0, 0); // hours, minutes, seconds
-
-    // Enable alarm for hour rollover match
+    //rtc.enableAlarm(rtc.MATCH_MMSS);
     rtc.enableAlarm(rtc.MATCH_MMSS);
 
     DEBUG_PRINT("Info: "); printDateTime();
@@ -108,8 +92,26 @@ void setRtcAlarm()
     DEBUG_PRINT("Info: Next alarm "); printAlarm();
     DEBUG_PRINT("Info: Alarm match "); DEBUG_PRINTLN(rtc.MATCH_HHMMSS);
   }
+  
   // Clear flag
   alarmFlag = false;
+}
+
+void setCutoffAlarm()
+{
+  // Set alarm for hour rollover match
+  rtc.setAlarmTime(0, 0, 0); // hours, minutes, seconds
+
+  // Enable alarm for hour rollover match
+  rtc.enableAlarm(rtc.MATCH_MMSS);
+
+  // Clear flag
+  alarmFlag = false;
+
+  DEBUG_PRINT("Info: "); printDateTime();
+  DEBUG_PRINT("Info: Next alarm "); printAlarm();
+  DEBUG_PRINT("Info: Alarm match "); DEBUG_PRINTLN(rtc.MATCH_HHMMSS);
+
 }
 
 // Print the RTC's current date and time

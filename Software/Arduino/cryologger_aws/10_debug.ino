@@ -27,7 +27,9 @@ void printSettings()
   DEBUG_PRINT("retransmitLimit: ");   printTab(1);  DEBUG_PRINTLN(retransmitLimit);
   DEBUG_PRINT("batteryCutoff: ");     printTab(2);  DEBUG_PRINTLN(batteryCutoff);
   DEBUG_PRINT("resetFlag: ");         printTab(2);  DEBUG_PRINTLN(resetFlag);
+  DEBUG_PRINT("freeRam(): ");         printTab(2);  DEBUG_PRINTLN(freeRam());
   printLine();
+  
 }
 
 void printTimers()

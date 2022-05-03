@@ -127,9 +127,9 @@ Statistic veStats;              // Wind east-west wind vector component (u)
 // ----------------------------------------------------------------------------
 unsigned long alarmInterval     = 300;     // Sleep duration (in seconds) between data sample acquisitions. Default = 5 minutes (300 seconds)
 unsigned int  averageInterval   = 12;      // Number of samples to be averaged for each RockBLOCK transmission. Default = 12 (Hourly)
-unsigned int  transmitInterval  = 1;      // Messages to transmit in each Iridium transmission (340 byte limit)
+unsigned int  transmitInterval  = 3;      // Messages to transmit in each Iridium transmission (340 byte limit)
 unsigned int  retransmitLimit   = 10;     // Failed data transmission reattempt (340 byte limit)
-unsigned int  gnssTimeout       = 1;      // Timeout for GNSS signal acquisition (minutes)
+unsigned int  gnssTimeout       = 2;      // Timeout for GNSS signal acquisition (minutes)
 unsigned int  iridiumTimeout    = 180;    // Timeout for Iridium transmission (s)
 bool          firstTimeFlag     = true;   // Flag to determine if program is running for the first time
 float         batteryCutoff     = 10.5;   // Battery voltage cutoff threshold (V)
@@ -276,8 +276,6 @@ void setup()
   syncRtc();            // Synch RTC with GNSS
   configureIridium();   // Configure Iridium 9603 transceiver
 
-  DEBUG_PRINT("Voltage: "); DEBUG_PRINTLN(voltage);
-
   // Close serial port if immediately entering deep sleep
   if (!firstTimeFlag)
   {
@@ -321,14 +319,12 @@ void loop()
     if (voltage < batteryCutoff)
     {
 
-      DEBUG_PRINTLN("Warning: Battery voltage too low. Entering deep sleep...");
+      DEBUG_PRINTLN("Warning: Battery voltage cutoff exceeded. Entering deep sleep...");
 
-      
       sampleCounter = 0; // Reset sample counter
 
       // Go to sleep
-
-      
+      setCutoffAlarm();
     }
     else
     {
@@ -360,10 +356,10 @@ void loop()
         }
         sampleCounter = 0; // Reset sample counter
       }
-      printTimers();    // Print function execution timers
-      setRtcAlarm();    // Set RTC alarm
-    }
 
+    }
+    printTimers();    // Print function execution timers
+    setRtcAlarm();    // Set RTC alarm
 
     DEBUG_PRINTLN("Info: Entering deep sleep...");
     DEBUG_PRINTLN();
