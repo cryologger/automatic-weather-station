@@ -84,7 +84,7 @@ void printMtSbd()
   DEBUG_PRINTLN("MT-SBD Message Data");
   printLine();
   DEBUG_PRINT("alarmInterval:");    printTab(2);  DEBUG_PRINTLN(mtSbdMessage.alarmInterval);
-  DEBUG_PRINT("averageInterval:");  printTab(2);  DEBUG_PRINTLN(mtSbdMessage.averageInterval);
+  DEBUG_PRINT("averageInterval:");  printTab(1);  DEBUG_PRINTLN(mtSbdMessage.averageInterval);
   DEBUG_PRINT("transmitInterval:"); printTab(1);  DEBUG_PRINTLN(mtSbdMessage.transmitInterval);
   DEBUG_PRINT("retransmitLimit:");  printTab(1);  DEBUG_PRINTLN(mtSbdMessage.retransmitLimit);
   DEBUG_PRINT("batteryCutoff:");    printTab(2);  DEBUG_PRINTLN(mtSbdMessage.batteryCutoff);

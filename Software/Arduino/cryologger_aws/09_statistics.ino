@@ -5,7 +5,7 @@ void calculateStats()
   moSbdMessage.temperatureExt = temperatureExtStats.average() * 100;  // Mean temperature (°C)
   moSbdMessage.humidityExt = humidityExtStats.average() * 100;        // Mean humidity (%)
   moSbdMessage.temperatureInt = temperatureIntStats.average() * 100;  // Mean temperature (°C)
-  moSbdMessage.voltage = batteryStats.minimum() * 100;                // Mean battery voltage (V)
+  moSbdMessage.voltage = batteryStats.average() * 100;                // Mean battery voltage (V)
 
   // Calculate mean wind speed and direction vectors
   windVectors();

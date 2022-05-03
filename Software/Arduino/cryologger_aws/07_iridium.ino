@@ -106,7 +106,7 @@ void transmitData()
                 (mtSbdMessage.averageInterval   >= 1    && mtSbdMessage.averageInterval   <= 24) &&
                 (mtSbdMessage.transmitInterval  >= 1    && mtSbdMessage.transmitInterval  <= 24) &&
                 (mtSbdMessage.retransmitLimit   >= 0    && mtSbdMessage.retransmitLimit   <= 24) &&
-                (mtSbdMessage.batteryCutoff     >= 8  && mtSbdMessage.batteryCutoff       <= 12) &&
+                (mtSbdMessage.batteryCutoff     >= 0    && mtSbdMessage.batteryCutoff     <= 12) &&
                 (mtSbdMessage.resetFlag         == 0    || mtSbdMessage.resetFlag         == 255))
             {
               DEBUG_PRINTLN("Info: All received values within accepted ranges.");
@@ -115,7 +115,7 @@ void transmitData()
               averageInterval = mtSbdMessage.averageInterval;   // Update sample average interval
               transmitInterval = mtSbdMessage.transmitInterval; // Update transmit interval
               retransmitLimit = mtSbdMessage.retransmitLimit;   // Update retransmit limit
-              batteryCutoff = mtSbdMessage.batteryCutoff;  // Update battery voltage cutoff
+              batteryCutoff = mtSbdMessage.batteryCutoff;       // Update battery cutoff voltage 
               resetFlag = mtSbdMessage.resetFlag;               // Update force reset flag
             }
             else
