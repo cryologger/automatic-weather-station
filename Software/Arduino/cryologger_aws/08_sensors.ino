@@ -148,9 +148,26 @@ void readHmp60()
   float humidityExt = analogRead(PIN_HUMID);
 
   // Map voltages to sensor ranges
-  temperatureExt = mapFloat(temperatureExt, 0, 1240, -40, 60); // Map temperature from 0-1 V to -40-60°C
-  humidityExt = mapFloat(humidityExt, 0, 1240, 0, 100);        // Map humidity 0-1 V to 0-100
+  temperatureExt = mapFloat(temperatureExt, 0, 1240, -40, 60); // Map temperature from 0-1 V to -40 to 60°C
+  humidityExt = mapFloat(humidityExt, 0, 1240, 0, 100);        // Map humidity 0-1 V to 0 to 100%
 
+  // Check if readings are erroneous
+  if (temperatureExt < -40)
+  {
+    temperatureExt = -40;
+  }
+  if (temperatureExt > 60)
+  {
+    temperatureExt = 60;
+  }
+  if (humidityExt < 0)
+  {
+    humidityExt = 0;
+  }
+  if (humidityExt > 100)
+  {
+    humidityExt = 100;
+  }
   //Serial.print(F("temperatureExt: ")); Serial.println(temperatureExt);
   //Serial.print(F("humidityExt: ")); Serial.println(humidityExt);
 
@@ -193,6 +210,20 @@ void readAnemometer()
   // Map wind direction to 0-360°
   windDirection = mapFloat(sensorValue2, 741, 3671, 0, 360);
 
+  // Check if readings are erroneous
+  if (windSpeed < 0)
+  {
+    windSpeed = 0;
+  }
+  if (windDirection < 0)
+  {
+    windDirection = 0;
+  }
+  if (windDirection > 360)
+  {
+    windDirection = 360;
+  }
+
   float voltage1 = sensorValue1 * (3.3 / 4095.0);
   float voltage2 = sensorValue2 * (3.3 / 4095.0);
 
@@ -203,11 +234,10 @@ void readAnemometer()
   //myDelay(500);
   //}
 
-
   // Determine wind gust and direction
-  if ((windSpeed > 0) && (windSpeed > windGust))
+  if ((windSpeed > 0) && (windSpeed > windGustSpeed))
   {
-    windGust = windSpeed;
+    windGustSpeed = windSpeed;
     windGustDirection = windDirection;
   }
 
@@ -217,7 +247,7 @@ void readAnemometer()
   float ve1 = -1.0 * windSpeed * sin(windDirectionRadians);   // Magnitude of the east-west component (u) of the resultant vector mean wind
 
   // Write data to union
-  moSbdMessage.windGust = windGust * 100;
+  moSbdMessage.windGustSpeed = windGustSpeed * 100;
   moSbdMessage.windGustDirection = windGustDirection;
 
   // Add to wind statistics 1

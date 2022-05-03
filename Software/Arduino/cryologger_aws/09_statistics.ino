@@ -68,4 +68,6 @@ void printStats()
   DEBUG_PRINT(F("Min: "));        DEBUG_PRINT(veStats.minimum());               printTab(1);
   DEBUG_PRINT(F("Max: "));        DEBUG_PRINT(veStats.maximum());               printTab(1);
   DEBUG_PRINT(F("Mean: "));       DEBUG_PRINTLN(veStats.average());
+  DEBUG_PRINT(F("Wind gust speed: "));      printTab(1);  DEBUG_PRINTLN(windGustSpeed);
+  DEBUG_PRINT(F("Wind gust direction: "));  printTab(1);  DEBUG_PRINTLN(windGustDirection);
 }

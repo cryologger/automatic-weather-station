@@ -69,11 +69,11 @@ void setRtcAlarm()
 
     // Enable alarm for hour rollover match
     //rtc.enableAlarm(rtc.MATCH_MMSS);
-    rtc.enableAlarm(rtc.MATCH_MMSS);
+    rtc.enableAlarm(rtc.MATCH_SS);
 
     DEBUG_PRINT("Info: "); printDateTime();
     DEBUG_PRINT("Info: Next alarm "); printAlarm();
-    DEBUG_PRINT("Info: Alarm match "); DEBUG_PRINTLN(rtc.MATCH_MMSS);
+    DEBUG_PRINT("Info: Alarm match "); DEBUG_PRINTLN(rtc.MATCH_SS);
   }
   else
   {

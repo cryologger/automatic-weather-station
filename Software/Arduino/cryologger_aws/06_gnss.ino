@@ -47,7 +47,7 @@ void syncRtc()
           fixCounter++; // Increment fix counter
 
           // Wait until a specified number of GNSS fixes have been collected
-          if ((fixCounter >= 5) && (gnss.satellites.value() > 0))
+          if (fixCounter >= 5)
           {
             fixFound = true;
 

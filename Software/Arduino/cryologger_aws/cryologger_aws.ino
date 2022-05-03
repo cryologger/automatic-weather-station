@@ -125,12 +125,12 @@ Statistic veStats;              // Wind east-west wind vector component (u)
 // ----------------------------------------------------------------------------
 // User defined global variable declarations
 // ----------------------------------------------------------------------------
-unsigned long alarmInterval     = 300;     // Sleep duration (in seconds) between data sample acquisitions. Default = 5 minutes (300 seconds)
+unsigned long alarmInterval     = 60;     // Sleep duration (in seconds) between data sample acquisitions. Default = 5 minutes (300 seconds)
 unsigned int  averageInterval   = 12;      // Number of samples to be averaged for each RockBLOCK transmission. Default = 12 (Hourly)
-unsigned int  transmitInterval  = 3;      // Messages to transmit in each Iridium transmission (340 byte limit)
+unsigned int  transmitInterval  = 1;      // Messages to transmit in each Iridium transmission (340 byte limit)
 unsigned int  retransmitLimit   = 10;     // Failed data transmission reattempt (340 byte limit)
 unsigned int  gnssTimeout       = 2;      // Timeout for GNSS signal acquisition (minutes)
-unsigned int  iridiumTimeout    = 180;    // Timeout for Iridium transmission (s)
+unsigned int  iridiumTimeout    = 10;    // Timeout for Iridium transmission (s)
 bool          firstTimeFlag     = true;   // Flag to determine if program is running for the first time
 float         batteryCutoff     = 10.5;   // Battery voltage cutoff threshold (V)
 
@@ -157,8 +157,8 @@ unsigned int  sampleCounter     = 0;      // Sensor measurement counter
 float         extTemperature    = 0.0;    // HMP60 temperature (°C)
 float         intTemperature    = 0.0;    // DPS310 temperature (°C)
 float         windSpeed         = 0.0;    // Wind speed (m/s)
-float         windGust          = 0.0;    // Wind gust speed  (m/s)
 float         windDirection     = 0.0;    // Wind direction (°)
+float         windGustSpeed     = 0.0;    // Wind gust speed  (m/s)
 float         windGustDirection = 0.0;    // Wind gust direction (°)
 float         voltage           = 0.0;    // Battery voltage (V)
 tmElements_t  tm;                         // Variable for converting time elements to time_t
@@ -180,7 +180,7 @@ typedef union
     int16_t   roll;               // Roll (°)                       (2 bytes)   * 100
     uint16_t  windSpeed;          // Mean wind speed (m/s)          (2 bytes)   * 100
     uint16_t  windDirection;      // Mean wind direction (°)        (2 bytes)
-    uint16_t  windGust;           // Wind gust speed (m/s)          (2 bytes)   * 100
+    uint16_t  windGustSpeed;      // Wind gust speed (m/s)          (2 bytes)   * 100
     uint16_t  windGustDirection;  // Wind gust direction (°)        (2 bytes)
     //int32_t   latitude;           // Latitude (DD)                  (4 bytes)   * 1000000
     //int32_t   longitude;          // Longitude (DD)                 (4 bytes)   * 1000000
@@ -349,7 +349,7 @@ void loop()
         writeBuffer();    // Write data to transmit buffer
 
         // Check if data should be transmitted
-        if (transmitCounter == transmitInterval)
+        if ((transmitCounter == transmitInterval) || firstTimeFlag)
         {
           syncRtc();        // Sync RTC with the GNSS
           transmitData();   // Transmit data via Iridium transceiver

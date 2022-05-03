@@ -17,6 +17,7 @@ void readBattery()
   //voltage = voltage / samples * 3.3 * 2 / 4096.0;
 
   DEBUG_PRINT("Info: Battery voltage: "); DEBUG_PRINTLN(voltage);
+  
   // Write data to union
   moSbdMessage.voltage = voltage * 100;
 
