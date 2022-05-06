@@ -144,14 +144,23 @@ void readHmp60()
   myDelay(4000);
 
   // Perform analog readings
-  float temperatureExt = analogRead(PIN_TEMP);
-  float humidityExt = analogRead(PIN_HUMID);
+  float sensorValue1 = analogRead(PIN_TEMP); // External temperature
+  float sensorValue2 = analogRead(PIN_HUMID); // External humidity
+
+  DEBUG_PRINTLN("done.");
 
   // Map voltages to sensor ranges
-  temperatureExt = mapFloat(temperatureExt, 0, 1240, -40, 60); // Map temperature from 0-1 V to -40 to 60°C
-  humidityExt = mapFloat(humidityExt, 0, 1240, 0, 100);        // Map humidity 0-1 V to 0 to 100%
+  float temperatureExt = mapFloat(sensorValue1, 0, 1240, -40, 60); // Map temperature from 0-1 V to -40 to 60°C
+  float humidityExt = mapFloat(sensorValue2, 0, 1240, 0, 100);      // Map humidity 0-1 V to 0 to 100%
 
-  // Check if readings are erroneous
+  // Calculate measured voltages
+  float voltage1 = sensorValue1 * (3.3 / 4095.0);
+  float voltage2 = sensorValue2 * (3.3 / 4095.0);
+
+  Serial.print(F("temperatureExt: ")); Serial.print(voltage1, 4); Serial.print(F(",")); Serial.print(sensorValue1); Serial.print(F(",")); Serial.println(temperatureExt, 2);
+  Serial.print(F("humidityExt: ")); Serial.print(voltage2, 4); Serial.print(F(",")); Serial.print(sensorValue2); Serial.print(F(",")); Serial.println(humidityExt, 2);
+
+  // Check and correct for erroneous readings
   if (temperatureExt < -40)
   {
     temperatureExt = -40;
@@ -168,14 +177,10 @@ void readHmp60()
   {
     humidityExt = 100;
   }
-  //Serial.print(F("temperatureExt: ")); Serial.println(temperatureExt);
-  //Serial.print(F("humidityExt: ")); Serial.println(humidityExt);
 
   // Add to statistics object
   temperatureExtStats.add(temperatureExt);
   humidityExtStats.add(humidityExt);
-
-  DEBUG_PRINTLN("done.");
 
   // Stop loop timer
   timer.hmp60 = millis() - loopStartTime;
@@ -196,19 +201,19 @@ void readAnemometer()
 
   DEBUG_PRINT("Info: Reading anemometer...");
 
-  //for (int i = 0; i < 5; i++)
+  //for (int i = 0; i < 50; i++)
   //{
-  // Measure wind speed
+  // Measure wind speed and direction
   float sensorValue1 = analogRead(PIN_WIND_SPEED); // Raw analog wind speed value
-
-  // Map wind speed to 0-100 m/s
-  windSpeed = mapFloat(sensorValue1, 741, 3671, 0, 100);
-
-  // Measure wind direction
   float sensorValue2 = analogRead(PIN_WIND_DIR); // Raw analog wind direction value
 
-  // Map wind direction to 0-360°
-  windDirection = mapFloat(sensorValue2, 741, 3671, 0, 360);
+  // Map wind speed and direction
+  windSpeed = mapFloat(sensorValue1, 745, 3684, 0, 100); // 0-100 m/s range
+  windDirection = mapFloat(sensorValue2, 745, 3684, 0, 360); // 0-360 range
+
+  // Calculate measured voltages
+  float voltage1 = sensorValue1 * (3.3 / 4095.0);
+  float voltage2 = sensorValue2 * (3.3 / 4095.0);
 
   // Check if readings are erroneous
   if (windSpeed < 0)
@@ -223,9 +228,6 @@ void readAnemometer()
   {
     windDirection = 360;
   }
-
-  float voltage1 = sensorValue1 * (3.3 / 4095.0);
-  float voltage2 = sensorValue2 * (3.3 / 4095.0);
 
   DEBUG_PRINTLN("done.");
 
@@ -284,11 +286,11 @@ void windVectors()
   }
 
   // Wind direction "from" correction
-  if (rvWindDirection < 180)
+  if (rvWindDirection <= 180)
   {
     rvWindDirection += 180;
   }
-  else if (rvWindDirection > 180)
+  else if (rvWindDirection >= 180)
   {
     rvWindDirection -= 180;
   }

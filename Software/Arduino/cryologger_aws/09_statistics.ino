@@ -3,7 +3,7 @@ void calculateStats()
 {
   // Write data to union
   moSbdMessage.temperatureExt = temperatureExtStats.average() * 100;  // Mean temperature (°C)
-  moSbdMessage.humidityExt = humidityExtStats.average() * 100;        // Mean humidity (%)
+  moSbdMessage.humidityExt = humidityExtStats.average() * 100;         // Mean humidity (%)
   moSbdMessage.temperatureInt = temperatureIntStats.average() * 100;  // Mean temperature (°C)
   moSbdMessage.voltage = batteryStats.average() * 100;                // Mean battery voltage (V)
 
@@ -12,6 +12,10 @@ void calculateStats()
 
   // Clear all statistics objects
   clearStats();
+
+  // Clear wind gust speed and direction maximums
+  windGustSpeed = 0;
+  windGustDirection = 0;
 }
 
 // Clear statistics objects

@@ -18,15 +18,24 @@ void configureAdc()
 
   // Apply ADC gain and offset error calibration correction
   // Offset:
-  // #1 = 2, #2 = ,#3 =
+  // #1 = 2 
+  // #2 = 8
+  // #3 = 3
   // Gain:
-  // #1 = 2059, #2 = , #3 =
+  // #1 = 2059
+  // #2 = 2060
+  // #3 = 2052
+
+  // Wind Limits
+  // #1 
+  // #2 745 3683
+  // #3 745 to 3686
 
   // Apply ADC gain and offset error calibration correction
-  ADC->OFFSETCORR.reg = ADC_OFFSETCORR_OFFSETCORR(2);
-  ADC->GAINCORR.reg = ADC_GAINCORR_GAINCORR(2059);
+  ADC->OFFSETCORR.reg = ADC_OFFSETCORR_OFFSETCORR(3);
+  ADC->GAINCORR.reg = ADC_GAINCORR_GAINCORR(2052);
   ADC->CTRLB.bit.CORREN = true;
-  while (ADC->STATUS.bit.SYNCBUSY);               // Wait for synchronization
+  while (ADC->STATUS.bit.SYNCBUSY); // Wait for synchronization
 }
 
 // Map raw ADC values to floats

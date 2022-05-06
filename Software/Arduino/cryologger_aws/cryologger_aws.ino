@@ -1,6 +1,6 @@
 /*
     Title:    Cryologger Automatic Weather Station v0.1
-    Date:     May 1, 2022
+    Date:     May 6, 2022
     Author:   Adam Garbo
 
     Description:
@@ -125,14 +125,14 @@ Statistic veStats;              // Wind east-west wind vector component (u)
 // ----------------------------------------------------------------------------
 // User defined global variable declarations
 // ----------------------------------------------------------------------------
-unsigned long alarmInterval     = 60;     // Sleep duration (in seconds) between data sample acquisitions. Default = 5 minutes (300 seconds)
-unsigned int  averageInterval   = 12;      // Number of samples to be averaged for each RockBLOCK transmission. Default = 12 (Hourly)
+unsigned long alarmInterval     = 300;    // Sleep duration (in seconds) between data sample acquisitions. Default = 5 minutes (300 seconds)
+unsigned int  averageInterval   = 12;     // Number of samples to be averaged for each RockBLOCK transmission. Default = 12 (Hourly)
 unsigned int  transmitInterval  = 1;      // Messages to transmit in each Iridium transmission (340 byte limit)
 unsigned int  retransmitLimit   = 10;     // Failed data transmission reattempt (340 byte limit)
-unsigned int  gnssTimeout       = 2;      // Timeout for GNSS signal acquisition (minutes)
+unsigned int  gnssTimeout       = 1;      // Timeout for GNSS signal acquisition (minutes)
 unsigned int  iridiumTimeout    = 180;    // Timeout for Iridium transmission (s)
 bool          firstTimeFlag     = true;   // Flag to determine if program is running for the first time
-float         batteryCutoff     = 10.5;   // Battery voltage cutoff threshold (V)
+float         batteryCutoff     = 0.0;    // Battery voltage cutoff threshold (V)
 
 // ----------------------------------------------------------------------------
 // Global variable declarations
@@ -264,7 +264,7 @@ void setup()
 
   DEBUG_PRINTLN();
   printLine();
-  DEBUG_PRINTLN("Cryologger - Automatic Weather Station v0.1");
+  DEBUG_PRINTLN("Cryologger - Automatic Weather Station #3");
 
   printLine();
 
@@ -321,10 +321,22 @@ void loop()
     if (voltage < batteryCutoff)
     {
       cutoffCounter++;
-      
+
+      // In the event that the battery voltage never recovers, force a reset of the
+      // system after 1 week
+      if (cutoffCounter > 168)
+      {
+        // Force WDT reset
+        while (1);
+      }
+
       DEBUG_PRINTLN("Warning: Battery voltage cutoff exceeded. Entering deep sleep...");
 
-      sampleCounter = 0; // Reset sample counter
+      // Reset sample counter
+      sampleCounter = 0;
+
+      // Clear statistics objects
+      clearStats();
 
       // Go to sleep
       setCutoffAlarm();
@@ -332,6 +344,8 @@ void loop()
     else
     {
       DEBUG_PRINT("Info: Battery voltage good: "); DEBUG_PRINTLN(voltage);
+
+      cutoffCounter = 0;
 
       // Perform measurements
       enable12V();      // Enable 12V power

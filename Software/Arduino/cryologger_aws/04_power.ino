@@ -95,7 +95,7 @@ void disableIridiumPower()
   digitalWrite(PIN_5V_EN, LOW);
 }
 
-//
+// Prepare system for sleep
 void prepareForSleep()
 {
   // Disable serial

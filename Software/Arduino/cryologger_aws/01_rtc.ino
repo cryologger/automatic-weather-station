@@ -65,7 +65,7 @@ void setRtcAlarm()
     DEBUG_PRINTLN(F("Warning: RTC alarm set in the past, too far in the future, or program running for the first time."));
 
     // Set alarm for hour rollover match
-    rtc.setAlarmTime(0, 0, 0); // hours, minutes, seconds
+    rtc.setAlarmTime(0, 5, 0); // hours, minutes, seconds
 
     // Enable alarm for hour rollover match
     rtc.enableAlarm(rtc.MATCH_MMSS);
@@ -100,7 +100,7 @@ void setRtcAlarm()
 void setCutoffAlarm()
 {
   // Set alarm for hour rollover match
-  rtc.setAlarmTime(0, 0, 0); // hours, minutes, seconds
+  rtc.setAlarmTime(0, 5, 0); // hours, minutes, seconds
 
   // Enable alarm for hour rollover match
   rtc.enableAlarm(rtc.MATCH_MMSS);
@@ -111,7 +111,6 @@ void setCutoffAlarm()
   DEBUG_PRINT("Info: "); printDateTime();
   DEBUG_PRINT("Info: Next alarm "); printAlarm();
   DEBUG_PRINT("Info: Alarm match "); DEBUG_PRINTLN(rtc.MATCH_HHMMSS);
-
 }
 
 // Print the RTC's current date and time
