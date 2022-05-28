@@ -23,7 +23,7 @@
     - RM Young Wind Monitor 5103L
 
     Comments:
-    -
+    - Sketch uses 70700 bytes (26%) of program storage space. Maximum is 262144 bytes.
 
 */
 
@@ -119,8 +119,8 @@ Statistic temperatureExtStats;  // External temperature
 Statistic humidityExtStats;     // External humidity
 Statistic temperatureIntStats;  // Internal temperature
 Statistic windSpeedStats;       // Wind speed
-Statistic vnStats;              // Wind north-south wind vector component (v)
-Statistic veStats;              // Wind east-west wind vector component (u)
+Statistic uStats;               // Wind east-west wind vector component (u)
+Statistic vStats;               // Wind north-south wind vector component (v)
 
 // ----------------------------------------------------------------------------
 // User defined global variable declarations
@@ -264,7 +264,7 @@ void setup()
 
   DEBUG_PRINTLN();
   printLine();
-  DEBUG_PRINTLN("Cryologger - Automatic Weather Station #3");
+  DEBUG_PRINTLN("Cryologger - Automatic Weather Station");
 
   printLine();
 

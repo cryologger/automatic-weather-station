@@ -201,7 +201,7 @@ void readAnemometer()
 
   DEBUG_PRINT("Info: Reading anemometer...");
 
-  //for (int i = 0; i < 50; i++)
+  //for (int i = 0; i < 20; i++)
   //{
   // Measure wind speed and direction
   float sensorValue1 = analogRead(PIN_WIND_SPEED); // Raw analog wind speed value
@@ -217,17 +217,11 @@ void readAnemometer()
 
   // Check if readings are erroneous
   if (windSpeed < 0)
-  {
     windSpeed = 0;
-  }
   if (windDirection < 0)
-  {
     windDirection = 0;
-  }
   if (windDirection > 360)
-  {
     windDirection = 360;
-  }
 
   DEBUG_PRINTLN("done.");
 
@@ -236,7 +230,7 @@ void readAnemometer()
   //myDelay(500);
   //}
 
-  // Determine wind gust and direction
+  // Check and update wind gust and direction
   if ((windSpeed > 0) && (windSpeed > windGustSpeed))
   {
     windGustSpeed = windSpeed;
@@ -244,58 +238,37 @@ void readAnemometer()
   }
 
   // Calculate wind speed and direction vectors
-  float windDirectionRadians = windDirection * DEG_TO_RAD;    // Convert wind direction from degrees to radians
-  float vn1 = -1.0 * windSpeed * cos(windDirectionRadians);   // Magnitude of the north-south component (v) of the resultant vector mean wind
-  float ve1 = -1.0 * windSpeed * sin(windDirectionRadians);   // Magnitude of the east-west component (u) of the resultant vector mean wind
+  // http://tornado.sfsu.edu/geosciences/classes/m430/Wind/WindDirection.html
+  float windDirectionRadians = windDirection * DEG_TO_RAD;  // Convert wind direction from degrees to radians
+  float u = -1.0 * windSpeed * sin(windDirectionRadians);   // Magnitude of east-west component (u) of vector winds
+  float v = -1.0 * windSpeed * cos(windDirectionRadians);   // Magnitude of north-south component (v) of vector winds
 
   // Write data to union
   moSbdMessage.windGustSpeed = windGustSpeed * 100;
   moSbdMessage.windGustDirection = windGustDirection;
 
-  // Add to wind statistics 1
+  // Add to wind statistics
   windSpeedStats.add(windSpeed);
-  vnStats.add(vn1);
-  veStats.add(ve1);
+  uStats.add(u);
+  vStats.add(v);
 
   // Stop loop timer
   timer.anemometer = millis() - loopStartTime;
 }
 
-// Calculate resultant mean wind speed and direction vectors
-// For more information see: http://www.webmet.com/met_monitoring/622.html
+// Calculate mean wind speed and direction from vector components
+// For more information see:
+// http://tornado.sfsu.edu/geosciences/classes/m430/Wind/WindDirection.html
 void windVectors()
 {
-  float rvWindDirection = atan2(veStats.average(), vnStats.average()); // Resultant mean wind direction
+  // Calculate resultant mean wind speed
+  float rvWindSpeed = sqrt(sq(uStats.average()) + sq(vStats.average()));
+
+  // Calculate resultant mean wind direction
+  float rvWindDirection = atan2((-1.0 * uStats.average()), (-1.0 * vStats.average()));
   rvWindDirection *= RAD_TO_DEG;  // Convert from radians to degrees
 
-  if (rvWindDirection < 0)
-  {
-    rvWindDirection += 360;
-  }
-
-  float rvWindSpeed = sqrt(sq(veStats.average()) + sq(vnStats.average())); // Resultant mean wind speed
-
-  if ((rvWindDirection == 0) && (rvWindSpeed != 0))
-  {
-    rvWindDirection = 360;
-  }
-
-  if (rvWindSpeed == 0)
-  {
-    rvWindDirection = 0;
-  }
-
-  // Wind direction "from" correction
-  if (rvWindDirection <= 180)
-  {
-    rvWindDirection += 180;
-  }
-  else if (rvWindDirection >= 180)
-  {
-    rvWindDirection -= 180;
-  }
-
   // Write data to union
-  moSbdMessage.windSpeed = rvWindSpeed * 100;      // Resultant mean wind speed 1 (m/s)
-  moSbdMessage.windDirection = rvWindDirection;    // Resultant mean wind direction 1 (°)
+  moSbdMessage.windSpeed = rvWindSpeed * 100;      // Resultant mean wind speed (m/s)
+  moSbdMessage.windDirection = rvWindDirection;    // Resultant mean wind direction (°)
 }
