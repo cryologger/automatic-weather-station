@@ -150,8 +150,8 @@ void readHmp60()
   DEBUG_PRINTLN("done.");
 
   // Map voltages to sensor ranges
-  float temperatureExt = mapFloat(sensorValue1, 0, 1240, -40, 60); // Map temperature from 0-1 V to -40 to 60°C
-  float humidityExt = mapFloat(sensorValue2, 0, 1240, 0, 100);      // Map humidity 0-1 V to 0 to 100%
+  float temperatureExt = mapFloat(sensorValue1, 0, 3102, -60, 40); // Map temperature from 0-2.5 V to -60 to 40°C
+  float humidityExt = mapFloat(sensorValue2, 0, 3102, 0, 100);      // Map humidity 0-2.5 V to 0 to 100%
 
   // Calculate measured voltages
   float voltage1 = sensorValue1 * (3.3 / 4095.0);
@@ -160,23 +160,15 @@ void readHmp60()
   Serial.print(F("temperatureExt: ")); Serial.print(voltage1, 4); Serial.print(F(",")); Serial.print(sensorValue1); Serial.print(F(",")); Serial.println(temperatureExt, 2);
   Serial.print(F("humidityExt: ")); Serial.print(voltage2, 4); Serial.print(F(",")); Serial.print(sensorValue2); Serial.print(F(",")); Serial.println(humidityExt, 2);
 
-  // Check and correct for erroneous readings
-  if (temperatureExt < -40)
-  {
-    temperatureExt = -40;
-  }
-  if (temperatureExt > 60)
-  {
-    temperatureExt = 60;
-  }
+  // Check and limit values if maximums are exceeded
+  if (temperatureExt < -60)
+    temperatureExt = -60;
+  if (temperatureExt > 40)
+    temperatureExt = 40;
   if (humidityExt < 0)
-  {
     humidityExt = 0;
-  }
   if (humidityExt > 100)
-  {
     humidityExt = 100;
-  }
 
   // Add to statistics object
   temperatureExtStats.add(temperatureExt);
@@ -245,7 +237,7 @@ void readAnemometer()
 
   // Write data to union
   moSbdMessage.windGustSpeed = windGustSpeed * 100;
-  moSbdMessage.windGustDirection = windGustDirection;
+  moSbdMessage.windGustDirection = windGustDirection * 10;
 
   // Add to wind statistics
   windSpeedStats.add(windSpeed);
@@ -264,11 +256,25 @@ void windVectors()
   // Calculate resultant mean wind speed
   float rvWindSpeed = sqrt(sq(uStats.average()) + sq(vStats.average()));
 
+  Serial.print("uStats.average(): "); Serial.println(uStats.average());
+  Serial.print("vStats.average(): "); Serial.println(vStats.average());
+
   // Calculate resultant mean wind direction
-  float rvWindDirection = atan2((-1.0 * uStats.average()), (-1.0 * vStats.average()));
+  float rvWindDirection = atan2(-1.0 * uStats.average(), -1.0 * vStats.average());
+  Serial.print("rvWindDirection: "); Serial.println(rvWindDirection);
   rvWindDirection *= RAD_TO_DEG;  // Convert from radians to degrees
+  Serial.print("rvWindDirection: "); Serial.println(rvWindDirection);
+
+  // Why?
+  if (rvWindDirection < 0)
+    rvWindDirection += 360;
+
+  // Zero wind direction if wind speed is zero.
+  // Note: atan2 can be undefined if u and v vectors are zero
+  if (rvWindSpeed == 0)
+    rvWindDirection = 0;
 
   // Write data to union
-  moSbdMessage.windSpeed = rvWindSpeed * 100;      // Resultant mean wind speed (m/s)
-  moSbdMessage.windDirection = rvWindDirection;    // Resultant mean wind direction (°)
+  moSbdMessage.windSpeed = rvWindSpeed * 100;         // Resultant mean wind speed (m/s)
+  moSbdMessage.windDirection = rvWindDirection * 10;  // Resultant mean wind direction (°)
 }

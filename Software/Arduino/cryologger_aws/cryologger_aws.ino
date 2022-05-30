@@ -1,6 +1,6 @@
 /*
-    Title:    Cryologger Automatic Weather Station v0.1
-    Date:     May 6, 2022
+    Title:    Cryologger Automatic Weather Station v0.2
+    Date:     May 29, 2022
     Author:   Adam Garbo
 
     Description:
@@ -23,8 +23,7 @@
     - RM Young Wind Monitor 5103L
 
     Comments:
-    - Sketch uses 70700 bytes (26%) of program storage space. Maximum is 262144 bytes.
-
+    - Sketch uses 72204 bytes (27%) of program storage space. Maximum is 262144 bytes.
 */
 
 // ----------------------------------------------------------------------------
