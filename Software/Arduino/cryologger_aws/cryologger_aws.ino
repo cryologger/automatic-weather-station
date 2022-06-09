@@ -36,6 +36,7 @@
 #include <ArduinoLowPower.h>        // https://github.com/arduino-libraries/ArduinoLowPower (v1.2.2)
 #include <IridiumSBD.h>             // https://github.com/sparkfun/SparkFun_IridiumSBD_I2C_Arduino_Library (v3.0.5)
 #include <RTCZero.h>                // https://github.com/arduino-libraries/RTCZero (v1.6.0)
+#include <sensirion.h>              // https://github.com/HydroSense/sensirion
 #include <Statistic.h>              // https://github.com/RobTillaart/Statistic (v1.0.0)
 #include <TimeLib.h>                // https://github.com/PaulStoffregen/Time (v1.6.1)
 #include <TinyGPS++.h>              // https://github.com/mikalhart/TinyGPSPlus (v1.0.3)
@@ -109,6 +110,7 @@ Adafruit_LSM303_Accel_Unified   lsm303 = Adafruit_LSM303_Accel_Unified(54321); /
 IridiumSBD                      modem(IRIDIUM_PORT, PIN_IRIDIUM_SLEEP);
 RTCZero                         rtc;
 TinyGPSPlus                     gnss;
+sensirion                       sht(20, 21); // (data, clock). Data requires pull-up.
 
 // ----------------------------------------------------------------------------
 // Statistics objects

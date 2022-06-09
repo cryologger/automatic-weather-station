@@ -64,6 +64,29 @@ void readDps310()
 }
 
 // ----------------------------------------------------------------------------
+// Davis Instruments Temperature Humidity Sensor 
+// Sensiron SHT31-LSS
+// ----------------------------------------------------------------------------
+void readSht31()
+{
+  // Disable I2C bus
+  Wire.end();
+
+  // Add delay
+  myDelay(100);
+
+  // Read sensor
+  float temperature = sht.readTemperatureC();
+  float humidity = sht.readHumidity();
+
+  Serial.print("Temperature: "); Serial.print(temperature); Serial.println(" C");
+  Serial.print("Humidity: "); Serial.print(humidity); Serial.println("%");
+
+  // Re-enable I2C bus
+  Wire.begin();
+}
+
+// ----------------------------------------------------------------------------
 // Adafruit LSM303AGR Accelerometer/Magnetomter
 // ----------------------------------------------------------------------------
 void configureLsm303()
@@ -126,7 +149,6 @@ void readLsm303()
 }
 
 // ----------------------------------------------------------------------------
-
 // Vaisala HMP60 Temperature/Relative Humidity
 // Brown  5-28 VDC
 // White  Channel 1 RH 0-1V
