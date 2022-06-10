@@ -64,7 +64,7 @@ void readDps310()
 }
 
 // ----------------------------------------------------------------------------
-// Davis Instruments Temperature Humidity Sensor 
+// Davis Instruments Temperature Humidity Sensor
 // Sensiron SHT31-LSS
 // ----------------------------------------------------------------------------
 void readSht31()
@@ -268,6 +268,76 @@ void readAnemometer()
 
   // Stop loop timer
   timer.anemometer = millis() - loopStartTime;
+}
+
+
+// ----------------------------------------------------------------------------
+// Measure wind speed and direction from Davis Instruments 7911 anemometer
+// Davis Instruments 7911 Anemometer
+// ------------------------------
+// Colour    Description     Pin
+// ------------------------------
+// Black     Wind speed      A0
+// Red       Ground          GND
+// Green     Wind direction  A1
+// Yellow    Power           A5
+// ----------------------------------------------------------------------------
+void readDavis7911()
+{
+  uint32_t loopStartTime = millis();
+
+  // Enable power
+  //digitalWrite(PIN_SENSOR_PWR, HIGH);
+
+  // Enable pull-ups
+  pinMode(PIN_WIND_SPEED, INPUT_PULLUP);
+
+  // Attach interrupt to wind speed input pin
+  attachInterrupt(PIN_WIND_SPEED, windSpeedIsr, FALLING);
+  revolutions = 0;
+
+  // Measure wind speed for 5 seconds
+  while (millis() < loopStartTime + (samplePeriod * 1000));
+  {
+    // Do nothing
+  }
+
+  // Detach interrupt from wind speed input pin
+  detachInterrupt(PIN_WIND_SPEED);
+
+  // Disable pull-ups
+  pinMode(PIN_WIND_SPEED, INPUT);
+
+  // Disable power
+  //digitalWrite(PIN_SENSOR_PWR, LOW);
+
+  // Calculate wind speed according to Davis Instruments formula: V = P(2.25/T)
+  // V = speed in miles per hour
+  // P = no. of pulses in sample period
+  // T = duration of sample period in seconds
+  windSpeed = revolutions * (2.25 / samplePeriod);  // Calculate wind speed in miles per hour
+  windSpeed *= 0.44704;                             // Convert wind speed to metres per second
+
+  // Measure wind direction
+  (void)analogRead(PIN_WIND_DIRECTION);
+  windDirection = analogRead(PIN_WIND_DIRECTION); // Raw analog wind direction value
+  windDirection = map(windDirection, 0, 4095, 0, 359); // Map wind direction to degrees (0-360°)
+
+  // Correct for negative wind direction values
+  if (windDirection > 360)
+    windDirection -= 360;
+  if (windDirection < 0)
+    windDirection += 360;
+
+  DEBUG_PRINT(F("Wind Speed: ")); DEBUG_PRINTLN(windSpeed);
+  DEBUG_PRINT(F("Wind Direction: ")); DEBUG_PRINTLN(windDirection);
+}
+
+// Wind speed interrupt service routine (ISR)
+// for Davis Instruments 7911 anemometer
+void windSpeedIsr()
+{
+  revolutions++;
 }
 
 // Calculate mean wind speed and direction from vector components
