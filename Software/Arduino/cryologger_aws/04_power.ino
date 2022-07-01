@@ -7,6 +7,7 @@ void readBattery()
   myDelay(1000);
 
   // Measure external battery voltage across 10/1 MΩ resistor divider (1/10 divider)
+  (void)analogRead(PIN_VBAT);
   voltage = analogRead(PIN_VBAT);
   voltage  *=  ((10000000.0 + 1000000.0) / 1000000.0); // Multiply back 1 MOhm / (10 MOhm + 1 MOhm)
   voltage *= 3.3;   // Multiply by 3.3V reference voltage

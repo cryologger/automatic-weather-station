@@ -56,6 +56,7 @@
 #define DEBUG           true  // Output debug messages to Serial Monitor
 #define DEBUG_GNSS      true  // Output GNSS debug information
 #define DEBUG_IRIDIUM   true  // Output Iridium debug messages to Serial Monitor
+#define CALIBRATE       false // 
 
 #if DEBUG
 #define DEBUG_PRINT(x)            SERIAL_PORT.print(x)
@@ -83,8 +84,9 @@
 #define PIN_WIND_SPEED      A1
 #define PIN_WIND_DIR        A2
 #define PIN_SOLAR           A3
-#define PIN_TEMP            A4  // Unused
-#define PIN_HUMID           A4  // Unused
+#define PIN_TEMP            A7  // Unused
+#define PIN_HUMID           A7  // Unused
+#define PIN_SENSOR_PWR      A4  // 3.3V power
 #define PIN_GNSS_EN         A5
 #define PIN_MICROSD_CS      4   // MicroSD chip select pin
 #define PIN_12V_EN          5   // 
@@ -146,7 +148,7 @@ unsigned int  averageInterval   = 6;     // Number of samples to be averaged for
 unsigned int  transmitInterval  = 3;      // Number of messages in each Iridium transmission (340-byte limit)
 unsigned int  retransmitLimit   = 2;     // Failed data transmission reattempts (340-byte limit)
 unsigned int  gnssTimeout       = 2;      // Timeout for GNSS signal acquisition (minutes)
-unsigned int  iridiumTimeout    = 180;    // Timeout for Iridium transmission (s)
+unsigned int  iridiumTimeout    = 10;    // Timeout for Iridium transmission (s)
 bool          firstTimeFlag     = false;   // Flag to determine if program is running for the first time
 float         batteryCutoff     = 0.0;    // Battery voltage cutoff threshold (V)
 unsigned int  samplesPerFile    = 8640;   // Maximum samples stored in a logfile (Default: 30 days * 288 samples per day)
@@ -283,12 +285,14 @@ void setup()
 {
   // Pin assignments
   pinMode(LED_BUILTIN, OUTPUT);
+  pinMode(PIN_SENSOR_PWR, OUTPUT);
   pinMode(PIN_5V_EN, OUTPUT);
   pinMode(PIN_12V_EN, OUTPUT);
   pinMode(PIN_GNSS_EN, OUTPUT);
   pinMode(PIN_LED, OUTPUT);
   pinMode(PIN_VBAT, INPUT);
   digitalWrite(LED_BUILTIN, LOW);
+  digitalWrite(PIN_SENSOR_PWR, LOW);  // Di3.3V
   digitalWrite(PIN_5V_EN, LOW);       // Disable power to Iridium 9603
   digitalWrite(PIN_12V_EN, LOW);      // Disable power
   digitalWrite(PIN_GNSS_EN, HIGH);    // Disable power to GNSS
@@ -302,7 +306,7 @@ void setup()
 
 #if DEBUG
   SERIAL_PORT.begin(115200); // Open serial port at 115200 baud
-  blinkLed(LED_BUILTIN, 4, 1000); // Non-blocking delay to allow user to open Serial Monitor
+  blinkLed(LED_BUILTIN, 4, 500); // Non-blocking delay to allow user to open Serial Monitor
 #endif
 
   DEBUG_PRINTLN();
@@ -325,6 +329,20 @@ void setup()
 
   getLogFileName();
   createLogFile();
+
+#if CALIBRATE
+  while (true)
+  {
+    petDog(); // Reset WDT
+    enable5V();       // Enable 5V power
+    //calibrateAdc();
+    //read7911();
+    readSht31();
+    myDelay(500);
+    
+    
+  }
+#endif
 
   // Close serial port if immediately entering deep sleep
   if (!firstTimeFlag)

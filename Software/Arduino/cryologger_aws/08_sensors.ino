@@ -289,7 +289,7 @@ void readSp212()
   // Start loop timer
   unsigned long loopStartTime = millis();
 
-  DEBUG_PRINT("Info: Reading SP-212...");
+  DEBUG_PRINT("Info: Reading SP212...");
 
   // Perform analog readings
   (void)analogRead(PIN_SOLAR);
@@ -397,7 +397,7 @@ void read7911()
 {
   uint32_t loopStartTime = millis();
 
-  DEBUG_PRINT("Info: Reading 7911...");
+  DEBUG_PRINTLN("Info: Reading 7911...");
 
   // Enable pull-ups
   pinMode(PIN_WIND_SPEED, INPUT_PULLUP);
@@ -418,9 +418,6 @@ void read7911()
   // Disable pull-ups
   pinMode(PIN_WIND_SPEED, INPUT);
 
-  // Disable power
-  //digitalWrite(PIN_SENSOR_PWR, LOW);
-
   // Calculate wind speed according to Davis Instruments formula: V = P(2.25/T)
   // V = speed in miles per hour
   // P = no. of pulses in sample period
@@ -428,11 +425,17 @@ void read7911()
   windSpeed = revolutions * (2.25 / 3);   // Calculate wind speed in miles per hour
   windSpeed *= 0.44704;                   // Convert wind speed to metres per second
 
+  // Enable power
+  digitalWrite(PIN_SENSOR_PWR, HIGH);
+  
   // Measure wind direction
   (void)analogRead(PIN_WIND_DIR);
   windDirection = analogRead(PIN_WIND_DIR); // Raw analog wind direction value
   windDirection = map(windDirection, 0, 4095, 0, 359); // Map wind direction to degrees (0-360°)
 
+  // Disable power
+  digitalWrite(PIN_SENSOR_PWR, LOW);
+  
   // Correct for negative wind direction values
   if (windDirection > 360)
     windDirection -= 360;

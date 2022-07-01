@@ -18,7 +18,7 @@ void configureAdc()
 
   // Apply ADC gain and offset error calibration correction
   // Offset:
-  // #1 = 2 
+  // #1 = 2
   // #2 = 8
   // #3 = 3
   // Gain:
@@ -27,13 +27,26 @@ void configureAdc()
   // #3 = 2052
 
   // Wind Limits
-  // #1 
+  // #1
   // #2 745 3683
   // #3 745 to 3686
 
   // Apply ADC gain and offset error calibration correction
-  ADC->OFFSETCORR.reg = ADC_OFFSETCORR_OFFSETCORR(2);
-  ADC->GAINCORR.reg = ADC_GAINCORR_GAINCORR(2059);
+  if (CRYOLOGGER_ID == 1)
+  {
+    ADC->OFFSETCORR.reg = ADC_OFFSETCORR_OFFSETCORR(30);
+    ADC->GAINCORR.reg = ADC_GAINCORR_GAINCORR(2144);
+  }
+  if (CRYOLOGGER_ID == 2)
+  {
+    ADC->OFFSETCORR.reg = ADC_OFFSETCORR_OFFSETCORR(2);
+    ADC->GAINCORR.reg = ADC_GAINCORR_GAINCORR(2059);
+  }
+  if (CRYOLOGGER_ID == 3)
+  {
+    ADC->OFFSETCORR.reg = ADC_OFFSETCORR_OFFSETCORR(2);
+    ADC->GAINCORR.reg = ADC_GAINCORR_GAINCORR(2059);
+  }
   ADC->CTRLB.bit.CORREN = true;
   while (ADC->STATUS.bit.SYNCBUSY); // Wait for synchronization
 }
@@ -42,4 +55,14 @@ void configureAdc()
 float mapFloat(float x, float in_min, float in_max, float out_min, float out_max)
 {
   return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+}
+
+void calibrateAdc()
+{
+  float sensorValue = analogRead(PIN_VBAT);
+  float voltage1 = sensorValue * (3.3 / 4095.0);
+  float voltage2 = sensorValue * ((10000000.0 + 1000000.0) / 1000000.0); // Multiply back 1 MOhm / (10 MOhm + 1 MOhm)
+  voltage2 *= 3.3;   // Multiply by 3.3V reference voltage
+  voltage2 /= 4096;  // Convert to voltage
+  Serial.print(F("sensorValue: ")); Serial.print(sensorValue); Serial.print(F(",")); Serial.print(voltage1, 4); Serial.print(F(",")); Serial.println(voltage2, 4);
 }

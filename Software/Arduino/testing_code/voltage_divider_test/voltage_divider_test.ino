@@ -7,6 +7,11 @@ void setup()
   Serial.begin(115200);
   while (!Serial);
 
+  pinMode(A5, OUTPUT);
+  pinMode(6, OUTPUT);
+  digitalWrite(A5, HIGH);
+  digitalWrite(6, LOW);
+
   // Configure ADC
   ADC->CTRLA.bit.ENABLE = 0;                      // Disable ADC
   ADC->CTRLB.reg = ADC_CTRLB_PRESCALER_DIV512 |   // Divide Clock ADC GCLK by 512 (48MHz/512 = 93.7kHz)
@@ -20,8 +25,8 @@ void setup()
   while (ADC->STATUS.bit.SYNCBUSY);               // Wait for synchronization
 
   // Apply ADC gain and offset error calibration correction
-  ADC->OFFSETCORR.reg = ADC_OFFSETCORR_OFFSETCORR(2);
-  ADC->GAINCORR.reg = ADC_GAINCORR_GAINCORR(2059);
+  ADC->OFFSETCORR.reg = ADC_OFFSETCORR_OFFSETCORR(41);
+  ADC->GAINCORR.reg = ADC_GAINCORR_GAINCORR(2122);
   ADC->CTRLB.bit.CORREN = true;
   while (ADC->STATUS.bit.SYNCBUSY);               // Wait for synchronization
 }
