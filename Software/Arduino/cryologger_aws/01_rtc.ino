@@ -18,12 +18,14 @@ void configureRtc()
   //rtc.setDate(day, month, year);
   //rtc.setEpoch();
 
+  //rtc.setTime(11, 04, 30); // Must be in the form of: rtc.setTime(11, 04, 30);
+  
   // Set initial RTC alarm time
-  rtc.setAlarmTime(0, 0, 0); // hours, minutes, seconds
+  rtc.setAlarmTime(0, 5, 0); // hours, minutes, seconds
 
   // Enable alarm for hour rollover match
-  rtc.enableAlarm(rtc.MATCH_MMSS);
-  //rtc.enableAlarm(rtc.MATCH_SS);
+  //rtc.enableAlarm(rtc.MATCH_MMSS);
+  rtc.enableAlarm(rtc.MATCH_SS);
 
   // Attach alarm interrupt service routine (ISR)
   rtc.attachInterrupt(alarmIsr);
@@ -32,7 +34,7 @@ void configureRtc()
 
   DEBUG_PRINT("Info: RTC initialized "); printDateTime();
   DEBUG_PRINT("Info: Initial alarm "); printAlarm();
-  DEBUG_PRINT("Info: Alarm match "); DEBUG_PRINTLN(rtc.MATCH_SS);
+  DEBUG_PRINT("Info: Alarm match "); DEBUG_PRINTLN(rtc.MATCH_MMSS);
 }
 
 // Read RTC
@@ -44,18 +46,22 @@ void readRtc()
   // Get Unix Epoch time
   unixtime = rtc.getEpoch();
 
+  sprintf(dateTime, "20%02d-%02d-%02d %02d:%02d:%02d",
+          rtc.getYear(), rtc.getMonth(), rtc.getDay(),
+          rtc.getHours(), rtc.getMinutes(), rtc.getSeconds());
+
   // Write data to union
   moSbdMessage.unixtime = unixtime;
 
   // Stop the loop timer
-  timer.rtc = millis() - loopStartTime;
+  timer.readRtc = millis() - loopStartTime;
 }
 
 // Set RTC alarm
 void setRtcAlarm()
 {
   // Calculate next alarm
-  alarmTime = unixtime + alarmInterval;
+  alarmTime = unixtime + (alarmInterval * 60UL);
   DEBUG_PRINT(F("Info: unixtime ")); DEBUG_PRINTLN(unixtime);
   DEBUG_PRINT(F("Info: alarmTime ")); DEBUG_PRINTLN(alarmTime);
 
@@ -70,6 +76,12 @@ void setRtcAlarm()
     // Enable alarm for hour rollover match
     rtc.enableAlarm(rtc.MATCH_MMSS);
     //rtc.enableAlarm(rtc.MATCH_SS);
+
+    // Reset sample counter
+    sampleCounter = 0;
+
+    // Clear all statistics objects
+    clearStats();
 
     DEBUG_PRINT("Info: "); printDateTime();
     DEBUG_PRINT("Info: Next alarm "); printAlarm();
@@ -92,7 +104,7 @@ void setRtcAlarm()
     DEBUG_PRINT("Info: Next alarm "); printAlarm();
     DEBUG_PRINT("Info: Alarm match "); DEBUG_PRINTLN(rtc.MATCH_HHMMSS);
   }
-  
+
   // Clear flag
   alarmFlag = false;
 }
