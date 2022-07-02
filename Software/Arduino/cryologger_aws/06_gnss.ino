@@ -28,7 +28,7 @@ void syncRtc()
   //GNSS_PORT.println("$CDCMD,33,0*7D"); // Disable antenna updates
 
   // Attempt to acquire a valid GNSS position fix for up to specified timeout period
-  while (!fixFound && millis() - loopStartTime < gnssTimeout * 1UL * 1000UL)
+  while (!fixFound && millis() - loopStartTime < gnssTimeout * 60UL * 1000UL)
   {
     if (GNSS_PORT.available())
     {

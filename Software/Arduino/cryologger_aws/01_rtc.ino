@@ -24,8 +24,8 @@ void configureRtc()
   rtc.setAlarmTime(0, 5, 0); // hours, minutes, seconds
 
   // Enable alarm for hour rollover match
-  //rtc.enableAlarm(rtc.MATCH_MMSS);
-  rtc.enableAlarm(rtc.MATCH_SS);
+  rtc.enableAlarm(rtc.MATCH_MMSS);
+  //rtc.enableAlarm(rtc.MATCH_SS);
 
   // Attach alarm interrupt service routine (ISR)
   rtc.attachInterrupt(alarmIsr);

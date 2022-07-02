@@ -1,6 +1,6 @@
 /*
     Title:    Cryologger Automatic Weather Station v0.2
-    Date:     June 30, 2022
+    Date:     July 1, 2022
     Author:   Adam Garbo
 
     Description:
@@ -16,6 +16,7 @@
     - Adafruit LSM303AGR Accelerometer/Magnetomter
     - Pololu 3.3V 600mA Step-Down Voltage Regulator D36V6F3
     - Pololu 5V 600mA Step-Down Voltage Regulator D36V6F5
+    - SanDisk Max Endurance 23 GB microSD card
 
     Sensors:
     - Davis Instruments 7811 Anemometer
@@ -23,7 +24,8 @@
     - Apogee SP-212 Pyranometer
 
     Comments:
-    - Sketch uses 87572 bytes (33%) of program storage space. Maximum is 262144 bytes.
+    - Sketch uses 94316 bytes (35%) of program storage space. Maximum is 262144 bytes.
+    - Power consumption in deep sleep is ~625 uA.
 */
 
 // ----------------------------------------------------------------------------
@@ -48,7 +50,7 @@
 // ----------------------------------------------------------------------------
 // Define unique identifier
 // ----------------------------------------------------------------------------
-#define CRYOLOGGER_ID 1
+#define CRYOLOGGER_ID 3
 
 // ----------------------------------------------------------------------------
 // Debugging macros
@@ -143,13 +145,13 @@ Statistic vStats;               // Wind north-south wind vector component (v)
 // ----------------------------------------------------------------------------
 // User defined global variable declarations
 // ----------------------------------------------------------------------------
-unsigned long alarmInterval     = 1;      // Sample period (minutes). Default: 5 minutes (300 seconds)
-unsigned int  averageInterval   = 6;     // Number of samples to be averaged for each RockBLOCK transmission. Default = 12 (Hourly)
+unsigned long alarmInterval     = 5;      // Sample period (minutes). Default: 5 minutes (300 seconds)
+unsigned int  averageInterval   = 12;     // Number of samples to be averaged for each RockBLOCK transmission. Default = 12 (Hourly)
 unsigned int  transmitInterval  = 3;      // Number of messages in each Iridium transmission (340-byte limit)
-unsigned int  retransmitLimit   = 2;     // Failed data transmission reattempts (340-byte limit)
+unsigned int  retransmitLimit   = 2;      // Failed data transmission reattempts (340-byte limit)
 unsigned int  gnssTimeout       = 2;      // Timeout for GNSS signal acquisition (minutes)
-unsigned int  iridiumTimeout    = 10;    // Timeout for Iridium transmission (s)
-bool          firstTimeFlag     = false;   // Flag to determine if program is running for the first time
+unsigned int  iridiumTimeout    = 180;    // Timeout for Iridium transmission (s)
+bool          firstTimeFlag     = true;   // Flag to determine if program is running for the first time
 float         batteryCutoff     = 0.0;    // Battery voltage cutoff threshold (V)
 unsigned int  samplesPerFile    = 8640;   // Maximum samples stored in a logfile (Default: 30 days * 288 samples per day)
 
@@ -334,10 +336,10 @@ void setup()
   while (true)
   {
     petDog(); // Reset WDT
-    enable5V();       // Enable 5V power
-    //calibrateAdc();
+    //enable5V();       // Enable 5V power
+    calibrateAdc();
     //read7911();
-    readSht31();
+    //readSht31();
     myDelay(500);
     
     

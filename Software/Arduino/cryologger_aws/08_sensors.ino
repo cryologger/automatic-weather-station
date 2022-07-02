@@ -213,6 +213,10 @@ void readLsm303()
     //rollStats.add();
 
     DEBUG_PRINTLN("done.");
+
+    DEBUG_PRINT(F("pitch: ")); DEBUG_PRINT_DEC(pitch, 2); 
+    DEBUG_PRINT(F(" roll: ")); DEBUG_PRINTLN_DEC(roll, 2); 
+    
   }
   else
   {
@@ -427,7 +431,7 @@ void read7911()
 
   // Enable power
   digitalWrite(PIN_SENSOR_PWR, HIGH);
-  
+
   // Measure wind direction
   (void)analogRead(PIN_WIND_DIR);
   windDirection = analogRead(PIN_WIND_DIR); // Raw analog wind direction value
@@ -435,13 +439,18 @@ void read7911()
 
   // Disable power
   digitalWrite(PIN_SENSOR_PWR, LOW);
-  
+
   // Correct for negative wind direction values
   if (windDirection > 360)
     windDirection -= 360;
   if (windDirection < 0)
     windDirection += 360;
 
+  if (windSpeed == 0) 
+  {
+    windDirection = 0.0;
+  }
+  
   // Check and update wind gust and direction
   if ((windSpeed > 0) && (windSpeed > windGustSpeed))
   {
@@ -463,7 +472,7 @@ void read7911()
   windSpeedStats.add(windSpeed);
   uStats.add(u);
   vStats.add(v);
-  
+
   DEBUG_PRINT(F("Wind Speed: ")); DEBUG_PRINTLN(windSpeed);
   DEBUG_PRINT(F("Wind Direction: ")); DEBUG_PRINTLN(windDirection);
 

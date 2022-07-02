@@ -34,21 +34,25 @@ void configureAdc()
   // Apply ADC gain and offset error calibration correction
   if (CRYOLOGGER_ID == 1)
   {
-    ADC->OFFSETCORR.reg = ADC_OFFSETCORR_OFFSETCORR(30);
+    ADC->OFFSETCORR.reg = ADC_OFFSETCORR_OFFSETCORR(20);
     ADC->GAINCORR.reg = ADC_GAINCORR_GAINCORR(2144);
+    ADC->CTRLB.bit.CORREN = true;
+    while (ADC->STATUS.bit.SYNCBUSY); // Wait for synchronization
   }
   if (CRYOLOGGER_ID == 2)
   {
-    ADC->OFFSETCORR.reg = ADC_OFFSETCORR_OFFSETCORR(2);
-    ADC->GAINCORR.reg = ADC_GAINCORR_GAINCORR(2059);
+    ADC->OFFSETCORR.reg = ADC_OFFSETCORR_OFFSETCORR(22);
+    ADC->GAINCORR.reg = ADC_GAINCORR_GAINCORR(2093);
+    ADC->CTRLB.bit.CORREN = true;
+    while (ADC->STATUS.bit.SYNCBUSY); // Wait for synchronization
   }
   if (CRYOLOGGER_ID == 3)
   {
-    ADC->OFFSETCORR.reg = ADC_OFFSETCORR_OFFSETCORR(2);
-    ADC->GAINCORR.reg = ADC_GAINCORR_GAINCORR(2059);
+    ADC->OFFSETCORR.reg = ADC_OFFSETCORR_OFFSETCORR(15);
+    ADC->GAINCORR.reg = ADC_GAINCORR_GAINCORR(2082);
+    ADC->CTRLB.bit.CORREN = true;
+    while (ADC->STATUS.bit.SYNCBUSY); // Wait for synchronization
   }
-  ADC->CTRLB.bit.CORREN = true;
-  while (ADC->STATUS.bit.SYNCBUSY); // Wait for synchronization
 }
 
 // Map raw ADC values to floats
