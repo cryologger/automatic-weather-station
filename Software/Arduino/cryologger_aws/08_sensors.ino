@@ -1,5 +1,64 @@
 // ----------------------------------------------------------------------------
+// Adafruit BME280 Temperature Humidity Pressure Sensor
+// https://www.adafruit.com/product/2652
+// ----------------------------------------------------------------------------
+void configureBme280()
+{
+  DEBUG_PRINT("Info: Initializing BME280...");
+
+  if (bme280.begin())
+  {
+    online.bme280 = true;
+    DEBUG_PRINTLN("success!");
+  }
+  else
+  {
+    online.bme280 = false;
+    DEBUG_PRINTLN("failed!");
+  }
+}
+
+// Read BME280
+void readBme280()
+{
+  // Start the loop timer
+  unsigned long loopStartTime = millis();
+
+  // Initialize sensor
+  configureBme280();
+
+  // Check if sensor initialized successfully
+  if (online.bme280)
+  {
+    DEBUG_PRINT("Info: Reading BME280...");
+
+    myDelay(250);
+    // Read sensor data
+    temperatureInt = bme280.readTemperature();
+    humidityInt = bme280.readHumidity();
+    pressureInt = bme280.readPressure() / 100.0F;
+
+    // Add to statistics object
+    temperatureIntStats.add(temperatureInt);
+    humidityIntStats.add(humidityInt);
+    pressureIntStats.add(pressureInt);
+
+    // Write data to union
+    moSbdMessage.temperatureInt = temperatureInt * 100;
+
+    DEBUG_PRINTLN("done.");
+  }
+  else
+  {
+    DEBUG_PRINTLN("Warning: DPS310 offline!");
+  }
+  // Stop the loop timer
+  timer.readBme280 = millis() - loopStartTime;
+}
+
+// ----------------------------------------------------------------------------
 // Adafruit DPS310 Precision Barometric Pressure Sensor
+// https://www.adafruit.com/product/4494
 // ----------------------------------------------------------------------------
 void configureDps310()
 {
@@ -59,8 +118,47 @@ void readDps310()
     DEBUG_PRINTLN("Warning: DPS310 offline!");
   }
   // Stop the loop timer
-  timer.dps310 = millis() - loopStartTime;
+  timer.readDps310 = millis() - loopStartTime;
+}
 
+// ----------------------------------------------------------------------------
+// Davis Instruments Temperature Humidity Sensor
+// Sensiron SHT31-LSS
+// Yellow:  Power
+// Green:   Ground
+// White:   SCK
+// Blue:    SDA
+
+// ----------------------------------------------------------------------------
+void readSht31()
+{
+  // Start the loop timer
+  unsigned long loopStartTime = millis();
+
+  DEBUG_PRINT("Info: Reading SHT31...");
+
+  // Disable I2C bus
+  Wire.end();
+
+  // Add delay
+  myDelay(100);
+
+  // Read sensor
+  temperatureExt = sht.readTemperatureC();
+  humidityExt = sht.readHumidity();
+
+  // Add to statistics object
+  temperatureExtStats.add(temperatureExt);
+  humidityExtStats.add(humidityExt);
+
+  DEBUG_PRINT("Temperature: "); DEBUG_PRINT(temperatureExt); DEBUG_PRINTLN(" C");
+  DEBUG_PRINT("Humidity: "); DEBUG_PRINT(humidityExt); DEBUG_PRINTLN("%");
+
+  // Re-enable I2C bus
+  Wire.begin();
+
+  // Stop the loop timer
+  timer.readSht31 = millis() - loopStartTime;
 }
 
 // ----------------------------------------------------------------------------
@@ -111,10 +209,14 @@ void readLsm303()
     moSbdMessage.roll = roll * 100;
 
     // Add to statistics object
-    //.add();
-    //.add();
+    //pitchStats.add();
+    //rollStats.add();
 
     DEBUG_PRINTLN("done.");
+
+    DEBUG_PRINT(F("pitch: ")); DEBUG_PRINT_DEC(pitch, 2); 
+    DEBUG_PRINT(F(" roll: ")); DEBUG_PRINTLN_DEC(roll, 2); 
+    
   }
   else
   {
@@ -122,16 +224,15 @@ void readLsm303()
   }
 
   // Stop loop timer
-  timer.lsm303 = millis() - loopStartTime;
+  timer.readLsm303 = millis() - loopStartTime;
 }
 
 // ----------------------------------------------------------------------------
-
 // Vaisala HMP60 Temperature/Relative Humidity
-// Brown  5-28 VDC
-// White  Channel 1 RH 0-1V
-// Blue   GND
-// Black  Channel 2 T 0-1V
+// Brown:  5-28 VDC
+// White:  Channel 1 RH 0-1V
+// Blue:   GND
+// Black:  Channel 2 T 0-1V
 // ----------------------------------------------------------------------------
 void readHmp60()
 {
@@ -144,7 +245,9 @@ void readHmp60()
   myDelay(4000);
 
   // Perform analog readings
+  (void)analogRead(PIN_TEMP);
   float sensorValue1 = analogRead(PIN_TEMP); // External temperature
+  (void)analogRead(PIN_HUMID);
   float sensorValue2 = analogRead(PIN_HUMID); // External humidity
 
   DEBUG_PRINTLN("done.");
@@ -157,8 +260,8 @@ void readHmp60()
   float voltage1 = sensorValue1 * (3.3 / 4095.0);
   float voltage2 = sensorValue2 * (3.3 / 4095.0);
 
-  Serial.print(F("temperatureExt: ")); Serial.print(voltage1, 4); Serial.print(F(",")); Serial.print(sensorValue1); Serial.print(F(",")); Serial.println(temperatureExt, 2);
-  Serial.print(F("humidityExt: ")); Serial.print(voltage2, 4); Serial.print(F(",")); Serial.print(sensorValue2); Serial.print(F(",")); Serial.println(humidityExt, 2);
+  DEBUG_PRINT(F("temperatureExt: ")); DEBUG_PRINT_DEC(voltage1, 4); DEBUG_PRINT(F(",")); DEBUG_PRINT(sensorValue1); DEBUG_PRINT(F(",")); DEBUG_PRINTLN_DEC(temperatureExt, 2);
+  DEBUG_PRINT(F("humidityExt: ")); DEBUG_PRINT_DEC(voltage2, 4); DEBUG_PRINT(F(",")); DEBUG_PRINT(sensorValue2); DEBUG_PRINT(F(",")); DEBUG_PRINTLN_DEC(humidityExt, 2);
 
   // Check and limit values if maximums are exceeded
   if (temperatureExt < -60)
@@ -175,7 +278,42 @@ void readHmp60()
   humidityExtStats.add(humidityExt);
 
   // Stop loop timer
-  timer.hmp60 = millis() - loopStartTime;
+  timer.readHmp60 = millis() - loopStartTime;
+}
+
+// ----------------------------------------------------------------------------
+// Apogee SP-212 Pyranometer
+// White: Positive (signal from sensor)
+// Red:   Input Power  5-24 V DC
+// Black: Ground (from sensor signal and output power)
+// Clear: Shield/Ground
+// ----------------------------------------------------------------------------
+void readSp212()
+{
+  // Start loop timer
+  unsigned long loopStartTime = millis();
+
+  DEBUG_PRINT("Info: Reading SP212...");
+
+  // Perform analog readings
+  (void)analogRead(PIN_SOLAR);
+  float sensorValue = analogRead(PIN_SOLAR); // External temperature
+
+  DEBUG_PRINTLN("done.");
+
+  // Map voltages to sensor ranges
+  float solar = mapFloat(sensorValue, 0, 3102, 0, 2000); // Map solar from 0-2.5 V to 0 to 2000
+
+  // Calculate measured voltages
+  float voltage = sensorValue * (3.3 / 4095.0);
+
+  DEBUG_PRINT(F("solar: ")); DEBUG_PRINT_DEC(voltage, 4); DEBUG_PRINT(F(",")); DEBUG_PRINT(sensorValue); DEBUG_PRINT(F(",")); DEBUG_PRINTLN_DEC(solar, 2);
+
+  // Add to statistics object
+  solarStats.add(solar);
+
+  // Stop loop timer
+  timer.readSp212 = millis() - loopStartTime;
 }
 
 // ----------------------------------------------------------------------------
@@ -187,7 +325,7 @@ void readHmp60()
 // WD+  White
 // WD-  Green
 // ----------------------------------------------------------------------------
-void readAnemometer()
+void read5103L()
 {
   unsigned int loopStartTime = millis();
 
@@ -217,8 +355,8 @@ void readAnemometer()
 
   DEBUG_PRINTLN("done.");
 
-  Serial.print(F("windSpeed: ")); Serial.print(voltage1, 4); Serial.print(F(",")); Serial.print(sensorValue1); Serial.print(F(",")); Serial.println(windSpeed, 2);
-  Serial.print(F("windDirection: ")); Serial.print(voltage2, 4); Serial.print(F(",")); Serial.print(sensorValue2); Serial.print(F(",")); Serial.println(windDirection, 2);
+  DEBUG_PRINT(F("windSpeed: ")); DEBUG_PRINT_DEC(voltage1, 4); DEBUG_PRINT(F(",")); DEBUG_PRINT(sensorValue1); DEBUG_PRINT(F(",")); DEBUG_PRINT_DEC(windSpeed, 2);
+  DEBUG_PRINT(F("windDirection: ")); DEBUG_PRINT_DEC(voltage2, 4); DEBUG_PRINT(F(",")); DEBUG_PRINT(sensorValue2); DEBUG_PRINT(F(",")); DEBUG_PRINT_DEC(windDirection, 2);
   //myDelay(500);
   //}
 
@@ -245,7 +383,108 @@ void readAnemometer()
   vStats.add(v);
 
   // Stop loop timer
-  timer.anemometer = millis() - loopStartTime;
+  timer.read5103L = millis() - loopStartTime;
+}
+
+// ----------------------------------------------------------------------------
+// Measure wind speed and direction from Davis Instruments 7911 anemometer
+// Davis Instruments 7911 Anemometer
+// ------------------------------
+// Colour    Description     Pin
+// ------------------------------
+// Black     Wind speed      A1
+// Green     Wind direction  A2
+// Yellow    Power           5V
+// Red       Ground          GND
+// ----------------------------------------------------------------------------
+void read7911()
+{
+  uint32_t loopStartTime = millis();
+
+  DEBUG_PRINTLN("Info: Reading 7911...");
+
+  // Enable pull-ups
+  pinMode(PIN_WIND_SPEED, INPUT_PULLUP);
+
+  // Attach interrupt to wind speed input pin
+  attachInterrupt(PIN_WIND_SPEED, windSpeedIsr, FALLING);
+  revolutions = 0;
+
+  // Measure wind speed for 5 seconds
+  while (millis() < loopStartTime + 3000);
+  {
+    // Do nothing
+  }
+
+  // Detach interrupt from wind speed input pin
+  detachInterrupt(PIN_WIND_SPEED);
+
+  // Disable pull-ups
+  pinMode(PIN_WIND_SPEED, INPUT);
+
+  // Calculate wind speed according to Davis Instruments formula: V = P(2.25/T)
+  // V = speed in miles per hour
+  // P = no. of pulses in sample period
+  // T = duration of sample period in seconds
+  windSpeed = revolutions * (2.25 / 3);   // Calculate wind speed in miles per hour
+  windSpeed *= 0.44704;                   // Convert wind speed to metres per second
+
+  // Enable power
+  digitalWrite(PIN_SENSOR_PWR, HIGH);
+
+  // Measure wind direction
+  (void)analogRead(PIN_WIND_DIR);
+  windDirection = analogRead(PIN_WIND_DIR); // Raw analog wind direction value
+  windDirection = map(windDirection, 0, 4095, 0, 359); // Map wind direction to degrees (0-360°)
+
+  // Disable power
+  digitalWrite(PIN_SENSOR_PWR, LOW);
+
+  // Correct for negative wind direction values
+  if (windDirection > 360)
+    windDirection -= 360;
+  if (windDirection < 0)
+    windDirection += 360;
+
+  if (windSpeed == 0) 
+  {
+    windDirection = 0.0;
+  }
+  
+  // Check and update wind gust and direction
+  if ((windSpeed > 0) && (windSpeed > windGustSpeed))
+  {
+    windGustSpeed = windSpeed;
+    windGustDirection = windDirection;
+  }
+
+  // Calculate wind speed and direction vectors
+  // http://tornado.sfsu.edu/geosciences/classes/m430/Wind/WindDirection.html
+  float windDirectionRadians = windDirection * DEG_TO_RAD;  // Convert wind direction from degrees to radians
+  float u = -1.0 * windSpeed * sin(windDirectionRadians);   // Magnitude of east-west component (u) of vector winds
+  float v = -1.0 * windSpeed * cos(windDirectionRadians);   // Magnitude of north-south component (v) of vector winds
+
+  // Write data to union
+  moSbdMessage.windGustSpeed = windGustSpeed * 100;
+  moSbdMessage.windGustDirection = windGustDirection * 10;
+
+  // Add to wind statistics
+  windSpeedStats.add(windSpeed);
+  uStats.add(u);
+  vStats.add(v);
+
+  DEBUG_PRINT(F("Wind Speed: ")); DEBUG_PRINTLN(windSpeed);
+  DEBUG_PRINT(F("Wind Direction: ")); DEBUG_PRINTLN(windDirection);
+
+  // Stop loop timer
+  timer.read7911 = millis() - loopStartTime;
+}
+
+// Wind speed interrupt service routine (ISR)
+// for Davis Instruments 7911 anemometer
+void windSpeedIsr()
+{
+  revolutions++;
 }
 
 // Calculate mean wind speed and direction from vector components
@@ -256,16 +495,16 @@ void windVectors()
   // Calculate resultant mean wind speed
   float rvWindSpeed = sqrt(sq(uStats.average()) + sq(vStats.average()));
 
-  Serial.print("uStats.average(): "); Serial.println(uStats.average());
-  Serial.print("vStats.average(): "); Serial.println(vStats.average());
+  DEBUG_PRINT("uStats.average(): "); DEBUG_PRINTLN(uStats.average());
+  DEBUG_PRINT("vStats.average(): "); DEBUG_PRINTLN(vStats.average());
 
   // Calculate resultant mean wind direction
   float rvWindDirection = atan2(-1.0 * uStats.average(), -1.0 * vStats.average());
-  Serial.print("rvWindDirection: "); Serial.println(rvWindDirection);
+  DEBUG_PRINT("rvWindDirection: "); DEBUG_PRINTLN(rvWindDirection);
   rvWindDirection *= RAD_TO_DEG;  // Convert from radians to degrees
-  Serial.print("rvWindDirection: "); Serial.println(rvWindDirection);
+  DEBUG_PRINT("rvWindDirection: "); DEBUG_PRINTLN(rvWindDirection);
 
-  // Why?
+  // To do: Check if necessary
   if (rvWindDirection < 0)
     rvWindDirection += 360;
 

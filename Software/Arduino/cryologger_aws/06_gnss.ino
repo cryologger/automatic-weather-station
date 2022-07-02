@@ -21,9 +21,9 @@ void syncRtc()
 
   // Configure GNSS
   GNSS_PORT.println("$PMTK220,1000*1F"); // Set NMEA update rate to 1 Hz
-  myDelay(100);
+  myDelay(250);
   GNSS_PORT.println("$PMTK314,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0*28"); // Set NMEA sentence output to GGA and RMC
-  myDelay(100);
+  myDelay(250);
   //GNSS_PORT.println("$CDCMD,33,1*7C"); // Enable antenna updates
   //GNSS_PORT.println("$CDCMD,33,0*7D"); // Disable antenna updates
 
@@ -64,7 +64,7 @@ void syncRtc()
             unsigned long rtcEpoch = rtc.getEpoch();
 
             // Calculate RTC drift
-            long rtcDrift = rtcEpoch - gnssEpoch;
+            rtcDrift = rtcEpoch - gnssEpoch;
 
             DEBUG_PRINTLN("");
             DEBUG_PRINT(F("gnssEpoch: ")); DEBUG_PRINTLN(gnssEpoch);
@@ -83,18 +83,25 @@ void syncRtc()
             }
 
             // Write data to buffer
+            latitude = gnss.location.lat();
+            longitude = gnss.location.lng();
+            satellites = gnss.satellites.value();
+            hdop = gnss.hdop.value() / 100.0;
+
+            // Write data to buffer
             //moSbdMessage.latitude = gnss.location.lat() * 1000000;
             //moSbdMessage.longitude = gnss.location.lng() * 1000000;
             //moSbdMessage.satellites = gnss.satellites.value();
             //moSbdMessage.hdop = gnss.hdop.value();
 
             DEBUG_PRINT(F("Info: RTC drift ")); DEBUG_PRINT(rtcDrift); DEBUG_PRINTLN(F(" seconds"));
-            blinkLed(5, 250);
+            blinkLed(PIN_LED, 5, 100);
           }
         }
         else
         {
           DEBUG_PRINT(F(" Fail"));
+
         }
       }
     }
@@ -113,6 +120,7 @@ void syncRtc()
   if (!fixFound)
   {
     DEBUG_PRINTLN(F("Warning: No GNSS fix found!"));
+    blinkLed(LED_BUILTIN, 5, 100);
   }
 
   // Close GNSS port

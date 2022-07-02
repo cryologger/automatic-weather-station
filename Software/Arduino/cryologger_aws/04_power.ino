@@ -7,6 +7,7 @@ void readBattery()
   myDelay(1000);
 
   // Measure external battery voltage across 10/1 MΩ resistor divider (1/10 divider)
+  (void)analogRead(PIN_VBAT);
   voltage = analogRead(PIN_VBAT);
   voltage  *=  ((10000000.0 + 1000000.0) / 1000000.0); // Multiply back 1 MOhm / (10 MOhm + 1 MOhm)
   voltage *= 3.3;   // Multiply by 3.3V reference voltage
@@ -14,8 +15,8 @@ void readBattery()
 
   // Measure LiPo battery voltage across 100 kΩ/100 kΩ onboard resistor divider (1/2 divider)
   //float voltage = analogRead(A7);
-  //voltage = voltage / samples * 3.3 * 2 / 4096.0;
-  
+  //voltage = voltage * 3.3 * 2 / 4096.0;
+
   // Write data to union
   moSbdMessage.voltage = voltage * 100;
 
@@ -131,11 +132,10 @@ void wakeUp()
 {
   // Enable serial port
   enableSerial();
-  blinkLed(4, 250);
 }
 
 // Non-blocking blink LED (https://forum.arduino.cc/index.php?topic=503368.0)
-void blinkLed(byte ledFlashes, unsigned int ledDelay)
+void blinkLed(byte ledPin, byte ledFlashes, unsigned int ledDelay)
 {
   byte i = 0;
   while (i < ledFlashes * 2)
@@ -143,20 +143,20 @@ void blinkLed(byte ledFlashes, unsigned int ledDelay)
     unsigned long currentMillis = millis();
     if (currentMillis - previousMillis >= ledDelay)
     {
-      digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN));
+      digitalWrite(ledPin, !digitalRead(ledPin));
       previousMillis = currentMillis;
       i++;
     }
   }
   // Ensure LED is off at end of blink cycle
-  digitalWrite(LED_BUILTIN, LOW);
+  digitalWrite(ledPin, LOW);
 }
 
 // Non-blocking delay (milliseconds)
 // https://arduino.stackexchange.com/questions/12587/how-can-i-handle-the-millis-rollover
 void myDelay(unsigned long ms)
 {
-  unsigned long start = millis(); // Start: timestamp
+  unsigned long start = millis();         // Start: timestamp
   for (;;)
   {
     petDog();                            // Reset watchdog timer

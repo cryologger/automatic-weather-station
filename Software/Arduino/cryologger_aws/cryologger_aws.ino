@@ -1,34 +1,37 @@
 /*
     Title:    Cryologger Automatic Weather Station v0.2
-    Date:     May 29, 2022
+    Date:     July 1, 2022
     Author:   Adam Garbo
 
     Description:
-    - Code configured for automatic weather stations to be deployed
-    in Arctic Bay and Pond Inlet.
+    - Code configured for automatic weather stations to be deployed on Milne Glacier,
+    Ellesmere Island, Nunavut during the 2022 field season.
 
     Components:
     - Rock7 RockBLOCK 9603
     - Maxtena M1621HCT-P-SMA antenna (optional)
     - Adafruit Feather M0 Proto
     - Adafruit Ultimate GPS Featherwing
+    - Adafruit BME280 Temperature Humidity Pressure Sensor
     - Adafruit LSM303AGR Accelerometer/Magnetomter
-    - Adafruit DPS310 Precision Barometric Pressure Sensor
-    - Pololu 3.3V, 600mA Step-Down Voltage Regulator D36V6F3
-    - Pololu 5V, 600mA Step-Down Voltage Regulator D36V6F5
-    - Pololu 9V, 600mA Step-Down Voltage Regulator D36V6F9
+    - Pololu 3.3V 600mA Step-Down Voltage Regulator D36V6F3
+    - Pololu 5V 600mA Step-Down Voltage Regulator D36V6F5
+    - SanDisk Max Endurance 23 GB microSD card
 
     Sensors:
-    - Vaisala HMP60 A12A0A3A0
-    - RM Young Wind Monitor 5103L
+    - Davis Instruments 7811 Anemometer
+    - Davis Instruments 3816 Temperature Relative Humidity Sensor
+    - Apogee SP-212 Pyranometer
 
     Comments:
-    - Sketch uses 72204 bytes (27%) of program storage space. Maximum is 262144 bytes.
+    - Sketch uses 94316 bytes (35%) of program storage space. Maximum is 262144 bytes.
+    - Power consumption in deep sleep is ~625 uA.
 */
 
 // ----------------------------------------------------------------------------
 // Libraries
 // ----------------------------------------------------------------------------
+#include <Adafruit_BME280.h>        // https://github.com/adafruit/Adafruit_BME280 (v2.2.2)
 #include <Adafruit_DPS310.h>        // https://github.com/adafruit/Adafruit_DPS310 (v1.1.1)
 #include <Adafruit_LSM303_Accel.h>  // https://github.com/adafruit/Adafruit_LSM303_Accel (v1.1.4)
 #include <Adafruit_Sensor.h>        // https://github.com/adafruit/Adafruit_Sensor (v1.1.4)
@@ -36,6 +39,8 @@
 #include <ArduinoLowPower.h>        // https://github.com/arduino-libraries/ArduinoLowPower (v1.2.2)
 #include <IridiumSBD.h>             // https://github.com/sparkfun/SparkFun_IridiumSBD_I2C_Arduino_Library (v3.0.5)
 #include <RTCZero.h>                // https://github.com/arduino-libraries/RTCZero (v1.6.0)
+#include <SdFat.h>                  // https://github.com/greiman/SdFat (v2.1.2)
+#include <sensirion.h>              // https://github.com/HydroSense/sensirion
 #include <Statistic.h>              // https://github.com/RobTillaart/Statistic (v1.0.0)
 #include <TimeLib.h>                // https://github.com/PaulStoffregen/Time (v1.6.1)
 #include <TinyGPS++.h>              // https://github.com/mikalhart/TinyGPSPlus (v1.0.3)
@@ -43,11 +48,17 @@
 #include <wiring_private.h>         // Required for creating new Serial instance
 
 // ----------------------------------------------------------------------------
+// Define unique identifier
+// ----------------------------------------------------------------------------
+#define CRYOLOGGER_ID 3
+
+// ----------------------------------------------------------------------------
 // Debugging macros
 // ----------------------------------------------------------------------------
 #define DEBUG           true  // Output debug messages to Serial Monitor
 #define DEBUG_GNSS      true  // Output GNSS debug information
 #define DEBUG_IRIDIUM   true  // Output Iridium debug messages to Serial Monitor
+#define CALIBRATE       false // 
 
 #if DEBUG
 #define DEBUG_PRINT(x)            SERIAL_PORT.print(x)
@@ -74,12 +85,15 @@
 #define PIN_VBAT            A0
 #define PIN_WIND_SPEED      A1
 #define PIN_WIND_DIR        A2
-#define PIN_TEMP            A3
-#define PIN_HUMID           A4
+#define PIN_SOLAR           A3
+#define PIN_TEMP            A7  // Unused
+#define PIN_HUMID           A7  // Unused
+#define PIN_SENSOR_PWR      A4  // 3.3V power
 #define PIN_GNSS_EN         A5
-//#define PIN_MICROSD_CS      4   // MicroSD chip select pin
-#define PIN_12V_EN          5
-#define PIN_5V_EN           6
+#define PIN_MICROSD_CS      4   // MicroSD chip select pin
+#define PIN_12V_EN          5   // 
+#define PIN_5V_EN           6   // 
+#define PIN_LED             8   // Adafruit Adalogger M0 green LED
 #define PIN_IRIDIUM_RX      10  // Pin 1 RXD (Yellow)
 #define PIN_IRIDIUM_TX      11  // Pin 6 TXD (Orange)
 #define PIN_IRIDIUM_SLEEP   12  // Pin 7 OnOff (Grey)
@@ -104,11 +118,15 @@ void SERCOM1_Handler()
 // ----------------------------------------------------------------------------
 // Object instantiations
 // ----------------------------------------------------------------------------
+Adafruit_BME280                 bme280;
 Adafruit_DPS310                 dps310;   // I2C address: 0x77
 Adafruit_LSM303_Accel_Unified   lsm303 = Adafruit_LSM303_Accel_Unified(54321); // I2C address: 0x1E
 IridiumSBD                      modem(IRIDIUM_PORT, PIN_IRIDIUM_SLEEP);
 RTCZero                         rtc;
+SdFs                            sd;           // File system object
+FsFile                          logFile;      // Log file
 TinyGPSPlus                     gnss;
+sensirion                       sht(20, 21);  // (data, clock). Data requires pull-up.
 
 // ----------------------------------------------------------------------------
 // Statistics objects
@@ -117,6 +135,9 @@ Statistic batteryStats;         // Battery voltage
 Statistic temperatureExtStats;  // External temperature
 Statistic humidityExtStats;     // External humidity
 Statistic temperatureIntStats;  // Internal temperature
+Statistic humidityIntStats;     // Internal humidity
+Statistic pressureIntStats;     // Internal pressure
+Statistic solarStats;           // Solar radiation
 Statistic windSpeedStats;       // Wind speed
 Statistic uStats;               // Wind east-west wind vector component (u)
 Statistic vStats;               // Wind north-south wind vector component (v)
@@ -124,14 +145,15 @@ Statistic vStats;               // Wind north-south wind vector component (v)
 // ----------------------------------------------------------------------------
 // User defined global variable declarations
 // ----------------------------------------------------------------------------
-unsigned long alarmInterval     = 300;    // Sleep duration (in seconds) between data sample acquisitions. Default = 5 minutes (300 seconds)
+unsigned long alarmInterval     = 5;      // Sample period (minutes). Default: 5 minutes (300 seconds)
 unsigned int  averageInterval   = 12;     // Number of samples to be averaged for each RockBLOCK transmission. Default = 12 (Hourly)
-unsigned int  transmitInterval  = 1;      // Messages to transmit in each Iridium transmission (340 byte limit)
-unsigned int  retransmitLimit   = 10;     // Failed data transmission reattempt (340 byte limit)
-unsigned int  gnssTimeout       = 1;      // Timeout for GNSS signal acquisition (minutes)
+unsigned int  transmitInterval  = 3;      // Number of messages in each Iridium transmission (340-byte limit)
+unsigned int  retransmitLimit   = 2;      // Failed data transmission reattempts (340-byte limit)
+unsigned int  gnssTimeout       = 2;      // Timeout for GNSS signal acquisition (minutes)
 unsigned int  iridiumTimeout    = 180;    // Timeout for Iridium transmission (s)
 bool          firstTimeFlag     = true;   // Flag to determine if program is running for the first time
 float         batteryCutoff     = 0.0;    // Battery voltage cutoff threshold (V)
+unsigned int  samplesPerFile    = 8640;   // Maximum samples stored in a logfile (Default: 30 days * 288 samples per day)
 
 // ----------------------------------------------------------------------------
 // Global variable declarations
@@ -139,28 +161,41 @@ float         batteryCutoff     = 0.0;    // Battery voltage cutoff threshold (V
 volatile bool alarmFlag         = false;  // Flag for alarm interrupt service routine
 volatile bool wdtFlag           = false;  // Flag for Watchdog Timer interrupt service routine
 volatile int  wdtCounter        = 0;      // Watchdog Timer interrupt counter
-bool          resetFlag         = 0;      // Flag to force system reset using Watchdog Timer
+volatile int  revolutions       = 0;      // Wind speed ISR counter
+bool          resetFlag         = false;  // Flag to force system reset using Watchdog Timer
+bool          logFlag           = true;   //
 uint8_t       moSbdBuffer[340];           // Buffer for Mobile Originated SBD (MO-SBD) message (340 bytes max)
 uint8_t       mtSbdBuffer[270];           // Buffer for Mobile Terminated SBD (MT-SBD) message (270 bytes max)
 size_t        moSbdBufferSize;
 size_t        mtSbdBufferSize;
-unsigned int  iterationCounter  = 0;      // Counter for program iterations (zero indicates a reset)
-byte          samples           = 30;     // Number of samples to average readings
+char          logFileName[30]   = "";     // Log file name
+char          dateTime[30]      = "";     // Datetime buffer
 byte          retransmitCounter = 0;      // Counter of Iridium 9603 transmission reattempts
 byte          transmitCounter   = 0;      // Counter of Iridium 9603 transmission intervals
+unsigned int  iterationCounter  = 0;      // Counter for program iterations (zero indicates a reset)
 unsigned int  failureCounter    = 0;      // Counter of consecutive failed Iridium transmission attempts
 unsigned long previousMillis    = 0;      // Global millis() timer
 unsigned long alarmTime         = 0;      // Global epoch alarm time variable
 unsigned long unixtime          = 0;      // Global epoch time variable
 unsigned int  sampleCounter     = 0;      // Sensor measurement counter
 unsigned int  cutoffCounter     = 0;      // Battery voltage cutoff sleep cycle counter
-float         extTemperature    = 0.0;    // HMP60 temperature (°C)
-float         intTemperature    = 0.0;    // DPS310 temperature (°C)
+unsigned int  samplesSaved      = 0;      // Log file sample counter
+long          rtcDrift          = 0;      // RTC drift calculated during sync
+float         temperatureExt    = 0.0;    // External temperature (°C)
+float         humidityExt       = 0.0;    // External humidity (%)
+float         temperatureInt    = 0.0;    // Internal temperature (°C)
+float         humidityInt       = 0.0;    // Internal hunidity (%)
+float         pressureInt       = 0.0;    // Internal pressure (hPa)
+float         solar             = 0.0;    // Solar radiation
 float         windSpeed         = 0.0;    // Wind speed (m/s)
 float         windDirection     = 0.0;    // Wind direction (°)
 float         windGustSpeed     = 0.0;    // Wind gust speed  (m/s)
 float         windGustDirection = 0.0;    // Wind gust direction (°)
 float         voltage           = 0.0;    // Battery voltage (V)
+float         latitude          = 0.0;
+float         longitude         = 0.0;
+byte          satellites        = 0;
+float         hdop              = 0.0;
 tmElements_t  tm;                         // Variable for converting time elements to time_t
 
 // ----------------------------------------------------------------------------
@@ -174,10 +209,13 @@ typedef union
   {
     uint32_t  unixtime;           // UNIX Epoch time                (4 bytes)
     int16_t   temperatureInt;     // Internal temperature (°C)      (2 bytes)   * 100
+    uint16_t  humidityInt;        // Internal humidity (%)          (2 bytes)   * 100
+    uint16_t  pressureInt;        // Internal pressure (hPa)        (2 bytes)   - 850 * 100
     int16_t   temperatureExt;     // External temperature (°C)      (2 bytes)   * 100
     uint16_t  humidityExt;        // External humidity (%)          (2 bytes)   * 10
     int16_t   pitch;              // Pitch (°)                      (2 bytes)   * 100
     int16_t   roll;               // Roll (°)                       (2 bytes)   * 100
+    uint16_t  solar;              // Solar irradiance (W m-2)       (2 bytes)   * 100
     uint16_t  windSpeed;          // Mean wind speed (m/s)          (2 bytes)   * 100
     uint16_t  windDirection;      // Mean wind direction (°)        (2 bytes)
     uint16_t  windGustSpeed;      // Wind gust speed (m/s)          (2 bytes)   * 100
@@ -190,8 +228,8 @@ typedef union
     uint16_t  transmitDuration;   // Previous transmission duration (2 bytes)
     uint8_t   transmitStatus;     // Iridium return code            (1 byte)
     uint16_t  iterationCounter;   // Message counter                (2 bytes)
-  } __attribute__((packed));                              // Total: (29 bytes)
-  uint8_t bytes[29];
+  } __attribute__((packed));                                    // Total: (35 bytes)
+  uint8_t bytes[35];
 } SBD_MO_MESSAGE;
 
 SBD_MO_MESSAGE moSbdMessage;
@@ -216,21 +254,29 @@ SBD_MT_MESSAGE mtSbdMessage;
 // Structure to store device online/offline states
 struct struct_online
 {
-  bool dps310 = false;
-  bool lsm303 = false;
-  bool gnss = false;
+  bool bme280   = false;
+  bool dps310   = false;
+  bool lsm303   = false;
+  bool gnss     = false;
+  bool microSd  = false;
 } online;
 
 // Union to store loop timers`
 struct struct_timer
 {
-  unsigned long rtc;
+  unsigned long readRtc;
   unsigned long battery;
-  unsigned long dps310;
-  unsigned long lsm303;
-  unsigned long hmp60;
-  unsigned long anemometer;
+  unsigned long configMicroSd;
+  unsigned long writeMicroSd;
   unsigned long gnss;
+  unsigned long readBme280;
+  unsigned long readDps310;
+  unsigned long readLsm303;
+  unsigned long readHmp60;
+  unsigned long readSht31;
+  unsigned long read5103L;
+  unsigned long read7911;
+  unsigned long readSp212;
   unsigned long iridium;
 } timer;
 
@@ -241,14 +287,18 @@ void setup()
 {
   // Pin assignments
   pinMode(LED_BUILTIN, OUTPUT);
+  pinMode(PIN_SENSOR_PWR, OUTPUT);
   pinMode(PIN_5V_EN, OUTPUT);
   pinMode(PIN_12V_EN, OUTPUT);
   pinMode(PIN_GNSS_EN, OUTPUT);
+  pinMode(PIN_LED, OUTPUT);
   pinMode(PIN_VBAT, INPUT);
   digitalWrite(LED_BUILTIN, LOW);
+  digitalWrite(PIN_SENSOR_PWR, LOW);  // Di3.3V
   digitalWrite(PIN_5V_EN, LOW);       // Disable power to Iridium 9603
   digitalWrite(PIN_12V_EN, LOW);      // Disable power
   digitalWrite(PIN_GNSS_EN, HIGH);    // Disable power to GNSS
+  digitalWrite(PIN_LED, LOW);
 
   // Configure analog-to-digital (ADC) converter
   configureAdc();
@@ -258,12 +308,12 @@ void setup()
 
 #if DEBUG
   SERIAL_PORT.begin(115200); // Open serial port at 115200 baud
-  blinkLed(4, 1000); // Non-blocking delay to allow user to open Serial Monitor
+  blinkLed(LED_BUILTIN, 4, 500); // Non-blocking delay to allow user to open Serial Monitor
 #endif
 
   DEBUG_PRINTLN();
   printLine();
-  DEBUG_PRINTLN("Cryologger - Automatic Weather Station");
+  DEBUG_PRINT("Cryologger - Automatic Weather Station #"); DEBUG_PRINTLN(CRYOLOGGER_ID);
 
   printLine();
 
@@ -272,10 +322,29 @@ void setup()
   readRtc();            // Read date and time from RTC
   configureWdt();       // Configure Watchdog Timer (WDT)
   readBattery();        // Read battery voltage
+  configureSd();
+
   DEBUG_PRINT("Info: Battery voltage: "); DEBUG_PRINTLN(voltage);
   printSettings();      // Print configuration settings
-  syncRtc();            // Synch RTC with GNSS
+  syncRtc();            // Sync RTC with GNSS
   configureIridium();   // Configure Iridium 9603 transceiver
+
+  getLogFileName();
+  createLogFile();
+
+#if CALIBRATE
+  while (true)
+  {
+    petDog(); // Reset WDT
+    //enable5V();       // Enable 5V power
+    calibrateAdc();
+    //read7911();
+    //readSht31();
+    myDelay(500);
+    
+    
+  }
+#endif
 
   // Close serial port if immediately entering deep sleep
   if (!firstTimeFlag)
@@ -284,7 +353,11 @@ void setup()
   }
 
   // Blink LED to indicate completion of setup
-  blinkLed(10, 100);
+  for (byte i = 0; i < 10; i++)
+  {
+    blinkLed(LED_BUILTIN, 1, 100);
+    blinkLed(PIN_LED, 1, 100);
+  }
 }
 
 // ----------------------------------------------------------------------------
@@ -304,7 +377,11 @@ void loop()
     // Check if program is running for the first time
     if (!firstTimeFlag)
     {
+      // Wake from deep sleep
       wakeUp();
+
+      // Blink LED
+      blinkLed(LED_BUILTIN, 4, 250);
     }
 
     // Print date and time
@@ -347,22 +424,25 @@ void loop()
       cutoffCounter = 0;
 
       // Perform measurements
-      enable12V();      // Enable 12V power
-      readHmp60();      // Read temperature/relative humidity sensor
-      readAnemometer(); // Read anemometer
-      disable12V();     // Disable 12V power
+      //enable12V();      // Enable 12V power
+      enable5V();       // Enable 5V power
+      readLsm303();     // Read acceleromter
+      readBme280();     // Read sensor
+      readSp212();      // Read solar radiation
+      readSht31();      // Read temperature/relative humidity sensor
+      read7911();       // Read anemometer
+      disable5V();      // Disable 5V power
+      //disable12V();     // Disable 12V power
 
-      printStats();     // Print summary of statistics
+      // Log data to microSD card
+      logData();
+
+      // Print summary of statistics
+      printStats();
 
       // Perform statistics on measurements
       if ((sampleCounter == averageInterval) || firstTimeFlag)
       {
-        // Measure internal temperature and orientiation
-        enable5V();       // Enable 5V power
-        readLsm303();     // Read acceleromter
-        readDps310();     // Read sensor
-        disable5V();      // Disable 5V power
-
         calculateStats(); // Calculate statistics of variables to be transmitted
         writeBuffer();    // Write data to transmit buffer
 
@@ -393,7 +473,7 @@ void loop()
   }
 
   // Blink LED to indicate WDT interrupt and nominal system operation
-  blinkLed(1, 25);
+  blinkLed(LED_BUILTIN, 1, 25);
 
   // Enter deep sleep and wait for WDT or RTC alarm interrupt
   goToSleep();

@@ -1,16 +1,17 @@
 /*
-   Code to test battery voltage 10/1 MOhm resistor divider
+   Code to test Davis Instruments 7911 anemometer
 */
+
+#define PIN_SOLAR   A3
+#define PIN_5V_EN   6
 
 void setup()
 {
-  Serial.begin(115200);
-  while (!Serial);
+  pinMode(PIN_5V_EN, OUTPUT);
+  digitalWrite(PIN_5V_EN, HIGH);
 
-  pinMode(A5, OUTPUT);
-  pinMode(6, OUTPUT);
-  digitalWrite(A5, HIGH);
-  digitalWrite(6, LOW);
+  Serial.begin(115200);
+  //while (!Serial);
 
   // Configure ADC
   ADC->CTRLA.bit.ENABLE = 0;                      // Disable ADC
@@ -25,21 +26,26 @@ void setup()
   while (ADC->STATUS.bit.SYNCBUSY);               // Wait for synchronization
 
   // Apply ADC gain and offset error calibration correction
-  ADC->OFFSETCORR.reg = ADC_OFFSETCORR_OFFSETCORR(41);
-  ADC->GAINCORR.reg = ADC_GAINCORR_GAINCORR(2122);
+  ADC->OFFSETCORR.reg = ADC_OFFSETCORR_OFFSETCORR(30);
+  ADC->GAINCORR.reg = ADC_GAINCORR_GAINCORR(2144);
   ADC->CTRLB.bit.CORREN = true;
   while (ADC->STATUS.bit.SYNCBUSY);               // Wait for synchronization
+
 }
 
 void loop()
 {
-  float sensorValue = analogRead(A0);
+  //(void)analogRead(PIN_SOLAR);
+  float sensorValue1 = analogRead(PIN_SOLAR); // Wind speed
+  float solar = mapFloat(sensorValue1, 0, 3102, 0, 2000); // 0-360 range
+  float voltage1 = sensorValue1 * (3.3 / 4095.0);
 
-  float voltage1 = sensorValue * (3.3 / 4095.0);
-  float voltage2 = sensorValue * ((10000000.0 + 1000000.0) / 1000000.0); // Multiply back 1 MOhm / (10 MOhm + 1 MOhm)
-  voltage2 *= 3.3;   // Multiply by 3.3V reference voltage
-  voltage2 /= 4096;  // Convert to voltage
-  Serial.print(F("sensorValue: ")); Serial.print(sensorValue); Serial.print(F(",")); Serial.print(voltage1, 4); Serial.print(F(",")); Serial.println(voltage2, 4);
+  Serial.print(F("solar: ")); Serial.print(voltage1, 4); Serial.print(F(",")); Serial.print(sensorValue1); Serial.print(F(",")); Serial.println(solar, 2);
+  delay(1000);
+}
 
-  delay(500);
+// Map raw ADC values to floats
+float mapFloat(float x, float in_min, float in_max, float out_min, float out_max)
+{
+  return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
 }
