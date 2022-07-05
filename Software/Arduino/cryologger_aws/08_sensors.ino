@@ -302,7 +302,7 @@ void readSp212()
   DEBUG_PRINTLN("done.");
 
   // Map voltages to sensor ranges
-  float solar = mapFloat(sensorValue, 0, 3102, 0, 2000); // Map solar from 0-2.5 V to 0 to 2000
+  solar = mapFloat(sensorValue, 0, 3102, 0, 2000); // Map solar from 0-2.5 V to 0 to 2000
 
   // Calculate measured voltages
   float voltage = sensorValue * (3.3 / 4095.0);
