@@ -1,6 +1,6 @@
 /*
-    Title:    Cryologger Automatic Weather Station v0.2
-    Date:     July 1, 2022
+    Title:    Cryologger Automatic Weather Station v0.2.1
+    Date:     July 13, 2022
     Author:   Adam Garbo
 
     Description:
@@ -10,7 +10,7 @@
     Components:
     - Rock7 RockBLOCK 9603
     - Maxtena M1621HCT-P-SMA antenna (optional)
-    - Adafruit Feather M0 Proto
+    - Adafruit Feather M0 Adalogger
     - Adafruit Ultimate GPS Featherwing
     - Adafruit BME280 Temperature Humidity Pressure Sensor
     - Adafruit LSM303AGR Accelerometer/Magnetomter
@@ -58,7 +58,7 @@
 #define DEBUG           true  // Output debug messages to Serial Monitor
 #define DEBUG_GNSS      true  // Output GNSS debug information
 #define DEBUG_IRIDIUM   true  // Output Iridium debug messages to Serial Monitor
-#define CALIBRATE       false // 
+#define CALIBRATE       false // Enable sensor calibration code
 
 #if DEBUG
 #define DEBUG_PRINT(x)            SERIAL_PORT.print(x)
