@@ -40,8 +40,22 @@ The Cryologger design is based on the open-source Arduino platform (www.arduino.
 | Power connector |	[Phoenix Contact MSTB 2,5/ 2-ST-5,08 - 1757019](https://www.mouser.ca/ProductDetail/Phoenix-Contact/1757242?qs=%2Fha2pyFadugVjodGKkrF4xNq%252BZEVHysqCHlL2cTnJ%252B8%3D) | $0.67 
 | Power connector	| [Phoenix Contact MSTBA 2,5/ 2-G-5,08 - 1757242](https://www.mouser.ca/ProductDetail/Phoenix-Contact/1757019?qs=sGAEpiMZZMvlX3nhDDO4AGmxTE5dWGQY3FmaBdjJUN0%3D) | $2.08 
 | Connector |	[Molex PicoBlade PCB Header](https://www.mouser.ca/datasheet/2/276/0530471010_PCB_HEADERS-171035.pdf) | $0.50 
-| Enclosure | Optional | 
-| Battery | Optional |  
+
+**Table x.** Power and mounting bill of materials
+| Component | Product | Cost (USD) |
+| --- | --- | :---: |
+| Solar Panel | [Ameresco Solar 20 Watt Solar Panel 20J](https://www.amerescosolar.com/20j-ameresco-solar-20-watt-solar-panel) | $ |
+| Solar Panel Bracket | [Ameresco Solar HPM18-30 Solar Panel Pole Mount (optional)](https://www.amerescosolar.com/hpm18-30solar-panel-pole-mount) | $ |
+| Charge Controller | [Genasun GV-4 50 W 4 A Solar charge controller with MPPT](https://sunforgellc.com/gv-4/) | $ |
+| Battery | [Deka SOLAR Gel 36 Ah 8GUIH](https://www.amerescosolar.com/deka-solar-8gu1-deka-gel-deep-cycle-battery-12v-36-ah) | $ |
+| Enclosure | [nVent Hoffman HJ1412HWPL2LG](https://hoffman.nvent.com/en-us/products/enchj1412hwpl2lg) | $ |
+| Pole Mount | L-Com Enclosure Pole Mounting Kit | $ |
+| Tripod | Onset HOBO Weather Station m 3m Tripod |  $ | 
+
+**Table x.** Sensors
+| Component | Product | Cost (USD) |
+| --- | --- | :---: |
+
 
 ### Data transmission and processing
 Sensor measurements and GPS position are recorded hourly and stored in memory until the desired transmission interval is reached. Data are compressed into a binary message (340 bytes maximum) to minimize the cost and total number of transmissions required. Data are transmitted via the Iridium Short Burst Data (SBD) satellite network at user-specified intervals, which can be remotely updated based on the desired sampling frequency. SBD data messages are received by an Iridium ground station and sent to Rock7's server. The data is then forwarded to an Amazon Web Services (AWS) SQS queue, decoded using an AWS Lambda Python function and stored in a database using the Amazon Relational Database Service (RDS). Data is made freely available and can be viewed in near-real time at https://cryologger.org.
