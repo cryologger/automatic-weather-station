@@ -1,4 +1,4 @@
-20262060589839537
+20273690411068236
 Audio_Module
 Reverb_BTDR-1H
 Digital Reverberation Unit, http://www.belton.co.kr/inc/downfile.php?seq=17&file=pdf (footprint from http://www.uk-electronic.de/PDF/BTDR-1.pdf)
@@ -48972,7 +48972,21 @@ Pin_1.0mm_10.0mm_1x16
 16
 16
 Cryologger
+Pin_1.0mm_10.0mm_1x20
+
+
+0
+20
+20
+Cryologger
 Pololu_D36V6x
+
+
+0
+4
+4
+Cryologger
+Pololu_D36V6x_Hor
 
 
 0
@@ -48999,6 +49013,41 @@ RockBLOCK_9603
 0
 2
 0
+Cryologger
+SparkFun_MMDLCB
+
+
+0
+52
+29
+Cryologger
+SparkFun_MMDLCB_copy
+
+
+0
+29
+29
+Cryologger
+SparkFun_OLED
+
+
+0
+0
+0
+Cryologger
+SparkFun_ZED-F9P
+
+
+0
+50
+25
+Cryologger
+SparkFun_ZED-F9P_copy
+
+
+0
+25
+25
 Crystal
 Crystal_AT310_D3.0mm_L10.0mm_Horizontal
 Crystal THT AT310 10.0mm-10.5mm length 3.0mm diameter http://www.cinetech.com.tw/upload/2011/04/20110401165201.pdf
@@ -79174,8 +79223,8 @@ GCT_USB4105-GF-A
 
 
 0
-16
-16
+20
+17
 SnapEDA
 LED_WS2812-2020
 
