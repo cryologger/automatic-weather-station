@@ -5,7 +5,7 @@
 
 
 | Pin | Wire  | Description   | Description                  | Connector |
-|-----|-------|---------------|------------------------------|-----------|
+|:---:|:-----:|---------------|------------------------------|:---------:|
 | 1   | Brown | VDC           | Voltage Input (5-28V)        | 12V       |
 | 2   | White | Channel 1: RH | Relative Humidity (%) (0-1V) | A4        |
 | 3   | Blue  | GND           | Ground                       | GND       |
@@ -15,13 +15,13 @@
 
 
 ### RM Young 5103L Wind Monitor
-| Pin | Pin   | Wire  | Description     | Connector |
-|-----|-------|-------|-----------------|-----------|
-| 1   | WD+   | White | 12-30 VDC Input | 12V       |
-| 2   | WD-   | Green | 4-20 mA Output  | A2        |
-| 3   | WS+   | Black | 12-30 VDC Input | 12V       |
-| 4   | WS-   | Red   | 4-20 mA Output  | A1        |
-| 5   | Earth |       |                 | GND       |
+| Pin | Wire   | Description                         | Connector |
+|:---:|:------:|-------------------------------------|:---------:|
+| 1   | White  | 12-30 VDC Input (Wind direction +)  | 12V       |
+| 2   | Green  | 4-20 mA Output  (Wind direction -)  | A2        |
+| 3   | Black  | 12-30 VDC Input (Wind speed +)      | 12V       |
+| 4   | Red    | 4-20 mA Output  (Wind speed -)      | A1        |
+| 5   | Shield | Earth ground                        | GND       |
 
 ### LSM303AGR
 Orientation of sensor, when viewing enclosure from the front:
