@@ -26,32 +26,56 @@ sns.set_context("talk")  # Options: talk, paper, poster
 # Set figure DPI
 dpi = 300
 
+
+# -----------------------------------------------------------------------------
+# Plotting attributes
+# -----------------------------------------------------------------------------
+
+lw = 1
+interval = 4
+date_format = "%Y-%m-%d"
+
+# Figure DPI
+dpi = 300
+
 # -----------------------------------------------------------------------------
 # Paths
 # -----------------------------------------------------------------------------
 
-# Path to figures
-path_figures = (
-    "/Users/adam/Documents/GitHub/Cryologger_Automatic_Weather_Station/Software/Python/"
-)
-
 # Path to data
-path_data = (
-    "/Users/adam/Documents/GitHub/Cryologger_Automatic_Weather_Station/Software/Python/"
-)
+path_data = ("/Users/adam/Documents/GitHub/Cryologger_Automatic_Weather_Station/Software/Python/")
+
+# Path to figures
+path_figures = ("/Users/adam/Documents/GitHub/Cryologger_Automatic_Weather_Station/Software/Python/")
 
 
 # -----------------------------------------------------------------------------
-# Load and prepare data
+# Load and clean data exported from MariaDB
 # -----------------------------------------------------------------------------
 
-df = pd.read_csv(
-    path_data + "2022_aws_arctic_bay.csv",
-    index_col=False,
-)
+df = pd.read_csv(path_data + "2022_aws_arctic_bay.csv", index_col=False)
+
+# Convert unixtime to datetime
+df["datetime"] = pd.to_datetime(df["unixtime"], unit="s")
+
+
+# -----------------------------------------------------------------------------
+# Optional: Download and clean data exported from WordPress
+# -----------------------------------------------------------------------------
+
+# Load most recent output file downloaded from WordPress
+df = pd.read_csv("/Users/adam/Downloads/2021_itb_amundsen (3).csv", index_col=False)
 
 # Convert to datetime
 df["Datetime"] = pd.to_datetime(df["Datetime"].astype(str), format="%Y-%m-%d %H:%M:%S")
+
+# Convert unixtime datetime
+df["datetime"] = pd.to_datetime(df["unixtime"].astype(str), format="%Y-%m-%d %H:%M:%S")
+
+# Convert IMEI to string
+df["imei"] = df["imei"].astype(str)
+
+
 
 # -----------------------------------------------------------------------------
 # Plot temperature, wind speed, and wind direction
