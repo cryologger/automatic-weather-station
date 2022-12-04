@@ -45,10 +45,10 @@ void printTimers()
   DEBUG_PRINT("readBme280: ");      printTab(1);  DEBUG_PRINTLN(timer.readBme280);
   //DEBUG_PRINT("readDps310: ");      printTab(1);  DEBUG_PRINTLN(timer.readDps310);
   DEBUG_PRINT("readLsm303: ");      printTab(1);  DEBUG_PRINTLN(timer.readLsm303);
-  //DEBUG_PRINT("readHmp60: ");       printTab(1);  DEBUG_PRINTLN(timer.readHmp60);
-  DEBUG_PRINT("readSht31: ");       printTab(1);  DEBUG_PRINTLN(timer.readSht31);
-  //DEBUG_PRINT("read5103L: ");       printTab(1);  DEBUG_PRINTLN(timer.read5103L);
-  DEBUG_PRINT("read7911: ");        printTab(1);  DEBUG_PRINTLN(timer.read7911);
+  DEBUG_PRINT("readHmp60: ");       printTab(1);  DEBUG_PRINTLN(timer.readHmp60);
+  //DEBUG_PRINT("readSht31: ");       printTab(1);  DEBUG_PRINTLN(timer.readSht31);
+  DEBUG_PRINT("read5103L: ");       printTab(1);  DEBUG_PRINTLN(timer.read5103L);
+  //DEBUG_PRINT("read7911: ");        printTab(1);  DEBUG_PRINTLN(timer.read7911);
   DEBUG_PRINT("readGnss: ");        printTab(1);  DEBUG_PRINTLN(timer.gnss);
   DEBUG_PRINT("transmitData: ");    printTab(1);  DEBUG_PRINTLN(timer.iridium);
   DEBUG_PRINT("freeRam(): ");       printTab(1);  DEBUG_PRINTLN(freeRam());
@@ -69,7 +69,7 @@ void printMoSbd()
   DEBUG_PRINT("pressureInt:");      printTab(2);  DEBUG_PRINTLN(moSbdMessage.pressureInt);
   DEBUG_PRINT("temperatureExt:");   printTab(2);  DEBUG_PRINTLN(moSbdMessage.temperatureExt);
   DEBUG_PRINT("humidityExt:");      printTab(2);  DEBUG_PRINTLN(moSbdMessage.humidityExt);
-  DEBUG_PRINT("solar:");            printTab(3);  DEBUG_PRINTLN(moSbdMessage.solar);
+  //DEBUG_PRINT("solar:");            printTab(3);  DEBUG_PRINTLN(moSbdMessage.solar);
   DEBUG_PRINT("pitch:");            printTab(3);  DEBUG_PRINTLN(moSbdMessage.pitch);
   DEBUG_PRINT("roll:");             printTab(3);  DEBUG_PRINTLN(moSbdMessage.roll);
   DEBUG_PRINT("windSpeed:");        printTab(2);  DEBUG_PRINTLN(moSbdMessage.windSpeed);
