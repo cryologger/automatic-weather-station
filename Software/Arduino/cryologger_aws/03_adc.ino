@@ -17,42 +17,10 @@ void configureAdc()
   while (ADC->STATUS.bit.SYNCBUSY);               // Wait for synchronization
 
   // Apply ADC gain and offset error calibration correction
-  // Offset:
-  // #1 = 2
-  // #2 = 8
-  // #3 = 3
-  // Gain:
-  // #1 = 2059
-  // #2 = 2060
-  // #3 = 2052
-
-  // Wind Limits
-  // #1
-  // #2 745 3683
-  // #3 745 to 3686
-
-  // Apply ADC gain and offset error calibration correction
-  if (CRYOLOGGER_ID == 1)
-  {
-    ADC->OFFSETCORR.reg = ADC_OFFSETCORR_OFFSETCORR(20);
-    ADC->GAINCORR.reg = ADC_GAINCORR_GAINCORR(2144);
-    ADC->CTRLB.bit.CORREN = true;
-    while (ADC->STATUS.bit.SYNCBUSY); // Wait for synchronization
-  }
-  if (CRYOLOGGER_ID == 2)
-  {
-    ADC->OFFSETCORR.reg = ADC_OFFSETCORR_OFFSETCORR(22);
-    ADC->GAINCORR.reg = ADC_GAINCORR_GAINCORR(2093);
-    ADC->CTRLB.bit.CORREN = true;
-    while (ADC->STATUS.bit.SYNCBUSY); // Wait for synchronization
-  }
-  if (CRYOLOGGER_ID == 3)
-  {
-    ADC->OFFSETCORR.reg = ADC_OFFSETCORR_OFFSETCORR(15);
-    ADC->GAINCORR.reg = ADC_GAINCORR_GAINCORR(2082);
-    ADC->CTRLB.bit.CORREN = true;
-    while (ADC->STATUS.bit.SYNCBUSY); // Wait for synchronization
-  }
+  ADC->OFFSETCORR.reg = ADC_OFFSETCORR_OFFSETCORR(-2);
+  ADC->GAINCORR.reg = ADC_GAINCORR_GAINCORR(2049);
+  ADC->CTRLB.bit.CORREN = true;
+  while (ADC->STATUS.bit.SYNCBUSY); // Wait for synchronization
 }
 
 // Map raw ADC values to floats
@@ -61,6 +29,7 @@ float mapFloat(float x, float in_min, float in_max, float out_min, float out_max
   return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
 }
 
+// Calibrate ADC
 void calibrateAdc()
 {
   float sensorValue = analogRead(PIN_VBAT);
