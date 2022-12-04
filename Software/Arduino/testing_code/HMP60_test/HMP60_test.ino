@@ -19,27 +19,41 @@ void setup()
   ADC->CTRLA.bit.ENABLE = 1;                      // Enable ADC
   while (ADC->STATUS.bit.SYNCBUSY);               // Wait for synchronization
 
+
   // Apply ADC gain and offset error calibration correction
-  ADC->OFFSETCORR.reg = ADC_OFFSETCORR_OFFSETCORR(2);
-  ADC->GAINCORR.reg = ADC_GAINCORR_GAINCORR(2059);
+  ADC->OFFSETCORR.reg = ADC_OFFSETCORR_OFFSETCORR(9);
+  ADC->GAINCORR.reg = ADC_GAINCORR_GAINCORR(2049);
   ADC->CTRLB.bit.CORREN = true;
   while (ADC->STATUS.bit.SYNCBUSY);               // Wait for synchronization
 
+
 }
+
 
 void loop()
 {
-  float sensorValue1 = analogRead(A3); // HMP60 temperature (CH2)
-  float sensorValue2 = analogRead(A4); // HMP60 humidity (CH1)
+  (void)analogRead(A4);
+  float sensorValue1 = analogRead(A4); // HMP60 temperature (CH2)
+  (void)analogRead(A3);
+  float sensorValue2 = analogRead(A3); // HMP60 humidity (CH1)
 
-  float extTemperature = mapFloat(sensorValue1, 0, 1240, -40, 60);  // Map temperature from 0-1 V to -40-60°C
-  float extHumidity = mapFloat(sensorValue2, 0, 1240, 0, 100);      // Map humidity 0-1 V to 0-100%
+  float temperatureExt = mapFloat(sensorValue1, 0, 1240, -40, 60);  // Map temperature from 0-1 V to -40-60°C
+  float humidityExt = mapFloat(sensorValue2, 0, 1240, 0, 100);      // Map humidity 0-1 V to 0-100%
 
   float voltage1 = sensorValue1 * (3.3 / 4095.0);
   float voltage2 = sensorValue2 * (3.3 / 4095.0);
 
-  Serial.print(F("extTemperature: ")); Serial.print(voltage1, 4); Serial.print(F(",")); Serial.print(sensorValue1); Serial.print(F(",")); Serial.println(extTemperature, 4);
-  Serial.print(F("extHumidity: ")); Serial.print(voltage2, 4); Serial.print(F(","));  Serial.print(sensorValue2); Serial.print(F(",")); Serial.println(extHumidity, 4);
+  if (temperatureExt < -40)
+    temperatureExt = -40;
+  if (temperatureExt > 60)
+    temperatureExt = 60;
+  if (humidityExt < 0)
+    humidityExt = 0;
+  if (humidityExt > 100)
+    humidityExt = 100;
+
+  Serial.print(F("temperatureExt: ")); Serial.print(voltage1, 4); Serial.print(F(",")); Serial.print(sensorValue1); Serial.print(F(",")); Serial.println(temperatureExt, 4);
+  Serial.print(F("humidityExt: ")); Serial.print(voltage2, 4); Serial.print(F(","));  Serial.print(sensorValue2); Serial.print(F(",")); Serial.println(humidityExt, 4);
   delay(500);
 }
 
