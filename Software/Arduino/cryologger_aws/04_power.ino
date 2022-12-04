@@ -9,7 +9,7 @@ void readBattery()
   // Measure external battery voltage across 10/1 MΩ resistor divider (1/10 divider)
   (void)analogRead(PIN_VBAT);
   voltage = analogRead(PIN_VBAT);
-  voltage  *=  ((10000000.0 + 1000000.0) / 1000000.0); // Multiply back 1 MOhm / (10 MOhm + 1 MOhm)
+  voltage *=  ((10000000.0 + 1000000.0) / 1000000.0); // Multiply back 1 MOhm / (10 MOhm + 1 MOhm)
   voltage *= 3.3;   // Multiply by 3.3V reference voltage
   voltage /= 4096;  // Convert to voltage
 
@@ -24,7 +24,7 @@ void readBattery()
   batteryStats.add(voltage);
 
   // Stop loop timer
-  timer.battery = millis() - loopStartTime;
+  timer.readBattery = millis() - loopStartTime;
 }
 
 // Disable serial port
@@ -156,7 +156,7 @@ void blinkLed(byte ledPin, byte ledFlashes, unsigned int ledDelay)
 // https://arduino.stackexchange.com/questions/12587/how-can-i-handle-the-millis-rollover
 void myDelay(unsigned long ms)
 {
-  unsigned long start = millis();         // Start: timestamp
+  unsigned long start = millis();        // Start: timestamp
   for (;;)
   {
     petDog();                            // Reset watchdog timer
