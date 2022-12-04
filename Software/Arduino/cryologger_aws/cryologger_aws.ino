@@ -1,11 +1,11 @@
 /*
-    Title:    Cryologger Automatic Weather Station v0.2.1
-    Date:     July 13, 2022
+    Title:    Cryologger Automatic Weather Station v0.3
+    Date:     September 19, 2022
     Author:   Adam Garbo
 
     Description:
-    - Code configured for automatic weather stations to be deployed on Milne Glacier,
-    Ellesmere Island, Nunavut during the 2022 field season.
+    - Code configured for automatic weather stations to be deployed in Arctic Bay and
+    Pond Inlet, Nunavut.
 
     Components:
     - Rock7 RockBLOCK 9603
@@ -16,16 +16,38 @@
     - Adafruit LSM303AGR Accelerometer/Magnetomter
     - Pololu 3.3V 600mA Step-Down Voltage Regulator D36V6F3
     - Pololu 5V 600mA Step-Down Voltage Regulator D36V6F5
-    - SanDisk Max Endurance 23 GB microSD card
+    - Pololu 12V 600mA Step-Down Voltage Regulator D36V6F5
+    - SanDisk Max Endurance 32 GB microSD card
 
     Sensors:
-    - Davis Instruments 7811 Anemometer
-    - Davis Instruments 3816 Temperature Relative Humidity Sensor
-    - Apogee SP-212 Pyranometer
+    - RM Young 05103L Wind Monitor
+    - Vaisala HMP60 Humidity and Temperature Probe
 
     Comments:
     - Sketch uses 94316 bytes (35%) of program storage space. Maximum is 262144 bytes.
     - Power consumption in deep sleep is ~625 uA.
+
+    Wiring Diagram:
+
+    R.M. Young Wind Monitor 5103L
+    ---------------------------------------------
+    Colour      Pin       Description
+    ---------------------------------------------
+    Black       12V       Wind speed +
+    Red         A1        Wind speed -
+    White       12V       Wind direction +
+    Green       A2        Wind direction -
+    Shield      GND       Earth ground
+
+    Vaisala HMP60 Humidity and Temperature Probe
+    ---------------------------------------------
+    Colour    Pin         Description
+    ---------------------------------------------
+    Brown       12V       Power
+    White       A3        Relative humidity (CH1)
+    Blue        GND       Ground
+    Black       A4        Temperature (CH2)
+    Shield      GND       Earth ground
 */
 
 // ----------------------------------------------------------------------------
@@ -50,7 +72,7 @@
 // ----------------------------------------------------------------------------
 // Define unique identifier
 // ----------------------------------------------------------------------------
-#define CRYOLOGGER_ID 3
+#define CRYOLOGGER_ID 1
 
 // ----------------------------------------------------------------------------
 // Debugging macros
@@ -82,17 +104,17 @@
 // ----------------------------------------------------------------------------
 // Pin definitions
 // ----------------------------------------------------------------------------
-#define PIN_VBAT            A0
-#define PIN_WIND_SPEED      A1
-#define PIN_WIND_DIR        A2
-#define PIN_SOLAR           A3
-#define PIN_TEMP            A7  // Unused
-#define PIN_HUMID           A7  // Unused
-#define PIN_SENSOR_PWR      A4  // 3.3V power
-#define PIN_GNSS_EN         A5
+#define PIN_VBAT            A0  // 
+#define PIN_WIND_SPEED      A1  // 
+#define PIN_WIND_DIR        A2  // 
+#define PIN_SOLAR           A7  // Unused
+#define PIN_TEMP            A4  // 
+#define PIN_HUMID           A3  // 
+#define PIN_SENSOR_PWR      A7  // Unused 
+#define PIN_GNSS_EN         A5  // 
 #define PIN_MICROSD_CS      4   // MicroSD chip select pin
-#define PIN_12V_EN          5   // 
-#define PIN_5V_EN           6   // 
+#define PIN_12V_EN          5   // 12 V step-up/down regulator
+#define PIN_5V_EN           6   // 5V step-down regulator
 #define PIN_LED             8   // Adafruit Adalogger M0 green LED
 #define PIN_IRIDIUM_RX      10  // Pin 1 RXD (Yellow)
 #define PIN_IRIDIUM_TX      11  // Pin 6 TXD (Orange)
@@ -192,10 +214,10 @@ float         windDirection     = 0.0;    // Wind direction (°)
 float         windGustSpeed     = 0.0;    // Wind gust speed  (m/s)
 float         windGustDirection = 0.0;    // Wind gust direction (°)
 float         voltage           = 0.0;    // Battery voltage (V)
-float         latitude          = 0.0;
-float         longitude         = 0.0;
-byte          satellites        = 0;
-float         hdop              = 0.0;
+float         latitude          = 0.0;    // GNSS latitude (DD)
+float         longitude         = 0.0;    // GNSS longitude (DD)
+byte          satellites        = 0;      // GNSS satellites
+float         hdop              = 0.0;    // GNSS HDOP
 tmElements_t  tm;                         // Variable for converting time elements to time_t
 
 // ----------------------------------------------------------------------------
@@ -215,7 +237,7 @@ typedef union
     uint16_t  humidityExt;        // External humidity (%)          (2 bytes)   * 10
     int16_t   pitch;              // Pitch (°)                      (2 bytes)   * 100
     int16_t   roll;               // Roll (°)                       (2 bytes)   * 100
-    uint16_t  solar;              // Solar irradiance (W m-2)       (2 bytes)   * 100
+    //uint16_t  solar;              // Solar irradiance (W m-2)       (2 bytes)   * 100
     uint16_t  windSpeed;          // Mean wind speed (m/s)          (2 bytes)   * 100
     uint16_t  windDirection;      // Mean wind direction (°)        (2 bytes)
     uint16_t  windGustSpeed;      // Wind gust speed (m/s)          (2 bytes)   * 100
@@ -228,8 +250,8 @@ typedef union
     uint16_t  transmitDuration;   // Previous transmission duration (2 bytes)
     uint8_t   transmitStatus;     // Iridium return code            (1 byte)
     uint16_t  iterationCounter;   // Message counter                (2 bytes)
-  } __attribute__((packed));                                    // Total: (35 bytes)
-  uint8_t bytes[35];
+  } __attribute__((packed));                                    // Total: (33 bytes)
+  uint8_t bytes[33];
 } SBD_MO_MESSAGE;
 
 SBD_MO_MESSAGE moSbdMessage;
@@ -261,11 +283,11 @@ struct struct_online
   bool microSd  = false;
 } online;
 
-// Union to store loop timers`
+// Union to store loop timers
 struct struct_timer
 {
   unsigned long readRtc;
-  unsigned long battery;
+  unsigned long readBattery;
   unsigned long configMicroSd;
   unsigned long writeMicroSd;
   unsigned long gnss;
@@ -294,7 +316,7 @@ void setup()
   pinMode(PIN_LED, OUTPUT);
   pinMode(PIN_VBAT, INPUT);
   digitalWrite(LED_BUILTIN, LOW);
-  digitalWrite(PIN_SENSOR_PWR, LOW);  // Di3.3V
+  digitalWrite(PIN_SENSOR_PWR, LOW);  // Disable power to 3.3V
   digitalWrite(PIN_5V_EN, LOW);       // Disable power to Iridium 9603
   digitalWrite(PIN_12V_EN, LOW);      // Disable power
   digitalWrite(PIN_GNSS_EN, HIGH);    // Disable power to GNSS
@@ -333,16 +355,20 @@ void setup()
   createLogFile();
 
 #if CALIBRATE
+
+  enable12V();  // Enable 12V power
+  enable5V();   // Enable 5V power
+
   while (true)
   {
     petDog(); // Reset WDT
-    //enable5V();       // Enable 5V power
-    calibrateAdc();
+
+    //calibrateAdc();
     //read7911();
     //readSht31();
+    read5103L();
+    readHmp60();
     myDelay(500);
-    
-    
   }
 #endif
 
@@ -371,6 +397,9 @@ void loop()
     // Read the RTC
     readRtc();
 
+    // Reset WDT
+    petDog();
+
     // Increment the sample counter
     sampleCounter++;
 
@@ -386,9 +415,6 @@ void loop()
 
     // Print date and time
     DEBUG_PRINT("Info: Alarm trigger "); printDateTime();
-
-    // Reset WDT
-    petDog();
 
     // Read battery voltage
     readBattery();
@@ -424,15 +450,17 @@ void loop()
       cutoffCounter = 0;
 
       // Perform measurements
-      //enable12V();      // Enable 12V power
       enable5V();       // Enable 5V power
+      enable12V();      // Enable 12V power
       readLsm303();     // Read acceleromter
       readBme280();     // Read sensor
-      readSp212();      // Read solar radiation
-      readSht31();      // Read temperature/relative humidity sensor
-      read7911();       // Read anemometer
+      //readSp212();      // Read solar radiation
+      //readSht31();      // Read temperature/relative humidity sensor
+      //read7911();       // Read anemometer
+      readHmp60();      // Read temperature/relative humidity sensor
+      read5103L();      // Read anemometer
+      disable12V();     // Disable 12V power
       disable5V();      // Disable 5V power
-      //disable12V();     // Disable 12V power
 
       // Log data to microSD card
       logData();
