@@ -33,6 +33,7 @@ void readBme280()
     DEBUG_PRINT("Info: Reading BME280...");
 
     myDelay(250);
+
     // Read sensor data
     temperatureInt = bme280.readTemperature();
     humidityInt = bme280.readHumidity();
@@ -43,14 +44,11 @@ void readBme280()
     humidityIntStats.add(humidityInt);
     pressureIntStats.add(pressureInt);
 
-    // Write data to union
-    moSbdMessage.temperatureInt = temperatureInt * 100;
-
     DEBUG_PRINTLN("done.");
   }
   else
   {
-    DEBUG_PRINTLN("Warning: DPS310 offline!");
+    DEBUG_PRINTLN("Warning: BME280 offline!");
   }
   // Stop the loop timer
   timer.readBme280 = millis() - loopStartTime;
@@ -128,7 +126,6 @@ void readDps310()
 // Green:   Ground
 // White:   SCK
 // Blue:    SDA
-
 // ----------------------------------------------------------------------------
 void readSht31()
 {
@@ -214,9 +211,10 @@ void readLsm303()
 
     DEBUG_PRINTLN("done.");
 
-    DEBUG_PRINT(F("pitch: ")); DEBUG_PRINT_DEC(pitch, 2); 
-    DEBUG_PRINT(F(" roll: ")); DEBUG_PRINTLN_DEC(roll, 2); 
-    
+    // Print debug info
+    //DEBUG_PRINT(F("pitch: ")); DEBUG_PRINT_DEC(pitch, 2);
+    //DEBUG_PRINT(F(" roll: ")); DEBUG_PRINTLN_DEC(roll, 2);
+
   }
   else
   {
@@ -253,15 +251,21 @@ void readHmp60()
   DEBUG_PRINTLN("done.");
 
   // Map voltages to sensor ranges
-  float temperatureExt = mapFloat(sensorValue1, 0, 3102, -60, 40); // Map temperature from 0-2.5 V to -60 to 40°C
-  float humidityExt = mapFloat(sensorValue2, 0, 3102, 0, 100);      // Map humidity 0-2.5 V to 0 to 100%
+  temperatureExt = mapFloat(sensorValue1, 0, 1240, -40, 60); // Map temperature from 0-1.0 V to -40 to 60°C
+  humidityExt = mapFloat(sensorValue2, 0, 1240, 0, 100);      // Map humidity 0-1 V to 0-100%
+  //float temperatureExt = mapFloat(sensorValue1, 0, 3102, -60, 40); // Map temperature from 0-2.5 V to -60 to 40°C
+  //float humidityExt = mapFloat(sensorValue2, 0, 3102, 0, 100);      // Map humidity 0-2.5 V to 0 to 100%
 
   // Calculate measured voltages
   float voltage1 = sensorValue1 * (3.3 / 4095.0);
   float voltage2 = sensorValue2 * (3.3 / 4095.0);
 
+  // Print debug info
+
+#if CALIBRATE
   DEBUG_PRINT(F("temperatureExt: ")); DEBUG_PRINT_DEC(voltage1, 4); DEBUG_PRINT(F(",")); DEBUG_PRINT(sensorValue1); DEBUG_PRINT(F(",")); DEBUG_PRINTLN_DEC(temperatureExt, 2);
   DEBUG_PRINT(F("humidityExt: ")); DEBUG_PRINT_DEC(voltage2, 4); DEBUG_PRINT(F(",")); DEBUG_PRINT(sensorValue2); DEBUG_PRINT(F(",")); DEBUG_PRINTLN_DEC(humidityExt, 2);
+#endif
 
   // Check and limit values if maximums are exceeded
   if (temperatureExt < -60)
@@ -307,7 +311,8 @@ void readSp212()
   // Calculate measured voltages
   float voltage = sensorValue * (3.3 / 4095.0);
 
-  DEBUG_PRINT(F("solar: ")); DEBUG_PRINT_DEC(voltage, 4); DEBUG_PRINT(F(",")); DEBUG_PRINT(sensorValue); DEBUG_PRINT(F(",")); DEBUG_PRINTLN_DEC(solar, 2);
+  // Print debug info
+  //DEBUG_PRINT(F("solar: ")); DEBUG_PRINT_DEC(voltage, 4); DEBUG_PRINT(F(",")); DEBUG_PRINT(sensorValue); DEBUG_PRINT(F(",")); DEBUG_PRINTLN_DEC(solar, 2);
 
   // Add to statistics object
   solarStats.add(solar);
@@ -320,10 +325,12 @@ void readSp212()
 // R.M. Young Wind Monitor 5103L (4-20 mA)
 // 150 Ohm 0.1% resistor
 // Voltage range: 0.5995 - 2.9675 V
-// WS+  Black
-// WS-  Red
-// WD+  White
-// WD-  Green
+// Pin  Colour  Pin
+// -----------------
+// WS+  Black   12 V
+// WS-  Red     A1
+// WD+  White   12 V
+// WD-  Green   A2
 // ----------------------------------------------------------------------------
 void read5103L()
 {
@@ -331,10 +338,10 @@ void read5103L()
 
   DEBUG_PRINT("Info: Reading anemometer...");
 
-  //for (int i = 0; i < 20; i++)
-  //{
   // Measure wind speed and direction
+  (void)analogRead(PIN_WIND_SPEED);
   float sensorValue1 = analogRead(PIN_WIND_SPEED); // Raw analog wind speed value
+  (void)analogRead(PIN_WIND_DIR);
   float sensorValue2 = analogRead(PIN_WIND_DIR); // Raw analog wind direction value
 
   // Map wind speed and direction
@@ -355,11 +362,11 @@ void read5103L()
 
   DEBUG_PRINTLN("done.");
 
-  DEBUG_PRINT(F("windSpeed: ")); DEBUG_PRINT_DEC(voltage1, 4); DEBUG_PRINT(F(",")); DEBUG_PRINT(sensorValue1); DEBUG_PRINT(F(",")); DEBUG_PRINT_DEC(windSpeed, 2);
-  DEBUG_PRINT(F("windDirection: ")); DEBUG_PRINT_DEC(voltage2, 4); DEBUG_PRINT(F(",")); DEBUG_PRINT(sensorValue2); DEBUG_PRINT(F(",")); DEBUG_PRINT_DEC(windDirection, 2);
-  //myDelay(500);
-  //}
-
+#if CALIBRATE
+  // Print debug info
+  DEBUG_PRINT(F("windSpeed: ")); DEBUG_PRINT_DEC(voltage1, 4); DEBUG_PRINT(F(",")); DEBUG_PRINT(sensorValue1); DEBUG_PRINT(F(",")); DEBUG_PRINTLN_DEC(windSpeed, 2);
+  DEBUG_PRINT(F("windDirection: ")); DEBUG_PRINT_DEC(voltage2, 4); DEBUG_PRINT(F(",")); DEBUG_PRINT(sensorValue2); DEBUG_PRINT(F(",")); DEBUG_PRINTLN_DEC(windDirection, 2);
+#endif
   // Check and update wind gust and direction
   if ((windSpeed > 0) && (windSpeed > windGustSpeed))
   {
@@ -387,7 +394,6 @@ void read5103L()
 }
 
 // ----------------------------------------------------------------------------
-// Measure wind speed and direction from Davis Instruments 7911 anemometer
 // Davis Instruments 7911 Anemometer
 // ------------------------------
 // Colour    Description     Pin
@@ -446,11 +452,11 @@ void read7911()
   if (windDirection < 0)
     windDirection += 360;
 
-  if (windSpeed == 0) 
+  if (windSpeed == 0)
   {
     windDirection = 0.0;
   }
-  
+
   // Check and update wind gust and direction
   if ((windSpeed > 0) && (windSpeed > windGustSpeed))
   {
@@ -473,8 +479,9 @@ void read7911()
   uStats.add(u);
   vStats.add(v);
 
-  DEBUG_PRINT(F("Wind Speed: ")); DEBUG_PRINTLN(windSpeed);
-  DEBUG_PRINT(F("Wind Direction: ")); DEBUG_PRINTLN(windDirection);
+  // Print debug info
+  //DEBUG_PRINT(F("Wind Speed: ")); DEBUG_PRINTLN(windSpeed);
+  //DEBUG_PRINT(F("Wind Direction: ")); DEBUG_PRINTLN(windDirection);
 
   // Stop loop timer
   timer.read7911 = millis() - loopStartTime;
@@ -516,4 +523,25 @@ void windVectors()
   // Write data to union
   moSbdMessage.windSpeed = rvWindSpeed * 100;         // Resultant mean wind speed (m/s)
   moSbdMessage.windDirection = rvWindDirection * 10;  // Resultant mean wind direction (°)
+}
+
+// ----------------------------------------------------------------------------
+// MaxBotix MB7354 HRXL-MaxSonar-WRS5
+// https://www.maxbotix.com/ultrasonic_sensors/mb7354.htm
+// --------------------------------------------------
+// Colour    Pin    Description             Pin
+// --------------------------------------------------
+// White    1       Temperature Sensor      Not connected
+// Orange   2       Pulse Width Output      Not connected
+// Brown    3       Analog Voltage Output   Analog In
+// Green    4       Ranging Start/Stop      Not connected
+// Blue     5       Serial Output           Not connected
+// Red      6       Vcc                     5V
+// Black    7       GND                     GND
+//
+// ----------------------------------------------------------------------------
+// Read Maxbotix distance to surface
+void readMb7354()
+{
+
 }
