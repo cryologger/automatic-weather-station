@@ -193,13 +193,30 @@ void readLsm303()
 
     myDelay(500);
 
+    float xAvg = 0, yAvg = 0, zAvg = 0;
+
     // Read accelerometer data
     sensors_event_t accel;
-    lsm303.getEvent(&accel);
+
+    // Average accelerometer values
+    int samplesToAverage = 30;
+    for (int i = 0; i < samplesToAverage; ++i)
+    {
+      lsm303.getEvent(&accel);   // Read accelerometer data
+      xAvg += accel.acceleration.x;
+      yAvg += accel.acceleration.y;
+      zAvg += accel.acceleration.z;
+      delay(1);
+    }
+    // Calculate average
+    xAvg /= samplesToAverage;
+    yAvg /= samplesToAverage;
+    zAvg /= samplesToAverage;
 
     // Calculate pitch and roll
-    float pitch = atan2(-accel.acceleration.x, sqrt(accel.acceleration.y * accel.acceleration.y + accel.acceleration.z * accel.acceleration.z)) * 180 / PI;
-    float roll = atan2(accel.acceleration.y, accel.acceleration.z) * 180 / PI;
+    // Note: X-axis and Z axis swapped due to orientation of sensor when installed
+    float pitch = atan2(-xAvg, sqrt(yAvg * yAvg + zAvg * zAvg)) * 180 / PI;
+    float roll = atan2(yAvg, zAvg) * 180 / PI;
 
     // Write data to union
     moSbdMessage.pitch = pitch * 100;
@@ -502,14 +519,15 @@ void windVectors()
   // Calculate resultant mean wind speed
   float rvWindSpeed = sqrt(sq(uStats.average()) + sq(vStats.average()));
 
-  DEBUG_PRINT("uStats.average(): "); DEBUG_PRINTLN(uStats.average());
-  DEBUG_PRINT("vStats.average(): "); DEBUG_PRINTLN(vStats.average());
+  DEBUG_PRINT("uStats.average(): "); printTab(1); DEBUG_PRINTLN(uStats.average());
+  DEBUG_PRINT("vStats.average(): "); printTab(1); DEBUG_PRINTLN(vStats.average());
 
   // Calculate resultant mean wind direction
   float rvWindDirection = atan2(-1.0 * uStats.average(), -1.0 * vStats.average());
-  DEBUG_PRINT("rvWindDirection: "); DEBUG_PRINTLN(rvWindDirection);
   rvWindDirection *= RAD_TO_DEG;  // Convert from radians to degrees
-  DEBUG_PRINT("rvWindDirection: "); DEBUG_PRINTLN(rvWindDirection);
+
+  DEBUG_PRINT("rvWindDirection: "); printTab(1); DEBUG_PRINTLN(rvWindDirection);
+  DEBUG_PRINT("rvWindDirection: "); printTab(1); DEBUG_PRINTLN(rvWindDirection);
 
   // To do: Check if necessary
   if (rvWindDirection < 0)
