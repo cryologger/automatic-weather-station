@@ -38,7 +38,7 @@ void printTimers()
   printLine();
   DEBUG_PRINTLN("Function Execution Timers");
   printLine();
-  DEBUG_PRINT("battery: ");         printTab(1);  DEBUG_PRINTLN(timer.battery);
+  DEBUG_PRINT("battery: ");         printTab(1);  DEBUG_PRINTLN(timer.readBattery);
   DEBUG_PRINT("readRtc: ");         printTab(1);  DEBUG_PRINTLN(timer.readRtc);
   DEBUG_PRINT("configMicroSd: ");   printTab(1);  DEBUG_PRINTLN(timer.configMicroSd);
   DEBUG_PRINT("writeMicroSd: ");    printTab(1);  DEBUG_PRINTLN(timer.writeMicroSd);

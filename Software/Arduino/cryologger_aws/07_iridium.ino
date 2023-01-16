@@ -133,7 +133,7 @@ void transmitData()
       {
         DEBUG_PRINT("Warning: Transmission failed with error code ");
         DEBUG_PRINTLN(returnCode);
-        blinkLed(LED_BUILTIN, 10, 100);
+        blinkLed(PIN_LED_RED, 10, 100);
       }
     }
 
@@ -190,7 +190,7 @@ void transmitData()
     if (resetFlag)
     {
       DEBUG_PRINTLN("Info: Forced system reset...");
-      digitalWrite(LED_BUILTIN, HIGH); // Turn on LED
+      digitalWrite(PIN_LED_RED, HIGH); // Turn on LED
       while (true); // Wait for Watchdog Timer to reset system
     }
   }
@@ -205,7 +205,7 @@ bool ISBDCallback()
     previousMillis = currentMillis;
     petDog(); // Reset the Watchdog Timer
     //readBattery(); // Measure battery voltage during Iridium transmission. Warning: Will crash GNSS
-    digitalWrite(LED_BUILTIN, !digitalRead(LED_BUILTIN)); // Blink LED
+    digitalWrite(PIN_LED_RED, !digitalRead(PIN_LED_RED)); // Blink LED
   }
   return true;
 }

@@ -120,7 +120,7 @@ void syncRtc()
   if (!fixFound)
   {
     DEBUG_PRINTLN(F("Warning: No GNSS fix found!"));
-    blinkLed(LED_BUILTIN, 5, 100);
+    blinkLed(PIN_LED_RED, 5, 100);
   }
 
   // Close GNSS port

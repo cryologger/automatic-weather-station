@@ -58,7 +58,7 @@ void WDT_Handler()
   else
   {
     //WDT->CTRL.bit.ENABLE = 0;         // Debugging only: Disable WDT
-    //digitalWrite(LED_BUILTIN, HIGH);  // Debugging only: Turn on LED to indicate WDT trigger
+    //digitalWrite(PIN_LED_RED, HIGH);  // Debugging only: Turn on LED to indicate WDT trigger
     while (true);                     // Force WDT to reset the system
   }
   wdtFlag = true; // Set the WDT flag
