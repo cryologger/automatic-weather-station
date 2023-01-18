@@ -4,15 +4,36 @@
 ### Vaisala HMP60
 
 
-| Pin | Wire  | Description   | Description                  | Connector |
-|:---:|:-----:|---------------|------------------------------|:---------:|
-| 1   | Brown | VDC           | Voltage Input (5-28V)        | 12V       |
-| 2   | White | Channel 1: RH | Relative Humidity (%) (0-1V) | A3        |
-| 3   | Blue  | GND           | Ground                       | GND       |
-| 4   | Black | Channel 2: T  | Temperature (°C) (0-1V)      | A4        |
-| 5   | Shield | Earth ground |      | GND        |
+| Pin | Wire  | Description   | Description                    | Connector |
+|:---:|:-----:|---------------|--------------------------------|:---------:|
+| 1   | Brown | VDC           | Voltage Input (5-28V)          | 12V       |
+| 2   | White | Channel 1: RH | Relative Humidity (%) (0-2.5V) | A3        |
+| 3   | Blue  | GND           | Ground                         | GND       |
+| 4   | Black | Channel 2: T  | Temperature (°C) (0-2.5V)      | A4        |
+| 5   | Shield | Earth ground |                                | GND       |
 
 <img width="240" alt="image" src="https://user-images.githubusercontent.com/22924092/166289749-5f874318-572a-4545-b4d9-ad0d5a73522e.png">
+
+#### HMP60 Configuration
+
+
+```
+# Show current output modes of analog channels
+amode
+
+# Set output modes of channels 1 & 2 to 0 - 2.5 V
+amode 2 2 
+
+# Show current output parameters and scaling
+asel ?
+
+# Change channel 1 to output relative humidity and adjust scaling to 0 to 100% and change channel 2 to temperature and adjust scaling to -60 to 40°C
+asel rh t 0 100 -60 40
+
+# Note: This can also be achieved by typing the asel command and entering values when prompted
+asel
+
+```
 
 
 ### RM Young 5103L Wind Monitor
