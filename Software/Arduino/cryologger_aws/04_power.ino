@@ -4,8 +4,6 @@ void readBattery()
   // Start loop timer
   unsigned long loopStartTime = millis();
 
-  myDelay(1000);
-
   // Measure external battery voltage across 10/1 MΩ resistor divider (1/10 divider)
   (void)analogRead(PIN_VBAT);
   voltage = analogRead(PIN_VBAT);
@@ -22,6 +20,11 @@ void readBattery()
 
   // Add to statistics object
   batteryStats.add(voltage);
+
+  if (firstTimeFlag)
+  {
+    DEBUG_PRINT("Info: Battery voltage: "); DEBUG_PRINTLN(voltage);
+  }
 
   // Stop loop timer
   timer.readBattery = millis() - loopStartTime;
@@ -46,27 +49,27 @@ void enableSerial()
 #endif
 }
 
-// Enable power to IMU
+// Enable 5 V power
 void enable5V()
 {
   digitalWrite(PIN_5V_EN, HIGH);
   myDelay(500);
 }
 
-// Disable power to IMU
+// Disable 5V power
 void disable5V()
 {
   digitalWrite(PIN_5V_EN, LOW);
 }
 
-// Enable power to sensors
+// Enable 12 V power
 void enable12V()
 {
   digitalWrite(PIN_12V_EN, HIGH);
   myDelay(500);
 }
 
-// Disable power to sensors
+// Disable 12 V power
 void disable12V()
 {
   digitalWrite(PIN_12V_EN, LOW);
@@ -76,6 +79,7 @@ void disable12V()
 void enableGnssPower()
 {
   digitalWrite(PIN_GNSS_EN, LOW);
+  myDelay(1000);
 }
 
 // Disable power to GNSS
@@ -120,9 +124,6 @@ void goToSleep()
 
   // Enter deep sleep
   LowPower.deepSleep();
-
-  // Sleep until next alarm match
-  //rtc.standbyMode();
 
   /* Code sleeps here and awaits RTC or WDT interrupt */
 }
