@@ -55,77 +55,14 @@ void readBme280()
 }
 
 // ----------------------------------------------------------------------------
-// Adafruit DPS310 Precision Barometric Pressure Sensor
-// https://www.adafruit.com/product/4494
-// ----------------------------------------------------------------------------
-void configureDps310()
-{
-  DEBUG_PRINT("Info: Initializing DPS310...");
-
-  if (dps310.begin_I2C())
-  {
-    online.dps310 = true;
-    DEBUG_PRINTLN("success!");
-    dps310.configurePressure(DPS310_64HZ, DPS310_64SAMPLES);
-    dps310.configureTemperature(DPS310_64HZ, DPS310_64SAMPLES);
-  }
-  else
-  {
-    online.dps310 = false;
-    DEBUG_PRINTLN("failed!");
-  }
-}
-
-// Read DPS310
-void readDps310()
-{
-  // Start the loop timer
-  unsigned long loopStartTime = millis();
-
-  // Initialize sensor(s)
-  configureDps310();
-
-  // Check if sensor initialized successfully
-  if (online.dps310)
-  {
-    DEBUG_PRINT("Info: Reading DPS310...");
-
-    sensors_event_t temp_event, pressure_event;
-
-    // Read sensor until value is returned or timeout is exceeded
-    while ((!dps310.temperatureAvailable() || !dps310.pressureAvailable()) && millis() - loopStartTime < 5000UL)
-    {
-      return;
-    }
-
-    // Read sensor data
-    dps310.getEvents(&temp_event, &pressure_event);
-    float temperatureInt = temp_event.temperature;
-
-    // Add to statistics object
-    temperatureIntStats.add(temperatureInt);
-    //.add();
-
-    // Write data to union
-    moSbdMessage.temperatureInt = temperatureInt * 100;
-
-    DEBUG_PRINTLN("done.");
-  }
-  else
-  {
-    DEBUG_PRINTLN("Warning: DPS310 offline!");
-  }
-  // Stop the loop timer
-  timer.readDps310 = millis() - loopStartTime;
-}
-
-// ----------------------------------------------------------------------------
-// Davis Instruments Temperature Humidity Sensor
-// Sensiron SHT31-LSS
-// Yellow:  Power
-// Green:   Ground
-// White:   SCK
-// Blue:    SDA
+// Davis Instruments Temperature Humidity Sensor (Sensiron SHT31-LSS)
+// ------------------------------
+// Colour     Pin     Description
+// ------------------------------
+// Yellow    3.3V     Power
+// Green     GND      Ground
+// White     SCK      Clock
+// Blue      SDA      Data
 // ----------------------------------------------------------------------------
 void readSht31()
 {
@@ -148,8 +85,9 @@ void readSht31()
   temperatureExtStats.add(temperatureExt);
   humidityExtStats.add(humidityExt);
 
-  DEBUG_PRINT("Temperature: "); DEBUG_PRINT(temperatureExt); DEBUG_PRINTLN(" C");
-  DEBUG_PRINT("Humidity: "); DEBUG_PRINT(humidityExt); DEBUG_PRINTLN("%");
+  // Print debug info
+  //DEBUG_PRINT("Temperature: "); DEBUG_PRINT(temperatureExt); DEBUG_PRINTLN(" C");
+  //DEBUG_PRINT("Humidity: "); DEBUG_PRINT(humidityExt); DEBUG_PRINTLN("%");
 
   // Re-enable I2C bus
   Wire.begin();
@@ -160,6 +98,7 @@ void readSht31()
 
 // ----------------------------------------------------------------------------
 // Adafruit LSM303AGR Accelerometer/Magnetomter
+// https://www.adafruit.com/product/4413
 // ----------------------------------------------------------------------------
 void configureLsm303()
 {
@@ -243,11 +182,15 @@ void readLsm303()
 }
 
 // ----------------------------------------------------------------------------
-// Vaisala HMP60 Temperature/Relative Humidity
-// Brown:  5-28 VDC
-// White:  Channel 1 RH 0-1V
-// Blue:   GND
-// Black:  Channel 2 T 0-1V
+//  Vaisala HMP60 Humidity and Temperature Probe
+// -----------------------------------------------------
+// Colour     Pin     Description
+// -----------------------------------------------------
+// Brown      12V     Power (5 - 28V)
+// White      A3      CH1: Relative humidity (0 - 2.5V)
+// Blue       GND     Ground
+// Black      A4      CH2: Temperature (0 - 2.5V)
+// Shield     GND     Earth ground
 // ----------------------------------------------------------------------------
 void readHmp60()
 {
@@ -256,7 +199,7 @@ void readHmp60()
 
   DEBUG_PRINT("Info: Reading HMP60...");
 
-  // Note: A startup delay of 4 s is recommended at 13.5 V and 2 s at 5 V
+  // Note: A startup delay of 4 s is recommended at 12 V and 2 s at 5 V
   myDelay(4000);
 
   // Perform analog readings
@@ -265,34 +208,23 @@ void readHmp60()
   (void)analogRead(PIN_HUMID);
   float sensorValue2 = analogRead(PIN_HUMID); // External humidity
 
-  DEBUG_PRINTLN("done.");
-
   // Map voltages to sensor ranges
-  temperatureExt = mapFloat(sensorValue1, 0, 1240, -40, 60); // Map temperature from 0-1.0 V to -40 to 60°C
-  humidityExt = mapFloat(sensorValue2, 0, 1240, 0, 100);      // Map humidity 0-1 V to 0-100%
-  //float temperatureExt = mapFloat(sensorValue1, 0, 3102, -60, 40); // Map temperature from 0-2.5 V to -60 to 40°C
-  //float humidityExt = mapFloat(sensorValue2, 0, 3102, 0, 100);      // Map humidity 0-2.5 V to 0 to 100%
+  //temperatureExt = mapFloat(sensorValue1, 0, 1240, -40, 60);  // Map temperature from 0-1.0 V to -40 to 60°C
+  //humidityExt = mapFloat(sensorValue2, 0, 1240, 0, 100);      // Map humidity 0-1 V to 0-100%
+  temperatureExt = mapFloat(sensorValue1, 0, 3102, -60, 40);  // Map temperature from 0-2.5 V to -60 to 40°C
+  humidityExt = mapFloat(sensorValue2, 0, 3102, 0, 100);      // Map humidity 0-2.5 V to 0 to 100%
 
   // Calculate measured voltages
   float voltage1 = sensorValue1 * (3.3 / 4095.0);
   float voltage2 = sensorValue2 * (3.3 / 4095.0);
 
-  // Print debug info
+  DEBUG_PRINTLN("done.");
 
 #if CALIBRATE
+  // Print calibration data
   DEBUG_PRINT(F("temperatureExt: ")); DEBUG_PRINT_DEC(voltage1, 4); DEBUG_PRINT(F(",")); DEBUG_PRINT(sensorValue1); DEBUG_PRINT(F(",")); DEBUG_PRINTLN_DEC(temperatureExt, 2);
   DEBUG_PRINT(F("humidityExt: ")); DEBUG_PRINT_DEC(voltage2, 4); DEBUG_PRINT(F(",")); DEBUG_PRINT(sensorValue2); DEBUG_PRINT(F(",")); DEBUG_PRINTLN_DEC(humidityExt, 2);
 #endif
-
-  // Check and limit values if maximums are exceeded
-  if (temperatureExt < -60)
-    temperatureExt = -60;
-  if (temperatureExt > 40)
-    temperatureExt = 40;
-  if (humidityExt < 0)
-    humidityExt = 0;
-  if (humidityExt > 100)
-    humidityExt = 100;
 
   // Add to statistics object
   temperatureExtStats.add(temperatureExt);
@@ -304,10 +236,13 @@ void readHmp60()
 
 // ----------------------------------------------------------------------------
 // Apogee SP-212 Pyranometer
-// White: Positive (signal from sensor)
-// Red:   Input Power  5-24 V DC
-// Black: Ground (from sensor signal and output power)
-// Clear: Shield/Ground
+// -----------------------------------------------------
+// Colour    Pin        Description
+// -----------------------------------------------------
+// White     ?          Positive (signal from sensor)
+// Red       5V         Input Power  5-24 V DC
+// Black     GND        Ground (from sensor signal and output power)
+// Clear     GND        Shield/Ground
 // ----------------------------------------------------------------------------
 void readSp212()
 {
@@ -320,13 +255,13 @@ void readSp212()
   (void)analogRead(PIN_SOLAR);
   float sensorValue = analogRead(PIN_SOLAR); // External temperature
 
-  DEBUG_PRINTLN("done.");
-
   // Map voltages to sensor ranges
-  solar = mapFloat(sensorValue, 0, 3102, 0, 2000); // Map solar from 0-2.5 V to 0 to 2000
+  solar = mapFloat(sensorValue, 0, 3102, 0, 2000); // Map solar from 0-2.5 V to 0 to 2000 W m^2
 
   // Calculate measured voltages
   float voltage = sensorValue * (3.3 / 4095.0);
+
+  DEBUG_PRINTLN("done.");
 
   // Print debug info
   //DEBUG_PRINT(F("solar: ")); DEBUG_PRINT_DEC(voltage, 4); DEBUG_PRINT(F(",")); DEBUG_PRINT(sensorValue); DEBUG_PRINT(F(",")); DEBUG_PRINTLN_DEC(solar, 2);
@@ -342,18 +277,22 @@ void readSp212()
 // R.M. Young Wind Monitor 5103L (4-20 mA)
 // 150 Ohm 0.1% resistor
 // Voltage range: 0.5995 - 2.9675 V
-// Pin  Colour  Pin
-// -----------------
-// WS+  Black   12 V
-// WS-  Red     A1
-// WD+  White   12 V
-// WD-  Green   A2
+//
+// --------------------------------------------------
+// Colour     Pin       Description
+// --------------------------------------------------
+// Black      12V       Wind speed + (WS+)
+// Red        A1        Wind speed - (WS-)
+// White      12V       Wind direction + (WD+
+// Green      A2        Wind direction - (WD-)
+// Shield     GND       Earth ground
+//
 // ----------------------------------------------------------------------------
 void read5103L()
 {
   unsigned int loopStartTime = millis();
 
-  DEBUG_PRINT("Info: Reading anemometer...");
+  DEBUG_PRINT("Info: Reading 5103L...");
 
   // Measure wind speed and direction
   (void)analogRead(PIN_WIND_SPEED);
@@ -369,21 +308,14 @@ void read5103L()
   float voltage1 = sensorValue1 * (3.3 / 4095.0);
   float voltage2 = sensorValue2 * (3.3 / 4095.0);
 
-  // Check if readings are erroneous
-  if (windSpeed < 0)
-    windSpeed = 0;
-  if (windDirection < 0)
-    windDirection = 0;
-  if (windDirection > 360)
-    windDirection = 360;
-
   DEBUG_PRINTLN("done.");
 
 #if CALIBRATE
-  // Print debug info
+  // Print calibration data
   DEBUG_PRINT(F("windSpeed: ")); DEBUG_PRINT_DEC(voltage1, 4); DEBUG_PRINT(F(",")); DEBUG_PRINT(sensorValue1); DEBUG_PRINT(F(",")); DEBUG_PRINTLN_DEC(windSpeed, 2);
   DEBUG_PRINT(F("windDirection: ")); DEBUG_PRINT_DEC(voltage2, 4); DEBUG_PRINT(F(",")); DEBUG_PRINT(sensorValue2); DEBUG_PRINT(F(",")); DEBUG_PRINTLN_DEC(windDirection, 2);
 #endif
+
   // Check and update wind gust and direction
   if ((windSpeed > 0) && (windSpeed > windGustSpeed))
   {
@@ -392,6 +324,7 @@ void read5103L()
   }
 
   // Calculate wind speed and direction vectors
+  // For more information see:
   // http://tornado.sfsu.edu/geosciences/classes/m430/Wind/WindDirection.html
   float windDirectionRadians = windDirection * DEG_TO_RAD;  // Convert wind direction from degrees to radians
   float u = -1.0 * windSpeed * sin(windDirectionRadians);   // Magnitude of east-west component (u) of vector winds
@@ -413,12 +346,12 @@ void read5103L()
 // ----------------------------------------------------------------------------
 // Davis Instruments 7911 Anemometer
 // ------------------------------
-// Colour    Description     Pin
+// Colour   Pin     Description     
 // ------------------------------
-// Black     Wind speed      A1
-// Green     Wind direction  A2
-// Yellow    Power           5V
-// Red       Ground          GND
+// Black    A1      Wind speed      
+// Green    A2      Wind direction  
+// Yellow   5V      Power           
+// Red      GND     Ground          
 // ----------------------------------------------------------------------------
 void read7911()
 {
@@ -504,7 +437,7 @@ void read7911()
   timer.read7911 = millis() - loopStartTime;
 }
 
-// Wind speed interrupt service routine (ISR)
+// Interrupt service routine (ISR) for wind speed measurement
 // for Davis Instruments 7911 anemometer
 void windSpeedIsr()
 {
@@ -526,14 +459,14 @@ void windVectors()
   float rvWindDirection = atan2(-1.0 * uStats.average(), -1.0 * vStats.average());
   rvWindDirection *= RAD_TO_DEG;  // Convert from radians to degrees
 
-  DEBUG_PRINT("rvWindDirection: "); printTab(1); DEBUG_PRINTLN(rvWindDirection);
+  DEBUG_PRINT("rvWindSpeed: "); printTab(1); DEBUG_PRINTLN(rvWindSpeed);
   DEBUG_PRINT("rvWindDirection: "); printTab(1); DEBUG_PRINTLN(rvWindDirection);
 
   // To do: Check if necessary
   if (rvWindDirection < 0)
     rvWindDirection += 360;
 
-  // Zero wind direction if wind speed is zero.
+  // Zero wind direction if wind speed is zero
   // Note: atan2 can be undefined if u and v vectors are zero
   if (rvWindSpeed == 0)
     rvWindDirection = 0;

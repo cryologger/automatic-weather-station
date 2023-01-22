@@ -49,6 +49,19 @@ void enableSerial()
 #endif
 }
 
+// Enable power to GNSS
+void enableGnssPower()
+{
+  digitalWrite(PIN_GNSS_EN, LOW);
+  myDelay(1000);
+}
+
+// Disable power to GNSS
+void disableGnssPower()
+{
+  digitalWrite(PIN_GNSS_EN, HIGH);
+}
+
 // Enable 5 V power
 void enable5V()
 {
@@ -73,31 +86,6 @@ void enable12V()
 void disable12V()
 {
   digitalWrite(PIN_12V_EN, LOW);
-}
-
-// Enable power to GNSS
-void enableGnssPower()
-{
-  digitalWrite(PIN_GNSS_EN, LOW);
-  myDelay(1000);
-}
-
-// Disable power to GNSS
-void disableGnssPower()
-{
-  digitalWrite(PIN_GNSS_EN, HIGH);
-}
-
-// Enable power to RockBLOCK 9603
-void enableIridiumPower()
-{
-  digitalWrite(PIN_5V_EN, HIGH);
-}
-
-// Disable power to RockBLOCK 9603
-void disableIridiumPower()
-{
-  digitalWrite(PIN_5V_EN, LOW);
 }
 
 // Prepare system for sleep

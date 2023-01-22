@@ -18,10 +18,10 @@ void configureRtc()
   //rtc.setDate(day, month, year);
   //rtc.setEpoch();
 
-  //rtc.setTime(11, 04, 30); // Must be in the form of: rtc.setTime(11, 04, 30);
+  //rtc.setTime(11, 04, 30); // Must be in the form: rtc.setTime(11, 04, 30);
   
   // Set initial RTC alarm time
-  rtc.setAlarmTime(0, 5, 0); // hours, minutes, seconds
+  rtc.setAlarmTime(0, 30, 0); // hours, minutes, seconds
 
   // Enable alarm for hour rollover match
   rtc.enableAlarm(rtc.MATCH_MMSS);
@@ -61,21 +61,21 @@ void readRtc()
 void setRtcAlarm()
 {
   // Calculate next alarm
-  alarmTime = unixtime + (alarmInterval * 60UL);
+  alarmTime = unixtime + (sampleInterval * 60UL);
   DEBUG_PRINT(F("Info: unixtime ")); DEBUG_PRINTLN(unixtime);
   DEBUG_PRINT(F("Info: alarmTime ")); DEBUG_PRINTLN(alarmTime);
 
-  // Check if alarm was set in the past
+  // Check if alarm was set in the past or too far in the future
   if ((rtc.getEpoch() >= alarmTime) || ((alarmTime - unixtime) > 86400) || firstTimeFlag)
   {
     DEBUG_PRINTLN(F("Warning: RTC alarm set in the past, too far in the future, or program running for the first time."));
 
     // Set alarm for hour rollover match
-    rtc.setAlarmTime(0, 5, 0); // hours, minutes, seconds
+    rtc.setAlarmTime(0, sampleInterval, 0); // hours, minutes, seconds
 
     // Enable alarm for hour rollover match
-    rtc.enableAlarm(rtc.MATCH_MMSS);
-    //rtc.enableAlarm(rtc.MATCH_SS);
+    //rtc.enableAlarm(rtc.MATCH_MMSS);
+    rtc.enableAlarm(rtc.MATCH_SS);
 
     // Reset sample counter
     sampleCounter = 0;
@@ -125,6 +125,12 @@ void setCutoffAlarm()
   DEBUG_PRINT("Info: Alarm match "); DEBUG_PRINTLN(rtc.MATCH_HHMMSS);
 }
 
+// RTC alarm interrupt service routine (ISR)
+void alarmIsr()
+{
+  alarmFlag = true;
+}
+
 // Print the RTC's current date and time
 void printDateTime()
 {
@@ -143,10 +149,4 @@ void printAlarm()
           rtc.getAlarmYear(), rtc.getAlarmMonth(), rtc.getAlarmDay(),
           rtc.getAlarmHours(), rtc.getAlarmMinutes(), rtc.getAlarmSeconds());
   DEBUG_PRINTLN(alarmBuffer);
-}
-
-// RTC alarm interrupt service routine (ISR)
-void alarmIsr()
-{
-  alarmFlag = true;
 }

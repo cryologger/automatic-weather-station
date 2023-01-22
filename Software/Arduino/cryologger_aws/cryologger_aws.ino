@@ -25,36 +25,17 @@
 
     Comments:
     - Sketch uses 94316 bytes (35%) of program storage space. Maximum is 262144 bytes.
+
+
+    Sketch uses 98360 bytes (37%) of program storage space. Maximum is 262144 bytes.
     - Power consumption in deep sleep is ~625 uA.
 
-    Wiring Diagram:
-
-    R.M. Young Wind Monitor 5103L
-    ---------------------------------------------
-    Colour      Pin       Description
-    ---------------------------------------------
-    Black       12V       Wind speed +
-    Red         A1        Wind speed -
-    White       12V       Wind direction +
-    Green       A2        Wind direction -
-    Shield      GND       Earth ground
-
-    Vaisala HMP60 Humidity and Temperature Probe
-    ---------------------------------------------
-    Colour    Pin         Description
-    ---------------------------------------------
-    Brown       12V       Power
-    White       A3        Relative humidity (CH1)
-    Blue        GND       Ground
-    Black       A4        Temperature (CH2)
-    Shield      GND       Earth ground
 */
 
 // ----------------------------------------------------------------------------
 // Libraries
 // ----------------------------------------------------------------------------
 #include <Adafruit_BME280.h>        // https://github.com/adafruit/Adafruit_BME280 (v2.2.2)
-#include <Adafruit_DPS310.h>        // https://github.com/adafruit/Adafruit_DPS310 (v1.1.1)
 #include <Adafruit_LSM303_Accel.h>  // https://github.com/adafruit/Adafruit_LSM303_Accel (v1.1.4)
 #include <Adafruit_Sensor.h>        // https://github.com/adafruit/Adafruit_Sensor (v1.1.4)
 #include <Arduino.h>                // Required for new Serial instance. Include before <wiring_private.h>
@@ -73,6 +54,11 @@
 // Define unique identifier
 // ----------------------------------------------------------------------------
 #define CRYOLOGGER_ID 1
+
+// ----------------------------------------------------------------------------
+// Data logging
+// ----------------------------------------------------------------------------
+#define LOGGING         true  // Log data to microSD
 
 // ----------------------------------------------------------------------------
 // Debugging macros
@@ -104,25 +90,28 @@
 // ----------------------------------------------------------------------------
 // Pin definitions
 // ----------------------------------------------------------------------------
-#define PIN_VBAT            A0  // 
-#define PIN_WIND_SPEED      A1  // 
-#define PIN_WIND_DIR        A2  // 
-#define PIN_SOLAR           A7  // Unused
-#define PIN_TEMP            A4  // 
-#define PIN_HUMID           A3  // 
-#define PIN_SENSOR_PWR      A7  // Unused 
-#define PIN_GNSS_EN         A5  // 
-#define PIN_MICROSD_CS      4   // MicroSD chip select pin
+#define PIN_VBAT            A0
+#define PIN_WIND_SPEED      A1
+#define PIN_WIND_DIR        A2
+#define PIN_HUMID           A3
+#define PIN_TEMP            A4
+#define PIN_GNSS_EN         A5
+#define PIN_MICROSD_CS      4
 #define PIN_12V_EN          5   // 12 V step-up/down regulator
 #define PIN_5V_EN           6   // 5V step-down regulator
-#define PIN_LED             8   // Adafruit Adalogger M0 green LED
+#define PIN_LED_GREEN       8   // Adafruit Adalogger M0 green LED
 #define PIN_IRIDIUM_RX      10  // Pin 1 RXD (Yellow)
 #define PIN_IRIDIUM_TX      11  // Pin 6 TXD (Orange)
 #define PIN_IRIDIUM_SLEEP   12  // Pin 7 OnOff (Grey)
+#define PIN_LED_RED         13
 
-// ----------------------------------------------------------------------------
+// Unused
+#define PIN_SOLAR           7
+#define PIN_SENSOR_PWR      7
+
+// ------------------------------------------------------------------------------------------------
 // Port configuration
-// ----------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------------------
 // Create a new UART instance and assign it to pins 10 (RX) and 11 (TX).
 // For more information see: https://www.arduino.cc/en/Tutorial/SamdSercom
 Uart Serial2 (&sercom1, PIN_IRIDIUM_RX, PIN_IRIDIUM_TX, SERCOM_RX_PAD_2, UART_TX_PAD_0);
@@ -141,14 +130,19 @@ void SERCOM1_Handler()
 // Object instantiations
 // ----------------------------------------------------------------------------
 Adafruit_BME280                 bme280;
-Adafruit_DPS310                 dps310;   // I2C address: 0x77
 Adafruit_LSM303_Accel_Unified   lsm303 = Adafruit_LSM303_Accel_Unified(54321); // I2C address: 0x1E
 IridiumSBD                      modem(IRIDIUM_PORT, PIN_IRIDIUM_SLEEP);
 RTCZero                         rtc;
 SdFs                            sd;           // File system object
 FsFile                          logFile;      // Log file
 TinyGPSPlus                     gnss;
-sensirion                       sht(20, 21);  // (data, clock). Data requires pull-up.
+sensirion                       sht(20, 21);  // (data, clock). Pull-up required on data pin
+
+// Custom TinyGPS objects to store fix and validity information
+// Note: $GPGGA and $GPRMC sentences produced by GPS receivers (PA6H module)
+// $GNGGA and $GNRMC sentences produced by GPS/GLONASS receivers (PA161D module)
+TinyGPSCustom gnssFix(gnss, "GNGGA", 6); // Fix quality
+TinyGPSCustom gnssValidity(gnss, "GNRMC", 2); // Validity
 
 // ----------------------------------------------------------------------------
 // Statistics objects
@@ -167,12 +161,12 @@ Statistic vStats;               // Wind north-south wind vector component (v)
 // ----------------------------------------------------------------------------
 // User defined global variable declarations
 // ----------------------------------------------------------------------------
-unsigned long alarmInterval     = 5;      // Sample period (minutes). Default: 5 minutes (300 seconds)
-unsigned int  averageInterval   = 12;     // Number of samples to be averaged for each RockBLOCK transmission. Default = 12 (Hourly)
-unsigned int  transmitInterval  = 3;      // Number of messages in each Iridium transmission (340-byte limit)
+unsigned long sampleInterval    = 5;      // Sampling interval (minutes). Default: 5 min (300 seconds)
+unsigned int  averageInterval   = 12;     // Number of samples to be averaged in each message. Default: 12 (hourly)
+unsigned int  transmitInterval  = 1;      // Number of messages in each Iridium transmission (340-byte limit)
 unsigned int  retransmitLimit   = 2;      // Failed data transmission reattempts (340-byte limit)
-unsigned int  gnssTimeout       = 2;      // Timeout for GNSS signal acquisition (minutes)
-unsigned int  iridiumTimeout    = 180;    // Timeout for Iridium transmission (s)
+unsigned int  gnssTimeout       = 5;      // Timeout for GNSS signal acquisition (minutes)
+unsigned int  iridiumTimeout    = 5;      // Timeout for Iridium transmission (seconds)
 bool          firstTimeFlag     = true;   // Flag to determine if program is running for the first time
 float         batteryCutoff     = 0.0;    // Battery voltage cutoff threshold (V)
 unsigned int  samplesPerFile    = 8640;   // Maximum samples stored in a logfile (Default: 30 days * 288 samples per day)
@@ -261,7 +255,7 @@ typedef union
 {
   struct
   {
-    uint32_t  alarmInterval;      // 4 bytes
+    uint32_t  sampleInterval;     // 2 bytes
     uint8_t   averageInterval;    // 1 byte
     uint8_t   transmitInterval;   // 1 byte
     uint8_t   retransmitLimit;    // 1 byte
@@ -277,22 +271,20 @@ SBD_MT_MESSAGE mtSbdMessage;
 struct struct_online
 {
   bool bme280   = false;
-  bool dps310   = false;
   bool lsm303   = false;
   bool gnss     = false;
   bool microSd  = false;
 } online;
 
-// Union to store loop timers
+// Structure to store function timers
 struct struct_timer
 {
   unsigned long readRtc;
   unsigned long readBattery;
   unsigned long configMicroSd;
   unsigned long writeMicroSd;
-  unsigned long gnss;
+  unsigned long readGnss;
   unsigned long readBme280;
-  unsigned long readDps310;
   unsigned long readLsm303;
   unsigned long readHmp60;
   unsigned long readSht31;
@@ -308,19 +300,19 @@ struct struct_timer
 void setup()
 {
   // Pin assignments
-  pinMode(LED_BUILTIN, OUTPUT);
+  pinMode(PIN_LED_GREEN, OUTPUT);
+  pinMode(PIN_LED_RED, OUTPUT);
   pinMode(PIN_SENSOR_PWR, OUTPUT);
   pinMode(PIN_5V_EN, OUTPUT);
   pinMode(PIN_12V_EN, OUTPUT);
   pinMode(PIN_GNSS_EN, OUTPUT);
-  pinMode(PIN_LED, OUTPUT);
   pinMode(PIN_VBAT, INPUT);
-  digitalWrite(LED_BUILTIN, LOW);
+  digitalWrite(PIN_LED_GREEN, LOW);   // Disable green LED
+  digitalWrite(PIN_LED_RED, LOW);     // Disable red LED
   digitalWrite(PIN_SENSOR_PWR, LOW);  // Disable power to 3.3V
   digitalWrite(PIN_5V_EN, LOW);       // Disable power to Iridium 9603
-  digitalWrite(PIN_12V_EN, LOW);      // Disable power
+  digitalWrite(PIN_12V_EN, LOW);      // Disable 12V power
   digitalWrite(PIN_GNSS_EN, HIGH);    // Disable power to GNSS
-  digitalWrite(PIN_LED, LOW);
 
   // Configure analog-to-digital (ADC) converter
   configureAdc();
@@ -330,7 +322,7 @@ void setup()
 
 #if DEBUG
   SERIAL_PORT.begin(115200); // Open serial port at 115200 baud
-  blinkLed(LED_BUILTIN, 4, 500); // Non-blocking delay to allow user to open Serial Monitor
+  blinkLed(PIN_LED_RED, 4, 500); // Non-blocking delay to allow user to open Serial Monitor
 #endif
 
   DEBUG_PRINTLN();
@@ -344,18 +336,13 @@ void setup()
   readRtc();            // Read date and time from RTC
   configureWdt();       // Configure Watchdog Timer (WDT)
   readBattery();        // Read battery voltage
-  configureSd();
-
-  DEBUG_PRINT("Info: Battery voltage: "); DEBUG_PRINTLN(voltage);
+  configureSd();        // Configure microSD
   printSettings();      // Print configuration settings
-  syncRtc();            // Sync RTC with GNSS
+  readGnss();           // Sync RTC with GNSS
   configureIridium();   // Configure Iridium 9603 transceiver
-
-  getLogFileName();
-  createLogFile();
+  createLogFile();      // Create initial log file
 
 #if CALIBRATE
-
   enable12V();  // Enable 12V power
   enable5V();   // Enable 5V power
 
@@ -364,8 +351,6 @@ void setup()
     petDog(); // Reset WDT
 
     //calibrateAdc();
-    //read7911();
-    //readSht31();
     read5103L();
     readHmp60();
     myDelay(500);
@@ -381,8 +366,10 @@ void setup()
   // Blink LED to indicate completion of setup
   for (byte i = 0; i < 10; i++)
   {
-    blinkLed(LED_BUILTIN, 1, 100);
-    blinkLed(PIN_LED, 1, 100);
+    // Blink LEDs
+    digitalWrite(PIN_LED_RED, !digitalRead(PIN_LED_RED));
+    digitalWrite(PIN_LED_GREEN, !digitalRead(PIN_LED_GREEN));
+    myDelay(250);
   }
 }
 
@@ -410,7 +397,7 @@ void loop()
       wakeUp();
 
       // Blink LED
-      blinkLed(LED_BUILTIN, 4, 250);
+      blinkLed(PIN_LED_RED, 4, 250);
     }
 
     // Print date and time
@@ -452,7 +439,7 @@ void loop()
       // Perform measurements
       enable5V();       // Enable 5V power
       enable12V();      // Enable 12V power
-      readLsm303();     // Read acceleromter
+      readLsm303();     // Read accelerometer
       readBme280();     // Read sensor
       //readSp212();      // Read solar radiation
       //readSht31();      // Read temperature/relative humidity sensor
@@ -468,41 +455,45 @@ void loop()
       // Print summary of statistics
       printStats();
 
-      // Perform statistics on measurements
+
+      // Check if number of samples collected has been reached and calculate statistics (if enabled)
       if ((sampleCounter == averageInterval) || firstTimeFlag)
       {
         calculateStats(); // Calculate statistics of variables to be transmitted
         writeBuffer();    // Write data to transmit buffer
 
-        // Check if data should be transmitted
+        // Check if data transmission interval has been reached
         if ((transmitCounter == transmitInterval) || firstTimeFlag)
         {
-          syncRtc();        // Sync RTC with the GNSS
+          readGnss();       // Sync RTC with the GNSS
           transmitData();   // Transmit data via Iridium transceiver
         }
         sampleCounter = 0; // Reset sample counter
       }
 
+      // Print function execution timers
+      printTimers();
+
+      // Set the RTC alarm
+      setRtcAlarm();
+
+      DEBUG_PRINTLN("Info: Entering deep sleep...");
+      DEBUG_PRINTLN();
+
+      // Prepare for sleep
+      prepareForSleep();
     }
-    printTimers();    // Print function execution timers
-    setRtcAlarm();    // Set RTC alarm
 
-    DEBUG_PRINTLN("Info: Entering deep sleep...");
-    DEBUG_PRINTLN();
+    // Check for WDT interrupts
+    if (wdtFlag)
+    {
+      petDog(); // Reset the WDT
+    }
 
-    // Prepare for sleep
-    prepareForSleep();
+    // Blink LED to indicate WDT interrupt and nominal system operation
+    blinkLed(LED_BUILTIN, 1, 25);
+
+    // Enter deep sleep and wait for WDT or RTC alarm interrupt
+    goToSleep();
   }
-
-  // Check for WDT interrupts
-  if (wdtFlag)
-  {
-    petDog(); // Reset the WDT
-  }
-
-  // Blink LED to indicate WDT interrupt and nominal system operation
-  blinkLed(LED_BUILTIN, 1, 25);
-
-  // Enter deep sleep and wait for WDT or RTC alarm interrupt
-  goToSleep();
 }

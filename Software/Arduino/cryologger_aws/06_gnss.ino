@@ -1,5 +1,5 @@
-// Configure and read GNSS
-void syncRtc()
+// Read GNSS
+void readGnss()
 {
   // Start loop timer
   unsigned long loopStartTime = millis();
@@ -14,21 +14,20 @@ void syncRtc()
   // Enable power to GNSS
   enableGnssPower();
 
-  DEBUG_PRINTLN("Info: Beginning to listen for GNSS traffic...");
-
+  // Open serial port at 9600 baud
   GNSS_PORT.begin(9600);
+  DEBUG_PRINTLN("Info: Beginning to listen for GNSS traffic...");
   myDelay(1000);
 
   // Configure GNSS
+  // Note: a delay of at least 1 s is required after powering on GNSS module
   GNSS_PORT.println("$PMTK220,1000*1F"); // Set NMEA update rate to 1 Hz
-  myDelay(250);
-  GNSS_PORT.println("$PMTK314,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0*28"); // Set NMEA sentence output to GGA and RMC
-  myDelay(250);
-  //GNSS_PORT.println("$CDCMD,33,1*7C"); // Enable antenna updates
-  //GNSS_PORT.println("$CDCMD,33,0*7D"); // Disable antenna updates
+  GNSS_PORT.println("$PMTK314,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0*28"); // Set NMEA sentence output frequencies to GGA and RMC
+  //GNSS_PORT.println("$PGCMD,33,1*6C"); // Enable antenna updates
+  //GNSS_PORT.println("$PGCMD,33,0*6D"); // Disable antenna updates
 
-  // Attempt to acquire a valid GNSS position fix for up to specified timeout period
-  while (!fixFound && millis() - loopStartTime < gnssTimeout * 60UL * 1000UL)
+  // Look for GNSS signal for up to gnssTimeout
+  while (!fixFound && millis() - loopStartTime < gnssTimeout * 1000UL)
   {
     if (GNSS_PORT.available())
     {
@@ -39,15 +38,15 @@ void syncRtc()
 #endif
       if (gnss.encode(c))
       {
-        if ((gnss.location.isValid() && gnss.date.isValid() && gnss.time.isValid()) &&
-            (gnss.location.isUpdated() && gnss.date.isUpdated() && gnss.time.isUpdated()) &&
-            (gnss.satellites.value() > 0))
+        // Check if NMEA sentences have a valid fix and are not stale
+        if ((gnssFix.value() > 0 && gnssFix.age() < 1000) &&
+            (String(gnssValidity.value()) == "A" && gnssValidity.age() < 1000) &&
+            gnss.satellites.value() > 0)
         {
-          DEBUG_PRINT(F(" Pass"));
           fixCounter++; // Increment fix counter
 
           // Wait until a specified number of GNSS fixes have been collected
-          if (fixCounter >= 5)
+          if (fixCounter >= 10)
           {
             fixFound = true;
 
@@ -64,29 +63,28 @@ void syncRtc()
             unsigned long rtcEpoch = rtc.getEpoch();
 
             // Calculate RTC drift
-            rtcDrift = rtcEpoch - gnssEpoch;
+            long rtcDrift = rtcEpoch - gnssEpoch;
 
             DEBUG_PRINTLN("");
             DEBUG_PRINT(F("gnssEpoch: ")); DEBUG_PRINTLN(gnssEpoch);
             DEBUG_PRINT(F("rtcEpoch: ")); DEBUG_PRINTLN(rtcEpoch);
-            DEBUG_PRINT(F("unixtime: ")); DEBUG_PRINTLN(unixtime);
 
-            // Sync RTC with GNSS date and time only if gnssEpoch is in the future
-            if (((gnssEpoch > 1651363200) && (gnssEpoch > unixtime) && (gnssEpoch < 1903824000)) || firstTimeFlag)
+            // Sync RTC with GNSS only if gnssEpoch is greater than current unixtime
+            if ((gnssEpoch > unixtime) || firstTimeFlag)
             {
               rtc.setEpoch(gnssEpoch);
               DEBUG_PRINT(F("Info: RTC synced ")); printDateTime();
             }
             else
             {
-              DEBUG_PRINT(F("Warning: RTC not synced! GNSS time in the past! ")); printDateTime();
+              DEBUG_PRINT(F("Warning: RTC sync failed. GNSS time not accurate! ")); printDateTime();
             }
 
-            // Write data to buffer
+            // Record position information
             latitude = gnss.location.lat();
             longitude = gnss.location.lng();
             satellites = gnss.satellites.value();
-            hdop = gnss.hdop.value() / 100.0;
+            hdop = gnss.hdop.value();
 
             // Write data to buffer
             //moSbdMessage.latitude = gnss.location.lat() * 1000000;
@@ -95,13 +93,12 @@ void syncRtc()
             //moSbdMessage.hdop = gnss.hdop.value();
 
             DEBUG_PRINT(F("Info: RTC drift ")); DEBUG_PRINT(rtcDrift); DEBUG_PRINTLN(F(" seconds"));
-            blinkLed(PIN_LED, 5, 100);
+            blinkLed(PIN_LED_RED, 5, 100);
           }
         }
         else
         {
-          DEBUG_PRINT(F(" Fail"));
-
+          //DEBUG_PRINT(F(" Fail"));
         }
       }
     }
@@ -109,7 +106,7 @@ void syncRtc()
     // Call callback during acquisition of GNSS fix
     ISBDCallback();
 
-    // Exit function if no GNSS data is received after 5 seconds
+    // Exit function if no GNSS data is received after a specified duration
     if ((millis() - loopStartTime) > 5000 && gnss.charsProcessed() < 10)
     {
       DEBUG_PRINTLN(F("Warning: No GNSS data received. Please check wiring."));
@@ -120,7 +117,6 @@ void syncRtc()
   if (!fixFound)
   {
     DEBUG_PRINTLN(F("Warning: No GNSS fix found!"));
-    blinkLed(PIN_LED_RED, 5, 100);
   }
 
   // Close GNSS port
@@ -130,5 +126,5 @@ void syncRtc()
   disableGnssPower();
 
   // Stop the loop timer
-  timer.gnss = millis() - loopStartTime;
+  timer.readGnss = millis() - loopStartTime;
 }

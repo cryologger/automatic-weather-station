@@ -35,7 +35,7 @@ void transmitData()
   if ((transmitCounter == transmitInterval) || firstTimeFlag)
   {
     // Enable power to the RockBLOCK 9603
-    enableIridiumPower();
+    enable5V();
 
     // Open the Iridium serial port
     IRIDIUM_PORT.begin(19200);
@@ -73,7 +73,7 @@ void transmitData()
       if (returnCode == ISBD_SUCCESS)
       {
         DEBUG_PRINTLN("Info: MO-SBD message transmission successful!");
-        blinkLed(PIN_LED, 10, 100);
+        blinkLed(PIN_LED_GREEN, 20, 500);
 
         failureCounter = 0; // Clear failed transmission counter
         retransmitCounter = 0; // Clear message retransmit counter
@@ -102,20 +102,20 @@ void transmitData()
             printMtSbd(); // Print MT-SBD message stored in union/structure
 
             // Check if MT-SBD message data is valid and update variables
-            if ((mtSbdMessage.alarmInterval     >= 60   && mtSbdMessage.alarmInterval     <= 1209600) &&
-                (mtSbdMessage.averageInterval   >= 1    && mtSbdMessage.averageInterval   <= 24) &&
-                (mtSbdMessage.transmitInterval  >= 1    && mtSbdMessage.transmitInterval  <= 24) &&
-                (mtSbdMessage.retransmitLimit   >= 0    && mtSbdMessage.retransmitLimit   <= 24) &&
-                (mtSbdMessage.batteryCutoff     >= 0    && mtSbdMessage.batteryCutoff     <= 12) &&
-                (mtSbdMessage.resetFlag         == 0    || mtSbdMessage.resetFlag         == 255))
+            if ((mtSbdMessage.sampleInterval    >= 1  &&  mtSbdMessage.sampleInterval   <= 60)  &&
+                (mtSbdMessage.averageInterval   >= 1  &&  mtSbdMessage.averageInterval  <= 24)  &&
+                (mtSbdMessage.transmitInterval  >= 1  &&  mtSbdMessage.transmitInterval <= 24)  &&
+                (mtSbdMessage.retransmitLimit   >= 0  &&  mtSbdMessage.retransmitLimit  <= 24)  &&
+                (mtSbdMessage.batteryCutoff     >= 0  &&  mtSbdMessage.batteryCutoff    <= 12)  &&
+                (mtSbdMessage.resetFlag         == 0  ||  mtSbdMessage.resetFlag        == 255))
             {
               DEBUG_PRINTLN("Info: All received values within accepted ranges.");
 
-              alarmInterval = mtSbdMessage.alarmInterval;       // Update alarm interval
+              sampleInterval = mtSbdMessage.sampleInterval;       // Update alarm interval
               averageInterval = mtSbdMessage.averageInterval;   // Update sample average interval
               transmitInterval = mtSbdMessage.transmitInterval; // Update transmit interval
               retransmitLimit = mtSbdMessage.retransmitLimit;   // Update retransmit limit
-              batteryCutoff = mtSbdMessage.batteryCutoff;       // Update battery cutoff voltage 
+              batteryCutoff = mtSbdMessage.batteryCutoff;       // Update battery cutoff voltage
               resetFlag = mtSbdMessage.resetFlag;               // Update force reset flag
             }
             else
@@ -133,7 +133,7 @@ void transmitData()
       {
         DEBUG_PRINT("Warning: Transmission failed with error code ");
         DEBUG_PRINTLN(returnCode);
-        blinkLed(PIN_LED_RED, 10, 100);
+        blinkLed(PIN_LED_RED, 20, 500);
       }
     }
 
@@ -172,8 +172,8 @@ void transmitData()
     // Close the Iridium serial port
     IRIDIUM_PORT.end();
 
-    // Disable power to Iridium 9603
-    disableIridiumPower();
+    // Disable power to the RockBLOCK 9603
+    disable5V();
 
     // Reset transmit counter
     transmitCounter = 0;
@@ -193,6 +193,7 @@ void transmitData()
       digitalWrite(PIN_LED_RED, HIGH); // Turn on LED
       while (true); // Wait for Watchdog Timer to reset system
     }
+
   }
 }
 
@@ -204,7 +205,6 @@ bool ISBDCallback()
   {
     previousMillis = currentMillis;
     petDog(); // Reset the Watchdog Timer
-    //readBattery(); // Measure battery voltage during Iridium transmission. Warning: Will crash GNSS
     digitalWrite(PIN_LED_RED, !digitalRead(PIN_LED_RED)); // Blink LED
   }
   return true;

@@ -21,7 +21,7 @@ void printSettings()
   printLine();
   DEBUG_PRINTLN("Current Settings");
   printLine();
-  DEBUG_PRINT("alarmInterval: ");     printTab(2);  DEBUG_PRINTLN(alarmInterval);
+  DEBUG_PRINT("sampleInterval: ");    printTab(2);  DEBUG_PRINTLN(sampleInterval);
   DEBUG_PRINT("averageInterval: ");   printTab(1);  DEBUG_PRINTLN(averageInterval);
   DEBUG_PRINT("transmitInterval: ");  printTab(1);  DEBUG_PRINTLN(transmitInterval);
   DEBUG_PRINT("retransmitCounter: "); printTab(1);  DEBUG_PRINTLN(retransmitCounter);
@@ -43,13 +43,12 @@ void printTimers()
   DEBUG_PRINT("configMicroSd: ");   printTab(1);  DEBUG_PRINTLN(timer.configMicroSd);
   DEBUG_PRINT("writeMicroSd: ");    printTab(1);  DEBUG_PRINTLN(timer.writeMicroSd);
   DEBUG_PRINT("readBme280: ");      printTab(1);  DEBUG_PRINTLN(timer.readBme280);
-  //DEBUG_PRINT("readDps310: ");      printTab(1);  DEBUG_PRINTLN(timer.readDps310);
   DEBUG_PRINT("readLsm303: ");      printTab(1);  DEBUG_PRINTLN(timer.readLsm303);
   DEBUG_PRINT("readHmp60: ");       printTab(1);  DEBUG_PRINTLN(timer.readHmp60);
   //DEBUG_PRINT("readSht31: ");       printTab(1);  DEBUG_PRINTLN(timer.readSht31);
   DEBUG_PRINT("read5103L: ");       printTab(1);  DEBUG_PRINTLN(timer.read5103L);
   //DEBUG_PRINT("read7911: ");        printTab(1);  DEBUG_PRINTLN(timer.read7911);
-  DEBUG_PRINT("readGnss: ");        printTab(1);  DEBUG_PRINTLN(timer.gnss);
+  DEBUG_PRINT("readGnss: ");        printTab(1);  DEBUG_PRINTLN(timer.readGnss);
   DEBUG_PRINT("transmitData: ");    printTab(1);  DEBUG_PRINTLN(timer.iridium);
   DEBUG_PRINT("freeRam(): ");       printTab(1);  DEBUG_PRINTLN(freeRam());
 
@@ -95,7 +94,7 @@ void printMtSbd()
   printLine();
   DEBUG_PRINTLN("MT-SBD Message Data");
   printLine();
-  DEBUG_PRINT("alarmInterval:");    printTab(2);  DEBUG_PRINTLN(mtSbdMessage.alarmInterval);
+  DEBUG_PRINT("sampleInterval:");    printTab(2);  DEBUG_PRINTLN(mtSbdMessage.sampleInterval);
   DEBUG_PRINT("averageInterval:");  printTab(1);  DEBUG_PRINTLN(mtSbdMessage.averageInterval);
   DEBUG_PRINT("transmitInterval:"); printTab(1);  DEBUG_PRINTLN(mtSbdMessage.transmitInterval);
   DEBUG_PRINT("retransmitLimit:");  printTab(1);  DEBUG_PRINTLN(mtSbdMessage.retransmitLimit);
