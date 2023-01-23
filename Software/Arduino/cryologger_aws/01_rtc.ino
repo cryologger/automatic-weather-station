@@ -21,7 +21,7 @@ void configureRtc()
   //rtc.setTime(11, 04, 30); // Must be in the form: rtc.setTime(11, 04, 30);
   
   // Set initial RTC alarm time
-  rtc.setAlarmTime(0, 30, 0); // hours, minutes, seconds
+  rtc.setAlarmTime(0, sampleInterval, 0); // hours, minutes, seconds
 
   // Enable alarm for hour rollover match
   rtc.enableAlarm(rtc.MATCH_MMSS);

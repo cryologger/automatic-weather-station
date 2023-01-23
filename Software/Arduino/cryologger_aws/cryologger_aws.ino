@@ -1,6 +1,6 @@
 /*
     Title:    Cryologger Automatic Weather Station v0.3
-    Date:     September 19, 2022
+    Date:     January 22, 2023
     Author:   Adam Garbo
 
     Description:
@@ -169,7 +169,8 @@ unsigned int  gnssTimeout       = 5;      // Timeout for GNSS signal acquisition
 unsigned int  iridiumTimeout    = 5;      // Timeout for Iridium transmission (seconds)
 bool          firstTimeFlag     = true;   // Flag to determine if program is running for the first time
 float         batteryCutoff     = 0.0;    // Battery voltage cutoff threshold (V)
-unsigned int  samplesPerFile    = 8640;   // Maximum samples stored in a logfile (Default: 30 days * 288 samples per day)
+byte          loggingMode       = 2;      // Timing of new log file creation. 1: daily, 2: monthly, 3: yearly
+
 
 // ----------------------------------------------------------------------------
 // Global variable declarations
@@ -188,6 +189,8 @@ char          logFileName[30]   = "";     // Log file name
 char          dateTime[30]      = "";     // Datetime buffer
 byte          retransmitCounter = 0;      // Counter of Iridium 9603 transmission reattempts
 byte          transmitCounter   = 0;      // Counter of Iridium 9603 transmission intervals
+byte          currentLogFile    = 0;      // Counter for tracking when new microSD log files are created
+byte          newLogFile        = 0;      // Counter for tracking when new microSD log files are created
 unsigned int  iterationCounter  = 0;      // Counter for program iterations (zero indicates a reset)
 unsigned int  failureCounter    = 0;      // Counter of consecutive failed Iridium transmission attempts
 unsigned long previousMillis    = 0;      // Global millis() timer
@@ -195,7 +198,7 @@ unsigned long alarmTime         = 0;      // Global epoch alarm time variable
 unsigned long unixtime          = 0;      // Global epoch time variable
 unsigned int  sampleCounter     = 0;      // Sensor measurement counter
 unsigned int  cutoffCounter     = 0;      // Battery voltage cutoff sleep cycle counter
-unsigned int  samplesSaved      = 0;      // Log file sample counter
+unsigned long samplesSaved      = 0;      // Log file sample counter
 long          rtcDrift          = 0;      // RTC drift calculated during sync
 float         temperatureExt    = 0.0;    // External temperature (°C)
 float         humidityExt       = 0.0;    // External humidity (%)

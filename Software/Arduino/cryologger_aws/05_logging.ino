@@ -104,6 +104,32 @@ void createLogFile()
 #endif
 }
 
+void updateLogFile()
+{
+  // Set value of log file tracker the first time program runs
+  if (firstTimeFlag)
+  {
+    if (loggingMode == 1) // Daily
+      currentLogFile = gnss.date.day();
+    else if (loggingMode == 2) // Monthly
+      currentLogFile = gnss.date.month();
+    else if (loggingMode == 3) // Yearly
+      currentLogFile = gnss.date.year();
+    else // Default to monthly
+      currentLogFile = gnss.date.month();
+  }
+
+  // Update log file tracker
+  if (loggingMode == 1) // Daily
+    newLogFile = gnss.date.day();
+  else if (loggingMode == 2) // Monthly
+    newLogFile = gnss.date.month();
+  else if (loggingMode == 3) // Yearly
+    newLogFile = gnss.date.year();
+  else // Default to monthly
+    newLogFile = gnss.date.month();
+}
+
 // Write data to log file
 void logData()
 {
@@ -117,10 +143,11 @@ void logData()
   // Check if microSD is online
   if (online.microSd)
   {
-    // Check that maximum file sample limit has not been exceeded
-    if (samplesSaved >= samplesPerFile)
+    // Check if new log file should be created
+    if (currentLogFile != newLogFile)
     {
       createLogFile();
+      currentLogFile == newLogFile;
       samplesSaved = 0;
     }
 

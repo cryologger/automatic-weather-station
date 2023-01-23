@@ -73,12 +73,16 @@ void readGnss()
             if ((gnssEpoch > unixtime) || firstTimeFlag)
             {
               rtc.setEpoch(gnssEpoch);
+
               DEBUG_PRINT(F("Info: RTC synced ")); printDateTime();
             }
             else
             {
               DEBUG_PRINT(F("Warning: RTC sync failed. GNSS time not accurate! ")); printDateTime();
             }
+
+            // Check if new log file should be created
+            updateLogFile();
 
             // Record position information
             latitude = gnss.location.lat();
