@@ -256,7 +256,7 @@ void readSp212()
   float sensorValue = analogRead(PIN_SOLAR); // External temperature
 
   // Map voltages to sensor ranges
-  solar = mapFloat(sensorValue, 0, 3102, 0, 2000); // Map solar from 0-2.5 V to 0 to 2000 W m^2
+  solar = mapFloat(sensorValue, 0, 3102, 0, 2000); // Map solar irradiance from 0-2.5 V to 0 to 2000 W m^2
 
   // Calculate measured voltages
   float voltage = sensorValue * (3.3 / 4095.0);
@@ -296,21 +296,21 @@ void read5103L()
 
   // Measure wind speed and direction
   (void)analogRead(PIN_WIND_SPEED);
-  float sensorValue1 = analogRead(PIN_WIND_SPEED); // Raw analog wind speed value
+  float sensorValue1 = analogRead(PIN_WIND_SPEED); // Read analog wind speed value
   (void)analogRead(PIN_WIND_DIR);
-  float sensorValue2 = analogRead(PIN_WIND_DIR); // Raw analog wind direction value
+  float sensorValue2 = analogRead(PIN_WIND_DIR); // Read analog wind direction value
 
-  // Map wind speed and direction
+  // Map wind speed and direction analogue values to
   windSpeed = mapFloat(sensorValue1, 745, 3684, 0, 100); // 0-100 m/s range
   windDirection = mapFloat(sensorValue2, 745, 3684, 0, 360); // 0-360 range
-
-  // Calculate measured voltages
-  float voltage1 = sensorValue1 * (3.3 / 4095.0);
-  float voltage2 = sensorValue2 * (3.3 / 4095.0);
 
   DEBUG_PRINTLN("done.");
 
 #if CALIBRATE
+  // Calculate measured voltages
+  float voltage1 = sensorValue1 * (3.3 / 4095.0);
+  float voltage2 = sensorValue2 * (3.3 / 4095.0);
+
   // Print calibration data
   DEBUG_PRINT(F("windSpeed: ")); DEBUG_PRINT_DEC(voltage1, 4); DEBUG_PRINT(F(",")); DEBUG_PRINT(sensorValue1); DEBUG_PRINT(F(",")); DEBUG_PRINTLN_DEC(windSpeed, 2);
   DEBUG_PRINT(F("windDirection: ")); DEBUG_PRINT_DEC(voltage2, 4); DEBUG_PRINT(F(",")); DEBUG_PRINT(sensorValue2); DEBUG_PRINT(F(",")); DEBUG_PRINTLN_DEC(windDirection, 2);
@@ -346,12 +346,12 @@ void read5103L()
 // ----------------------------------------------------------------------------
 // Davis Instruments 7911 Anemometer
 // ------------------------------
-// Colour   Pin     Description     
+// Colour   Pin     Description
 // ------------------------------
-// Black    A1      Wind speed      
-// Green    A2      Wind direction  
-// Yellow   5V      Power           
-// Red      GND     Ground          
+// Black    A1      Wind speed
+// Green    A2      Wind direction
+// Yellow   5V      Power
+// Red      GND     Ground
 // ----------------------------------------------------------------------------
 void read7911()
 {
@@ -366,7 +366,7 @@ void read7911()
   attachInterrupt(PIN_WIND_SPEED, windSpeedIsr, FALLING);
   revolutions = 0;
 
-  // Measure wind speed for 5 seconds
+  // Measure wind speed for 3 seconds
   while (millis() < loopStartTime + 3000);
   {
     // Do nothing
@@ -407,7 +407,7 @@ void read7911()
     windDirection = 0.0;
   }
 
-  // Check and update wind gust and direction
+  // Check and update wind gust speed and direction
   if ((windSpeed > 0) && (windSpeed > windGustSpeed))
   {
     windGustSpeed = windSpeed;
