@@ -25,7 +25,6 @@
 
     Comments:
 
-
     Sketch uses 98360 bytes (37%) of program storage space. Maximum is 262144 bytes.
     - Power consumption in deep sleep is ~625 uA.
 
@@ -443,8 +442,8 @@ void loop()
       // Perform measurements
       enable5V();       // Enable 5V power
       enable12V();      // Enable 12V power
-      //readBme280();     // Read sensor
-      //readLsm303();     // Read accelerometer
+      readBme280();     // Read sensor
+      readLsm303();     // Read accelerometer
       //readSp212();      // Read solar radiation
       //readSht31();      // Read temperature/relative humidity sensor
       //read7911();       // Read anemometer
