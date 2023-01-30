@@ -1,7 +1,8 @@
 /*
-    Title:    Cryologger Automatic Weather Station v0.3
+    Title:    Cryologger Automatic Weather Station
     Date:     January 28, 2023
     Author:   Adam Garbo
+    Version:  0.3
 
     Description:
     - Code configured for automatic weather stations to be deployed in Igloolil, Nunavut.
@@ -162,12 +163,12 @@ Statistic vStats;               // Wind north-south wind vector component (v)
 // ----------------------------------------------------------------------------
 // User defined global variable declarations
 // ----------------------------------------------------------------------------
-unsigned long sampleInterval    = 60;      // Sampling interval (minutes). Default: 5 min (300 seconds)
+unsigned long sampleInterval    = 5;      // Sampling interval (minutes). Default: 5 min (300 seconds)
 unsigned int  averageInterval   = 12;     // Number of samples to be averaged in each message. Default: 12 (hourly)
 unsigned int  transmitInterval  = 1;      // Number of messages in each Iridium transmission (340-byte limit)
 unsigned int  retransmitLimit   = 2;      // Failed data transmission reattempts (340-byte limit)
-unsigned int  gnssTimeout       = 5;    // Timeout for GNSS signal acquisition (seconds)
-unsigned int  iridiumTimeout    = 5;    // Timeout for Iridium transmission (seconds)
+unsigned int  gnssTimeout       = 120;    // Timeout for GNSS signal acquisition (seconds)
+unsigned int  iridiumTimeout    = 120;    // Timeout for Iridium transmission (seconds)
 bool          firstTimeFlag     = true;   // Flag to determine if program is running for the first time
 float         batteryCutoff     = 0.0;    // Battery voltage cutoff threshold (V)
 byte          loggingMode       = 1;      // Flag for new log file creation. 1: daily, 2: monthly, 3: yearly
