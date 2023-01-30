@@ -16,7 +16,7 @@ void readGnss()
 
   // Open serial port at 9600 baud
   GNSS_PORT.begin(9600);
-  DEBUG_PRINTLN("Info: Beginning to listen for GNSS traffic...");
+  DEBUG_PRINTLN("Info - Beginning to listen for GNSS traffic...");
   myDelay(1000);
 
   // Configure GNSS
@@ -66,23 +66,20 @@ void readGnss()
             long rtcDrift = rtcEpoch - gnssEpoch;
 
             DEBUG_PRINTLN("");
-            DEBUG_PRINT(F("gnssEpoch: ")); DEBUG_PRINTLN(gnssEpoch);
-            DEBUG_PRINT(F("rtcEpoch: ")); DEBUG_PRINTLN(rtcEpoch);
+            DEBUG_PRINT(F("Info - gnssEpoch: ")); DEBUG_PRINTLN(gnssEpoch);
+            DEBUG_PRINT(F("Info - rtcEpoch: ")); DEBUG_PRINTLN(rtcEpoch);
 
             // Sync RTC with GNSS only if gnssEpoch is greater than current unixtime
             if ((gnssEpoch > unixtime) || firstTimeFlag)
             {
               rtc.setEpoch(gnssEpoch);
 
-              DEBUG_PRINT(F("Info: RTC synced ")); printDateTime();
+              DEBUG_PRINT(F("Info - RTC synced to: ")); printDateTime();
             }
             else
             {
-              DEBUG_PRINT(F("Warning: RTC sync failed. GNSS time not accurate! ")); printDateTime();
+              DEBUG_PRINT(F("Warning - RTC sync failed. GNSS time not accurate! ")); printDateTime();
             }
-
-            // Check if new log file should be created
-            updateLogFile();
 
             // Record position information
             latitude = gnss.location.lat();
@@ -96,8 +93,8 @@ void readGnss()
             //moSbdMessage.satellites = gnss.satellites.value();
             //moSbdMessage.hdop = gnss.hdop.value();
 
-            DEBUG_PRINT(F("Info: RTC drift ")); DEBUG_PRINT(rtcDrift); DEBUG_PRINTLN(F(" seconds"));
-            blinkLed(PIN_LED_RED, 5, 100);
+            DEBUG_PRINT(F("Info - RTC drift ")); DEBUG_PRINT(rtcDrift); DEBUG_PRINTLN(F(" seconds"));
+            blinkLed(PIN_LED_GREEN, 5, 100);
           }
         }
         else
@@ -113,14 +110,14 @@ void readGnss()
     // Exit function if no GNSS data is received after a specified duration
     if ((millis() - loopStartTime) > 5000 && gnss.charsProcessed() < 10)
     {
-      DEBUG_PRINTLN(F("Warning: No GNSS data received. Please check wiring."));
+      DEBUG_PRINTLN(F("Warning - No GNSS data received. Please check wiring."));
       break;
     }
   }
 
   if (!fixFound)
   {
-    DEBUG_PRINTLN(F("Warning: No GNSS fix found!"));
+    DEBUG_PRINTLN(F("Warning - No GNSS fix found!"));
   }
 
   // Close GNSS port

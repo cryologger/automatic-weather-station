@@ -4,7 +4,7 @@
 // ----------------------------------------------------------------------------
 void configureBme280()
 {
-  DEBUG_PRINT("Info: Initializing BME280...");
+  DEBUG_PRINT("Info - Initializing BME280...");
 
   if (bme280.begin())
   {
@@ -30,7 +30,7 @@ void readBme280()
   // Check if sensor initialized successfully
   if (online.bme280)
   {
-    DEBUG_PRINT("Info: Reading BME280...");
+    DEBUG_PRINT("Info - Reading BME280...");
 
     myDelay(250);
 
@@ -48,7 +48,7 @@ void readBme280()
   }
   else
   {
-    DEBUG_PRINTLN("Warning: BME280 offline!");
+    DEBUG_PRINTLN("Warning - BME280 offline!");
   }
   // Stop the loop timer
   timer.readBme280 = millis() - loopStartTime;
@@ -69,7 +69,7 @@ void readSht31()
   // Start the loop timer
   unsigned long loopStartTime = millis();
 
-  DEBUG_PRINT("Info: Reading SHT31...");
+  DEBUG_PRINT("Info - Reading SHT31...");
 
   // Disable I2C bus
   Wire.end();
@@ -102,7 +102,8 @@ void readSht31()
 // ----------------------------------------------------------------------------
 void configureLsm303()
 {
-  DEBUG_PRINT("Info: Initializing LSM303...");
+  DEBUG_PRINT("Info - Initializing LSM303...");
+
 
   // Initialize LSM303 accelerometer
   if (lsm303.begin())
@@ -128,12 +129,12 @@ void readLsm303()
   // Check if sensor initialized successfully
   if (online.lsm303)
   {
-    DEBUG_PRINT("Info: Reading LSM303...");
+    DEBUG_PRINT("Info - Reading LSM303...");
 
     myDelay(500);
 
     float xAvg = 0, yAvg = 0, zAvg = 0;
-
+   
     // Read accelerometer data
     sensors_event_t accel;
 
@@ -154,8 +155,8 @@ void readLsm303()
 
     // Calculate pitch and roll
     // Note: X-axis and Z axis swapped due to orientation of sensor when installed
-    float pitch = atan2(-xAvg, sqrt(yAvg * yAvg + zAvg * zAvg)) * 180 / PI;
-    float roll = atan2(yAvg, zAvg) * 180 / PI;
+    pitch = atan2(-xAvg, sqrt(yAvg * yAvg + zAvg * zAvg)) * 180 / PI;
+    roll = atan2(yAvg, zAvg) * 180 / PI;
 
     // Write data to union
     moSbdMessage.pitch = pitch * 100;
@@ -174,7 +175,7 @@ void readLsm303()
   }
   else
   {
-    DEBUG_PRINTLN("Warning: LSM303 offline!");
+    DEBUG_PRINTLN("Warning - LSM303 offline!");
   }
 
   // Stop loop timer
@@ -197,7 +198,7 @@ void readHmp60()
   // Start loop timer
   unsigned long loopStartTime = millis();
 
-  DEBUG_PRINT("Info: Reading HMP60...");
+  //DEBUG_PRINT("Info - Reading HMP60...");
 
   // Note: A startup delay of 4 s is recommended at 12 V and 2 s at 5 V
   myDelay(4000);
@@ -222,8 +223,8 @@ void readHmp60()
 
 #if CALIBRATE
   // Print calibration data
-  DEBUG_PRINT(F("temperatureExt: ")); DEBUG_PRINT_DEC(voltage1, 4); DEBUG_PRINT(F(",")); DEBUG_PRINT(sensorValue1); DEBUG_PRINT(F(",")); DEBUG_PRINTLN_DEC(temperatureExt, 2);
-  DEBUG_PRINT(F("humidityExt: ")); DEBUG_PRINT_DEC(voltage2, 4); DEBUG_PRINT(F(",")); DEBUG_PRINT(sensorValue2); DEBUG_PRINT(F(",")); DEBUG_PRINTLN_DEC(humidityExt, 2);
+  DEBUG_PRINT(F("temperatureExt: ")); DEBUG_PRINT(sensorValue1); DEBUG_PRINT(F(",")); DEBUG_PRINT_DEC(voltage1, 4); DEBUG_PRINT(F(",")); DEBUG_PRINTLN_DEC(temperatureExt, 2);
+  DEBUG_PRINT(F("humidityExt: ")); DEBUG_PRINT(sensorValue2); DEBUG_PRINT(F(",")); DEBUG_PRINT_DEC(voltage2, 4); DEBUG_PRINT(F(",")); DEBUG_PRINTLN_DEC(humidityExt, 2);
 #endif
 
   // Add to statistics object
@@ -240,7 +241,7 @@ void readHmp60()
 // Colour    Pin        Description
 // -----------------------------------------------------
 // White     ?          Positive (signal from sensor)
-// Red       5V         Input Power  5-24 V DC
+// Red       5V         Input Power 5-24 V DC
 // Black     GND        Ground (from sensor signal and output power)
 // Clear     GND        Shield/Ground
 // ----------------------------------------------------------------------------
@@ -249,7 +250,7 @@ void readSp212()
   // Start loop timer
   unsigned long loopStartTime = millis();
 
-  DEBUG_PRINT("Info: Reading SP212...");
+  DEBUG_PRINT("Info - Reading SP212...");
 
   // Perform analog readings
   (void)analogRead(PIN_SOLAR);
@@ -292,7 +293,7 @@ void read5103L()
 {
   unsigned int loopStartTime = millis();
 
-  DEBUG_PRINT("Info: Reading 5103L...");
+  DEBUG_PRINT("Info - Reading 5103L...");
 
   // Measure wind speed and direction
   (void)analogRead(PIN_WIND_SPEED);
@@ -357,7 +358,7 @@ void read7911()
 {
   uint32_t loopStartTime = millis();
 
-  DEBUG_PRINTLN("Info: Reading 7911...");
+  DEBUG_PRINTLN("Info - Reading 7911...");
 
   // Enable pull-ups
   pinMode(PIN_WIND_SPEED, INPUT_PULLUP);
@@ -459,7 +460,7 @@ void windVectors()
   float rvWindDirection = atan2(-1.0 * uStats.average(), -1.0 * vStats.average());
   rvWindDirection *= RAD_TO_DEG;  // Convert from radians to degrees
 
-  DEBUG_PRINT("rvWindSpeed: "); printTab(1); DEBUG_PRINTLN(rvWindSpeed);
+  DEBUG_PRINT("rvWindSpeed: "); printTab(2); DEBUG_PRINTLN(rvWindSpeed);
   DEBUG_PRINT("rvWindDirection: "); printTab(1); DEBUG_PRINTLN(rvWindDirection);
 
   // To do: Check if necessary

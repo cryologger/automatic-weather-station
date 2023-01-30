@@ -1,11 +1,10 @@
 /*
     Title:    Cryologger Automatic Weather Station v0.3
-    Date:     January 22, 2023
+    Date:     January 28, 2023
     Author:   Adam Garbo
 
     Description:
-    - Code configured for automatic weather stations to be deployed in Arctic Bay and
-    Pond Inlet, Nunavut.
+    - Code configured for automatic weather stations to be deployed in Igloolil, Nunavut.
 
     Components:
     - Rock7 RockBLOCK 9603
@@ -24,7 +23,6 @@
     - Vaisala HMP60 Humidity and Temperature Probe
 
     Comments:
-    - Sketch uses 94316 bytes (35%) of program storage space. Maximum is 262144 bytes.
 
 
     Sketch uses 98360 bytes (37%) of program storage space. Maximum is 262144 bytes.
@@ -64,9 +62,9 @@
 // Debugging macros
 // ----------------------------------------------------------------------------
 #define DEBUG           true  // Output debug messages to Serial Monitor
-#define DEBUG_GNSS      true  // Output GNSS debug information
-#define DEBUG_IRIDIUM   true  // Output Iridium debug messages to Serial Monitor
-#define CALIBRATE       false // Enable sensor calibration code
+#define DEBUG_GNSS      false  // Output GNSS debug information
+#define DEBUG_IRIDIUM   false  // Output Iridium debug messages to Serial Monitor
+#define CALIBRATE       true // Enable sensor calibration code
 
 #if DEBUG
 #define DEBUG_PRINT(x)            SERIAL_PORT.print(x)
@@ -99,7 +97,7 @@
 #define PIN_MICROSD_CS      4
 #define PIN_12V_EN          5   // 12 V step-up/down regulator
 #define PIN_5V_EN           6   // 5V step-down regulator
-#define PIN_LED_GREEN       8   // Adafruit Adalogger M0 green LED
+#define PIN_LED_GREEN       8   // Green LED
 #define PIN_IRIDIUM_RX      10  // Pin 1 RXD (Yellow)
 #define PIN_IRIDIUM_TX      11  // Pin 6 TXD (Orange)
 #define PIN_IRIDIUM_SLEEP   12  // Pin 7 OnOff (Grey)
@@ -108,6 +106,9 @@
 // Unused
 #define PIN_SOLAR           7
 #define PIN_SENSOR_PWR      7
+#define PIN_RFM95_CS        7   // LoRa "B"
+#define PIN_RFM95_RST       7   // LoRa "A"
+#define PIN_RFM95_INT       7   // LoRa "D"
 
 // ------------------------------------------------------------------------------------------------
 // Port configuration
@@ -148,11 +149,11 @@ TinyGPSCustom gnssValidity(gnss, "GNRMC", 2); // Validity
 // Statistics objects
 // ----------------------------------------------------------------------------
 Statistic batteryStats;         // Battery voltage
-Statistic temperatureExtStats;  // External temperature
-Statistic humidityExtStats;     // External humidity
 Statistic temperatureIntStats;  // Internal temperature
 Statistic humidityIntStats;     // Internal humidity
 Statistic pressureIntStats;     // Internal pressure
+Statistic temperatureExtStats;  // External temperature
+Statistic humidityExtStats;     // External humidity
 Statistic solarStats;           // Solar radiation
 Statistic windSpeedStats;       // Wind speed
 Statistic uStats;               // Wind east-west wind vector component (u)
@@ -161,16 +162,15 @@ Statistic vStats;               // Wind north-south wind vector component (v)
 // ----------------------------------------------------------------------------
 // User defined global variable declarations
 // ----------------------------------------------------------------------------
-unsigned long sampleInterval    = 5;      // Sampling interval (minutes). Default: 5 min (300 seconds)
+unsigned long sampleInterval    = 60;      // Sampling interval (minutes). Default: 5 min (300 seconds)
 unsigned int  averageInterval   = 12;     // Number of samples to be averaged in each message. Default: 12 (hourly)
 unsigned int  transmitInterval  = 1;      // Number of messages in each Iridium transmission (340-byte limit)
 unsigned int  retransmitLimit   = 2;      // Failed data transmission reattempts (340-byte limit)
-unsigned int  gnssTimeout       = 5;      // Timeout for GNSS signal acquisition (minutes)
-unsigned int  iridiumTimeout    = 5;      // Timeout for Iridium transmission (seconds)
+unsigned int  gnssTimeout       = 5;    // Timeout for GNSS signal acquisition (seconds)
+unsigned int  iridiumTimeout    = 5;    // Timeout for Iridium transmission (seconds)
 bool          firstTimeFlag     = true;   // Flag to determine if program is running for the first time
 float         batteryCutoff     = 0.0;    // Battery voltage cutoff threshold (V)
-byte          loggingMode       = 2;      // Timing of new log file creation. 1: daily, 2: monthly, 3: yearly
-
+byte          loggingMode       = 1;      // Flag for new log file creation. 1: daily, 2: monthly, 3: yearly
 
 // ----------------------------------------------------------------------------
 // Global variable declarations
@@ -180,7 +180,6 @@ volatile bool wdtFlag           = false;  // Flag for Watchdog Timer interrupt s
 volatile int  wdtCounter        = 0;      // Watchdog Timer interrupt counter
 volatile int  revolutions       = 0;      // Wind speed ISR counter
 bool          resetFlag         = false;  // Flag to force system reset using Watchdog Timer
-bool          logFlag           = true;   //
 uint8_t       moSbdBuffer[340];           // Buffer for Mobile Originated SBD (MO-SBD) message (340 bytes max)
 uint8_t       mtSbdBuffer[270];           // Buffer for Mobile Terminated SBD (MT-SBD) message (270 bytes max)
 size_t        moSbdBufferSize;
@@ -191,6 +190,7 @@ byte          retransmitCounter = 0;      // Counter of Iridium 9603 transmissio
 byte          transmitCounter   = 0;      // Counter of Iridium 9603 transmission intervals
 byte          currentLogFile    = 0;      // Counter for tracking when new microSD log files are created
 byte          newLogFile        = 0;      // Counter for tracking when new microSD log files are created
+int           transmitStatus    = 0;      // Iridium transmission status code
 unsigned int  iterationCounter  = 0;      // Counter for program iterations (zero indicates a reset)
 unsigned int  failureCounter    = 0;      // Counter of consecutive failed Iridium transmission attempts
 unsigned long previousMillis    = 0;      // Global millis() timer
@@ -200,11 +200,13 @@ unsigned int  sampleCounter     = 0;      // Sensor measurement counter
 unsigned int  cutoffCounter     = 0;      // Battery voltage cutoff sleep cycle counter
 unsigned long samplesSaved      = 0;      // Log file sample counter
 long          rtcDrift          = 0;      // RTC drift calculated during sync
-float         temperatureExt    = 0.0;    // External temperature (°C)
-float         humidityExt       = 0.0;    // External humidity (%)
 float         temperatureInt    = 0.0;    // Internal temperature (°C)
 float         humidityInt       = 0.0;    // Internal hunidity (%)
 float         pressureInt       = 0.0;    // Internal pressure (hPa)
+float         temperatureExt    = 0.0;    // External temperature (°C)
+float         humidityExt       = 0.0;    // External humidity (%)
+float         pitch             = 0.0;    // Pitch (°)
+float         roll              = 0.0;    // Roll (°)
 float         solar             = 0.0;    // Solar radiation
 float         windSpeed         = 0.0;    // Wind speed (m/s)
 float         windDirection     = 0.0;    // Wind direction (°)
@@ -258,7 +260,7 @@ typedef union
 {
   struct
   {
-    uint32_t  sampleInterval;     // 2 bytes
+    uint8_t   sampleInterval;     // 2 bytes
     uint8_t   averageInterval;    // 1 byte
     uint8_t   transmitInterval;   // 1 byte
     uint8_t   retransmitLimit;    // 1 byte
@@ -320,7 +322,8 @@ void setup()
   // Configure analog-to-digital (ADC) converter
   configureAdc();
 
-  Wire.begin(); // Initialize I2C
+  // Initialize I2C
+  Wire.begin();
   Wire.setClock(400000); // Set I2C clock speed to 400 kHz
 
 #if DEBUG
@@ -346,15 +349,15 @@ void setup()
   createLogFile();      // Create initial log file
 
 #if CALIBRATE
-  enable12V();  // Enable 12V power
   enable5V();   // Enable 5V power
+  enable12V();  // Enable 12V power
 
   while (true)
   {
     petDog(); // Reset WDT
 
     //calibrateAdc();
-    read5103L();
+    //read5103L();
     readHmp60();
     myDelay(500);
   }
@@ -387,6 +390,9 @@ void loop()
     // Read the RTC
     readRtc();
 
+    // Print date and time
+    DEBUG_PRINT("Info - Alarm trigger: "); printDateTime();
+
     // Reset WDT
     petDog();
 
@@ -398,13 +404,7 @@ void loop()
     {
       // Wake from deep sleep
       wakeUp();
-
-      // Blink LED
-      blinkLed(PIN_LED_RED, 4, 250);
     }
-
-    // Print date and time
-    DEBUG_PRINT("Info: Alarm trigger "); printDateTime();
 
     // Read battery voltage
     readBattery();
@@ -422,7 +422,7 @@ void loop()
         while (1);
       }
 
-      DEBUG_PRINTLN("Warning: Battery voltage cutoff exceeded. Entering deep sleep...");
+      DEBUG_PRINTLN("Warning - Battery voltage cutoff exceeded. Entering deep sleep...");
 
       // Reset sample counter
       sampleCounter = 0;
@@ -435,15 +435,15 @@ void loop()
     }
     else
     {
-      DEBUG_PRINT("Info: Battery voltage good: "); DEBUG_PRINTLN(voltage);
+      DEBUG_PRINT("Info - Battery voltage good: "); DEBUG_PRINTLN(voltage);
 
       cutoffCounter = 0;
 
       // Perform measurements
       enable5V();       // Enable 5V power
       enable12V();      // Enable 12V power
-      readLsm303();     // Read accelerometer
-      readBme280();     // Read sensor
+      //readBme280();     // Read sensor
+      //readLsm303();     // Read accelerometer
       //readSp212();      // Read solar radiation
       //readSht31();      // Read temperature/relative humidity sensor
       //read7911();       // Read anemometer
@@ -452,12 +452,8 @@ void loop()
       disable12V();     // Disable 12V power
       disable5V();      // Disable 5V power
 
-      // Log data to microSD card
-      logData();
-
       // Print summary of statistics
       printStats();
-
 
       // Check if number of samples collected has been reached and calculate statistics (if enabled)
       if ((sampleCounter == averageInterval) || firstTimeFlag)
@@ -474,29 +470,31 @@ void loop()
         sampleCounter = 0; // Reset sample counter
       }
 
+      // Log data to microSD card
+      logData();
+
       // Print function execution timers
       printTimers();
 
       // Set the RTC alarm
       setRtcAlarm();
 
-      DEBUG_PRINTLN("Info: Entering deep sleep...");
+      DEBUG_PRINTLN("Info - Entering deep sleep...");
       DEBUG_PRINTLN();
 
       // Prepare for sleep
       prepareForSleep();
     }
-
-    // Check for WDT interrupts
-    if (wdtFlag)
-    {
-      petDog(); // Reset the WDT
-    }
-
-    // Blink LED to indicate WDT interrupt and nominal system operation
-    blinkLed(LED_BUILTIN, 1, 25);
-
-    // Enter deep sleep and wait for WDT or RTC alarm interrupt
-    goToSleep();
   }
+  // Check for WDT interrupts
+  if (wdtFlag)
+  {
+    petDog(); // Reset the WDT
+  }
+
+  // Blink LED to indicate WDT interrupt and nominal system operation
+  blinkLed(PIN_LED_GREEN, 1, 25);
+
+  // Enter deep sleep and wait for WDT or RTC alarm interrupt
+  goToSleep();
 }

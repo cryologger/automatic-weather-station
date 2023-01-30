@@ -23,7 +23,7 @@ void readBattery()
 
   if (firstTimeFlag)
   {
-    DEBUG_PRINT("Info: Battery voltage: "); DEBUG_PRINTLN(voltage);
+    DEBUG_PRINT("Info - Battery voltage: "); DEBUG_PRINTLN(voltage);
   }
 
   // Stop loop timer
@@ -45,6 +45,7 @@ void enableSerial()
 #if DEBUG
   USBDevice.attach(); // Re-attach USB
   SERIAL_PORT.begin(115200);
+  blinkLed(PIN_LED_RED, 4, 250); // Blink LED
   //myDelay(3000); // Non-blocking delay to allow user to open Serial Monitor
 #endif
 }
