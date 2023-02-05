@@ -17,13 +17,15 @@
 #### HMP60 Configuration
 See section 6.4 of the Vaisala Humidity and Temperature Probes User Guide:  
 **Accessing serial line command interface from analog or Modbus mode**
+https://docs.vaisala.com/r/M211060EN-L/en-US
+
 
 ```
 # Show current output modes of analog channels
 amode
 
 # Set output modes of channels 1 & 2 to 0 - 2.5 V
-amode 2 2 
+amode 1 1 
 
 # Show current output parameters and scaling
 asel ?
