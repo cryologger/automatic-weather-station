@@ -23,46 +23,44 @@ The Cryologger design is based on the open-source Arduino platform (www.arduino.
 ### Bill of Materials
 
 **Table 1.** Bill of materials used in automatic weather station deployments.
-| Component | Product | Cost (USD) |
-| --- | --- | :---: |
+| Component             | Product                                                               | Cost (USD) |
+|-----------------------|-----------------------------------------------------------| :---: |
 | Satellite transceiver | [Rock7 RockBLOCK 9603](http://www.rock7mobile.com/products-rockblock-9603) | $267.50
-| Satellite antenna (optional) | [Maxtena M1621HCT-P-SMA](https://maxtena.com/products/f-passive/m1621hct-p-sma-iridium-passive-antenna/) | $50.00 
-| Processor | [Adafruit Feather M0 Adalogger](https://www.adafruit.com/product/2796) | $19.95
-| GPS | [Adafruit Ultimate GPS FeatherWing](https://www.adafruit.com/product/3133) | $24.95
-| IMU | [Adafruit LSM303AGR Accelerometer Magnetometer](https://www.adafruit.com/product/4413) | $12.50
-| Sensor | [Adafruit BME280 Temperature Humidity Pressure Sensor ](https://www.adafruit.com/product/2652) | $14.95
-| Voltage regulator | [Pololu D36V6F3 3.3V 600mA Step-Down Voltage Regulator](https://www.pololu.com/product/3791) | $9.95 
-| Voltage regulator | [Pololu D36V6F5 5V 600mA Step-Down Voltage Regulator](https://www.pololu.com/product/3792) | $9.95 
-| Voltage regulator | [Pololu 12V Step-Up Voltage Regulator U3V40F12](https://www.pololu.com/product/4016) | $9.95 
-| Resistor | [10 M 1% 0.6 W resistor](https://www.mouser.ca/ProductDetail/594-MBB02070C2004FCT) | $0.29 |
-| Resistor | [1 M 1% 0.6 W resistor](https://www.mouser.ca/ProductDetail/594-B0207C1M000F5T) | $0.20 
-| Capacitor | [0.1 uF Capacitor](https://www.mouser.ca/ProductDetail/Vishay-BC-Components/K104K15X7RF53L2?qs=mWFvmKOfYW8KbAXlf9eSQA%3D%3D) | $0.29 
-| Power connector |	[Phoenix Contact MSTB 2,5/ 2-ST-5,08 - 1757019](https://www.mouser.ca/ProductDetail/Phoenix-Contact/1757242?qs=%2Fha2pyFadugVjodGKkrF4xNq%252BZEVHysqCHlL2cTnJ%252B8%3D) | $0.67 
-| Power connector	| [Phoenix Contact MSTBA 2,5/ 2-G-5,08 - 1757242](https://www.mouser.ca/ProductDetail/Phoenix-Contact/1757019?qs=sGAEpiMZZMvlX3nhDDO4AGmxTE5dWGQY3FmaBdjJUN0%3D) | $2.08 
-| Connector |	[Molex PicoBlade PCB Header](https://www.mouser.ca/datasheet/2/276/0530471010_PCB_HEADERS-171035.pdf) | $0.50 
+| Satellite antenna*    | [Maxtena M1621HCT-P-SMA](https://maxtena.com/products/f-passive/m1621hct-p-sma-iridium-passive-antenna/) | $50.00 
+| Processor             | [Adafruit Feather M0 Adalogger](https://www.adafruit.com/product/2796) | $19.95
+| GNSS                  | [Adafruit Ultimate GPS FeatherWing](https://www.adafruit.com/product/3133) | $24.95
+| IMU                   | [Adafruit LSM303AGR Accelerometer Magnetometer](https://www.adafruit.com/product/4413) | $12.50
+| Sensor                | [Adafruit BME280 Temperature Humidity Pressure Sensor ](https://www.adafruit.com/product/2652) | $14.95
+| Voltage regulator     | [Pololu D36V6F3 3.3V 600mA Step-Down Voltage Regulator](https://www.pololu.com/product/3791) | $16.95 
+| Voltage regulator     | [Pololu D36V6F5 5V 600mA Step-Down Voltage Regulator](https://www.pololu.com/product/3792) | $16.95 
+| Voltage regulator     | [Pololu U3V40F12 12V Step-Up Voltage Regulator ](https://www.pololu.com/product/4016) | $9.95 
+| Resistor              | [10 M 1% 0.6 W resistor](https://www.mouser.ca/ProductDetail/594-MBB02070C1005FCT) | $0.44 |
+| Resistor              | [1 M 1% 0.6 W resistor](https://www.mouser.ca/ProductDetail/594-B0207C1M000F5T) | $0.40 
+| Capacitor             | [0.1 uF Capacitor](https://www.mouser.ca/ProductDetail/Vishay-BC-Components/K104K15X7RF53L2?qs=mWFvmKOfYW8KbAXlf9eSQA%3D%3D) | $0.29 
+| Power connector       |	[Phoenix Contact MSTB 2,5/ 2-ST-5,08 - 1757019](https://www.mouser.ca/ProductDetail/Phoenix-Contact/1757242?qs=%2Fha2pyFadugVjodGKkrF4xNq%252BZEVHysqCHlL2cTnJ%252B8%3D) | $0.67 
+| Power connector	      | [Phoenix Contact MSTBA 2,5/ 2-G-5,08 - 1757242](https://www.mouser.ca/ProductDetail/Phoenix-Contact/1757019?qs=sGAEpiMZZMvlX3nhDDO4AGmxTE5dWGQY3FmaBdjJUN0%3D) | $2.08 
+| Connector             |	[Molex PicoBlade PCB Header](https://www.mouser.ca/datasheet/2/276/0530471010_PCB_HEADERS-171035.pdf) | $0.50 
 
 **Table x.** Power and mounting bill of materials
-| Component | Product | Cost (USD) |
-| --- | --- | :---: |
-| Solar Panel | [Ameresco Solar 20 Watt Solar Panel 20J](https://www.amerescosolar.com/20j-ameresco-solar-20-watt-solar-panel) | $ |
+| Component           | Product | Cost (USD) |
+|---------------------|-------- | :---: |
+| Solar Panel         | [Ameresco Solar 20 Watt Solar Panel 20J](https://www.amerescosolar.com/20j-ameresco-solar-20-watt-solar-panel) | $99 |
 | Solar Panel Bracket | [Ameresco Solar HPM18-30 Solar Panel Pole Mount (optional)](https://www.amerescosolar.com/hpm18-30solar-panel-pole-mount) | $ |
-| Charge Controller | [Genasun GV-4 50 W 4 A Solar charge controller with MPPT](https://sunforgellc.com/gv-4/) | $ |
-| Battery | [Deka SOLAR Gel 36 Ah 8GUIH](https://www.amerescosolar.com/deka-solar-8gu1-deka-gel-deep-cycle-battery-12v-36-ah) | $ |
-| Enclosure | [nVent Hoffman HJ1412HWPL2LG](https://hoffman.nvent.com/en-us/products/enchj1412hwpl2lg) | $ |
-| Pole Mount | L-Com Enclosure Pole Mounting Kit | $ |
-| Tripod | Onset HOBO Weather Station m 3m Tripod |  $ | 
+| Charge Controller   | [Genasun GV-4 50 W 4 A Solar charge controller with MPPT](https://sunforgellc.com/gv-4/) | $63 |
+| Battery             | [Deka SOLAR Gel 36 Ah 8GUIH](https://www.amerescosolar.com/deka-solar-8gu1-deka-gel-deep-cycle-battery-12v-36-ah) | $ |
+| Enclosure           | [nVent Hoffman HJ1412HWPL2LG](https://hoffman.nvent.com/en-us/products/enchj1412hwpl2lg) | $ |
+| Pole Mount          | L-Com Enclosure Pole Mounting Kit | $ |
+| Tripod              | Onset HOBO Weather Station m 3m Tripod |  $ | 
 
 **Table x.** Sensors
-| Component | Product | Cost (USD) |
-| --- | --- | :---: |
+| Environment Variable          | Sensor                                                                                         | Cost (USD) |
+|-------------------------------|------------------------------------------------------------------------------------------------|:----------:|
+| Wind Speed & Direction        | [RM Young Wind Monitor 5103L Anemometer](https://www.youngusa.com/product/wind-monitor/)       | $1432      |
+| Temperature/Relative Humidity | [Vaisala HMP60 Humidity and Temperature Probe](https://store.vaisala.com/en/products/HMP60)    | $330       |
+| Solar Irradiance              | [SP-212-SS: Amplified 0-2.5 Volt Pyranometer](https://www.apogeeinstruments.com/sp-212-ss-amplified-0-2-5-volt-pyranometer/) | $325       |
+| Snow Depth                    | [Maxboxtix MB7374 HRXL-MaxSonar-WRST7](https://maxbotix.com/products/mb7374)                   | $290       |
 
-
-### Data transmission and processing
-Sensor measurements and GPS position are recorded hourly and stored in memory until the desired transmission interval is reached. Data are compressed into a binary message (340 bytes maximum) to minimize the cost and total number of transmissions required. Data are transmitted via the Iridium Short Burst Data (SBD) satellite network at user-specified intervals, which can be remotely updated based on the desired sampling frequency. SBD data messages are received by an Iridium ground station and sent to Rock7's server. The data is then forwarded to an Amazon Web Services (AWS) SQS queue, decoded using an AWS Lambda Python function and stored in a database using the Amazon Relational Database Service (RDS). Data is made freely available and can be viewed in near-real time at https://cryologger.org.
-
-## Deployments
-
-#### Recorded Measurements
+## Measurements
 
 **Table 2.** List of all available data variables that can be transmitted and/or logged with associated sizes and encoding schemes.
 
@@ -89,6 +87,10 @@ Sensor measurements and GPS position are recorded hourly and stored in memory un
 | uint16_t | transmitDuration  | Previous transmission duration (s)  | 2     |                  |
 | uint8_t  | transmitStatus    | Iridium return code                 | 1     |                  |
 | uint16_t | iterationCounter  | Message counter                     | 2     |                  |
+
+### Data transmission and processing
+Sensor measurements and GPS position are recorded hourly and stored in memory until the desired transmission interval is reached. Data are compressed into a binary message (340 bytes maximum) to minimize the cost and total number of transmissions required. Data are transmitted via the Iridium Short Burst Data (SBD) satellite network at user-specified intervals, which can be remotely updated based on the desired sampling frequency. SBD data messages are received by an Iridium ground station and sent to Rock7's server. The data is then forwarded to an Amazon Web Services (AWS) SQS queue, decoded using an AWS Lambda Python function and stored in a database using the Amazon Relational Database Service (RDS). Data is made freely available and can be viewed in near-real time at https://cryologger.org.
+
 
 ## Repository Contents
 
