@@ -155,8 +155,8 @@ void readLsm303()
 
     // Calculate pitch and roll
     // Note: X-axis and Z axis swapped due to orientation of sensor when installed
-    pitch = atan2(-xAvg, sqrt(yAvg * yAvg + zAvg * zAvg)) * 180 / PI;
-    roll = atan2(yAvg, zAvg) * 180 / PI;
+    pitch = atan2(-zAvg, sqrt(yAvg * yAvg + xAvg * xAvg)) * 180 / PI;
+    roll = atan2(yAvg, xAvg) * 180 / PI;
 
     // Write data to union
     moSbdMessage.pitch = pitch * 100;
@@ -198,7 +198,7 @@ void readHmp60()
   // Start loop timer
   unsigned long loopStartTime = millis();
 
-  //DEBUG_PRINT("Info - Reading HMP60...");
+  DEBUG_PRINT("Info - Reading HMP60...");
 
   // Note: A startup delay of 4 s is recommended at 12 V and 2 s at 5 V
   myDelay(4000);
@@ -210,10 +210,8 @@ void readHmp60()
   float sensorValue2 = analogRead(PIN_HUMID); // External humidity
 
   // Map voltages to sensor ranges
-  //temperatureExt = mapFloat(sensorValue1, 0, 1240, -40, 60);  // Map temperature from 0-1.0 V to -40 to 60°C
-  //humidityExt = mapFloat(sensorValue2, 0, 1240, 0, 100);      // Map humidity 0-1 V to 0-100%
-  temperatureExt = mapFloat(sensorValue1, 0, 3102, -60, 40);  // Map temperature from 0-2.5 V to -60 to 40°C
-  humidityExt = mapFloat(sensorValue2, 0, 3102, 0, 100);      // Map humidity 0-2.5 V to 0 to 100%
+  temperatureExt = mapFloat(sensorValue1, 0, 3103, -60, 40);  // Map temperature from 0-2.5 V to -60 to 40°C
+  humidityExt = mapFloat(sensorValue2, 0, 3103, 0, 100);      // Map humidity 0-2.5 V to 0 to 100%
 
   // Calculate measured voltages
   float voltage1 = sensorValue1 * (3.3 / 4095.0);
