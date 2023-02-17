@@ -96,7 +96,7 @@ void createLogFile()
   // Write header to file
   logFile.println("sample,datetime,voltage,temperature_int,humidity_int,pressure_int,temperature_ext,"
                   "humidity_ext,pitch,roll,wind_speed,wind_direction,latitude,longitude,satellites,hdop,"
-                  "online_microSd,online_readBme280,online_readLsm303,timer_readRtc,timer_readBattery,timer_configMicroSd,"
+                  "online_microSd,online_Bme280,online_Lsm303,timer_readRtc,timer_readBattery,timer_configMicroSd,"
                   "timer_readGnss,timer_bme280,timer_lsm303,timer_readHmp60,timer_read5103l,"
                   "timer_iridium,transmit_status,rtc_drift,free_ram,"
                   "sampleInterval,averageInterval,transmitInterval,retransmitLimit,gnssTimeout,iridiumTimeout");
@@ -235,6 +235,8 @@ void logData()
       DEBUG_PRINT(pressureInt);         DEBUG_PRINT(",");
       DEBUG_PRINT(temperatureExt);      DEBUG_PRINT(",");
       DEBUG_PRINT(humidityExt);         DEBUG_PRINT(",");
+      DEBUG_PRINT(pitch);               DEBUG_PRINT(",");
+      DEBUG_PRINT(roll);                DEBUG_PRINT(",");      
       DEBUG_PRINT(windSpeed);           DEBUG_PRINT(",");
       DEBUG_PRINT(windDirection);       DEBUG_PRINT(",");
       //DEBUG_PRINT(solar);               DEBUG_PRINT(",");
