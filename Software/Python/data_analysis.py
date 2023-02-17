@@ -10,29 +10,27 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.ticker as mticker
 import matplotlib.dates as mdates
-import seaborn as sns
 import numpy as np
-
-# -----------------------------------------------------------------------------
-# Library Configuration
-# -----------------------------------------------------------------------------
-
-# Configure Seaborn styles
-sns.set_theme(style="ticks")
-sns.set_style({"xtick.direction": "in", "ytick.direction": "in"})
-
-sns.set_context("talk")  # Options: talk, paper, poster
-
-# Set figure DPI
-dpi = 300
-
+import seaborn as sns
 
 # -----------------------------------------------------------------------------
 # Plotting attributes
 # -----------------------------------------------------------------------------
 
-lw = 1
-interval = 4
+# Seaborn configuration
+sns.set_theme(style="ticks")
+sns.set_context("talk") # talk, paper, poster
+
+# Set ticks to point inward
+sns.set_style({"xtick.direction": "in", "ytick.direction": "in"})
+
+# Set colour palette
+sns.set_palette("colorblind")
+colours = sns.color_palette("colorblind").as_hex()
+
+# Graph
+lw = 2
+interval = 1
 date_format = "%Y-%m-%d"
 
 # Figure DPI
@@ -43,20 +41,42 @@ dpi = 300
 # -----------------------------------------------------------------------------
 
 # Path to data
-path_data = ("/Users/adam/Documents/GitHub/Cryologger_Automatic_Weather_Station/Software/Python/")
+path_data = ("/Users/adam/Documents/GitHub/cryologger-automatic-weather-station/Software/Python/")
 
 # Path to figures
-path_figures = ("/Users/adam/Documents/GitHub/Cryologger_Automatic_Weather_Station/Software/Python/")
+path_figures = ("/Users/adam/Documents/GitHub/cryologger-automatic-weather-station/Software/Python/")
 
 
 # -----------------------------------------------------------------------------
 # Load and clean data exported from MariaDB
 # -----------------------------------------------------------------------------
 
-df = pd.read_csv(path_data + "2022_aws_arctic_bay.csv", index_col=False)
+
+df1 = pd.read_csv("/Users/adam/Downloads/cryologger_aws.csv", index_col=False)
+
+
+df1 = pd.read_csv(path_data + "2022_aws_arctic_bay.csv", index_col=False)
+df2 = pd.read_csv(path_data + "2022_aws_milne.csv", index_col=False)
 
 # Convert unixtime to datetime
-df["datetime"] = pd.to_datetime(df["unixtime"], unit="s")
+df1["datetime"] = pd.to_datetime(df1["unixtime"], unit="s")
+df2["datetime"] = pd.to_datetime(df2["unixtime"], unit="s")
+
+# Convert datetime
+df1["datetime"] = pd.to_datetime(df1["datetime"].astype(str), format="%Y-%m-%d %H:%M:%S")
+
+
+# Convert IMEI to string
+df1["imei"] = df1["imei"].astype(str)
+df2["imei"] = df2["imei"].astype(str)
+
+# Subset data based on dates
+df1 = df1[(df1["datetime"] > "2022-11-01 00:00")]
+df2 = df2[(df2["datetime"] > "2022-12-01 00:00")]
+
+# Set zero transmission duration values to null
+df1.loc[df1["transmit_duration"] == 0, "transmit_duration"] = np.nan
+df2.loc[df2["transmit_duration"] == 0, "transmit_duration"] = np.nan
 
 
 # -----------------------------------------------------------------------------
@@ -69,48 +89,51 @@ df = pd.read_csv("/Users/adam/Downloads/2021_itb_amundsen (3).csv", index_col=Fa
 # Convert to datetime
 df["Datetime"] = pd.to_datetime(df["Datetime"].astype(str), format="%Y-%m-%d %H:%M:%S")
 
-# Convert unixtime datetime
-df["datetime"] = pd.to_datetime(df["unixtime"].astype(str), format="%Y-%m-%d %H:%M:%S")
-
 # Convert IMEI to string
-df["imei"] = df["imei"].astype(str)
+df["IMEI"] = df["IMEI"].astype(str)
 
-
+# Set zero transmission duration values to null
+df.loc[df["Transmit Duration (s)"] == 0, "Transmit Duration (s)"] = np.nan
 
 # -----------------------------------------------------------------------------
 # Plot temperature, wind speed, and wind direction
 # -----------------------------------------------------------------------------
 
-fig, axs = plt.subplots(3, 1, figsize=(12, 12), sharex=True, constrained_layout=True)
+df = df2
+
+fig, axs = plt.subplots(3, 1, figsize=(12, 12), sharex=True)
 sns.lineplot(
-    x="Datetime",
-    y="Temperature (°C)",
+    x="datetime",
+    y="temperature_int",
     data=df,
     lw=1,
-    ci=None,
-    color="red",
+    errorbar=None,
+    hue="imei",
     ax=axs[0],
 )
 sns.lineplot(
-    x="Datetime",
-    y="Wind Speed (km/h)",
+    x="datetime",
+    y="wind_speed",
     data=df,
     lw=1,
-    ci=None,
-    color="blue",
+    errorbar=None,
+    hue="imei",
     ax=axs[1],
 )
 sns.lineplot(
-    x="Datetime",
-    y="Wind Direction (°)",
+    x="datetime",
+    y="wind_direction",
     data=df,
     lw=1,
-    ci=None,
-    color="green",
+    errorbar=None,
+    hue="imei",
     ax=axs[2],
 )
 
-axs[2].xaxis.set_major_locator(mdates.DayLocator(interval=7))
+axs[0].get_legend().remove()
+axs[1].get_legend().remove()
+axs[2].get_legend().remove()
+axs[2].xaxis.set_major_locator(mdates.MonthLocator(interval=interval))
 axs[2].xaxis.set_major_formatter(mdates.DateFormatter("%Y-%m-%d"))
 axs[2].set(xlabel=" ")
 sns.despine()
@@ -125,13 +148,13 @@ fig.savefig(path_figures + "temp_wind4.png", dpi=dpi, transparent=False, bbox_in
 # Plot battery voltage
 # -----------------------------------------------------------------------------
 
-fig, axs = plt.subplots(1, 1, figsize=(12, 6), constrained_layout=True)
+fig, axs = plt.subplots(1, 1, figsize=(12, 6))
 sns.lineplot(
-    x="Datetime",
-    y="Voltage (V)",
+    x="datetime",
+    y="voltage",
     data=df,
     lw=1,
-    ci=None,
+    errorbar=None,
     ax=axs,
 )
 
@@ -150,27 +173,97 @@ fig.savefig(
 
 
 # -----------------------------------------------------------------------------
+# Plot battery voltage & temperature
+# -----------------------------------------------------------------------------
+
+
+# Twin plot
+fig, ax1 = plt.subplots(figsize=(10,5))
+sns.lineplot(x="datetime", y="voltage", data=df1, errorbar=None, lw=lw, color=colours[0], label="Voltage (V)") #hue="imei"
+ax1.set(xlabel=None, ylabel="Voltage (V)", ylim=(12,15.5))
+ax1.xaxis.set_major_locator(mdates.DayLocator(interval=7))
+ax1.xaxis.set_major_formatter(mdates.DateFormatter("%Y-%m-%d"))
+ax1.get_legend().remove()
+ax2 = plt.twinx()
+sns.lineplot(x="datetime", y="temperature_int", data=df1, errorbar=None, lw=lw, color=colours[1], label="Temperature (°C)")
+ax2.set(xlabel=None, ylabel="Temperature (°C)", ylim=(-50,0))
+ax2.xaxis.set_major_locator(mdates.DayLocator(interval=7))
+ax2.xaxis.set_major_formatter(mdates.DateFormatter("%Y-%m-%d"))
+ax2.get_legend().remove()
+fig.autofmt_xdate(rotation=45)
+#fig.legend(bbox_to_anchor=(1.25, 0.4))
+fig.legend(loc="lower center", ncol=2, bbox_to_anchor=(0.5, -0.15))
+# Save figure
+plt.savefig(path_figures + "temp_volt.png", dpi=dpi, transparent=False, bbox_inches='tight')
+ 
+# -----------------------------------------------------------------------------
 # Transmit Duration
 # -----------------------------------------------------------------------------
 
-fig, axs = plt.subplots(1, 1, figsize=(12, 6), constrained_layout=True)
-sns.lineplot(
-    x="Datetime",
-    y="Transmit Duration (s)",
-    data=df,
-    lw=1,
-    ci=None,
-    ax=axs,
-)
-axs.grid(ls="dotted")
-axs.xaxis.set_major_locator(mdates.DayLocator(interval=7))
-axs.xaxis.set_major_formatter(mdates.DateFormatter("%Y-%m-%d"))
-axs.set(xlabel=' ')
-#sns.despine()
-fig.autofmt_xdate(rotation=45)
-fig.align_ylabels()
+df1["transmit_duration"].describe()
+df2["transmit_duration"].describe()
 
-# Save figure
-fig.savefig(
-    path_figures + "transmit.png", dpi=dpi, transparent=False, bbox_inches="tight"
-)
+
+df1.columns
+df2.columns
+
+df3 = pd.concat([df1, df2]) 
+df3["imei"] = df3["imei"].astype(str)
+
+# Scatterplot
+fig, ax = plt.subplots(figsize=(10,5))
+ax.grid(ls="dotted")
+sns.scatterplot(x="datetime", y="transmit_duration", data=df2, hue="imei")
+ax.set(xlabel=None, ylabel="Transmit Duration (s)", ylim=(-5,225))
+plt.xticks(rotation=45, horizontalalignment="right")
+ax.xaxis.set_major_formatter(mdates.DateFormatter(date_format))
+ax.xaxis.set_major_locator(mdates.MonthLocator(interval=1)) 
+ax.legend(loc="center left", bbox_to_anchor=(1.0, 0.5), title="Milne Fiord")
+plt.savefig(path_figures + "transmit_duration_mf.png", dpi=dpi, transparent=False, bbox_inches="tight")
+
+
+# Boxplot
+fig, ax = plt.subplots(figsize=(10,5))
+ax.grid(ls="dotted")
+sns.boxplot(data=df3, x="imei", y="transmit_duration", hue="imei", dodge=False)
+ax.set(xlabel=None, ylabel="Transmit Duration (s)")
+ax.set_yscale("log")
+plt.xticks(rotation=45, horizontalalignment="right")
+ax.legend(loc="center left", bbox_to_anchor=(1.0, 0.5), title="IMEI")
+ax.axhline(30, ls="dashed")
+plt.savefig(path_figures + "transmit_duration_box.png", dpi=dpi, transparent=False, bbox_inches="tight")
+
+
+sns.boxplot(data=df2, x="imei", y="transmit_duration")
+
+# -----------------------------------------------------------------------------
+# Temperature (°C)
+# -----------------------------------------------------------------------------
+
+date_format = "%H:%M"
+fig, ax = plt.subplots(figsize=(10,5))
+ax.grid(ls="dotted")
+sns.lineplot(x="datetime", y="temperature_int", data=df1, errorbar=None, lw=lw, label="Interal")
+sns.lineplot(x="datetime", y="temperature_ext", data=df1, errorbar=None, lw=lw, label="External")
+ax.set(xlabel=None, ylabel="Temperature (°C)")
+plt.xticks(rotation=45, horizontalalignment="right")
+ax.xaxis.set_major_formatter(mdates.DateFormatter(date_format))
+#ax.xaxis.set_major_locator(mdates.MonthLocator(interval=1)) 
+ax.legend(loc="center left", bbox_to_anchor=(1.0, 0.5), title="Sensor")
+plt.savefig(path_figures + "temperature_int.png", dpi=dpi, transparent=False, bbox_inches="tight")
+
+# -----------------------------------------------------------------------------
+# Humidity (%)
+# -----------------------------------------------------------------------------
+
+date_format = "%H:%M"
+fig, ax = plt.subplots(figsize=(10,5))
+ax.grid(ls="dotted")
+sns.lineplot(x="datetime", y="humidity_int", data=df1, errorbar=None, lw=lw, label="Interal")
+sns.lineplot(x="datetime", y="humidity_ext", data=df1, errorbar=None, lw=lw, label="External")
+ax.set(xlabel=None, ylabel="Humiidty (%)")
+plt.xticks(rotation=45, horizontalalignment="right")
+ax.xaxis.set_major_formatter(mdates.DateFormatter(date_format))
+#ax.xaxis.set_major_locator(mdates.MonthLocator(interval=1)) 
+ax.legend(loc="center left", bbox_to_anchor=(1.0, 0.5), title="Sensor")
+plt.savefig(path_figures + "humidity_int.png", dpi=dpi, transparent=False, bbox_inches="tight")
