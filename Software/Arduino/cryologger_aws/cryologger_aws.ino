@@ -1,11 +1,11 @@
 /*
     Title:    Cryologger Automatic Weather Station
-    Date:     January 28, 2023
+    Date:     February 19, 2023
     Author:   Adam Garbo
-    Version:  0.3
+    Version:  0.4
 
     Description:
-    - Code configured for automatic weather stations to be deployed in Igloolil, Nunavut.
+    - Code configured for automatic weather stations to be deployed in Igloolik, Nunavut.
 
     Components:
     - Rock7 RockBLOCK 9603
@@ -17,16 +17,15 @@
     - Pololu 3.3V 600mA Step-Down Voltage Regulator D36V6F3
     - Pololu 5V 600mA Step-Down Voltage Regulator D36V6F5
     - Pololu 12V 600mA Step-Down Voltage Regulator D36V6F5
-    - SanDisk Max Endurance 32 GB microSD card
+    - SanDisk Industrial XI 8 GB microSD card
 
     Sensors:
     - RM Young 05103L Wind Monitor
     - Vaisala HMP60 Humidity and Temperature Probe
 
     Comments:
-
-    Sketch uses 98360 bytes (37%) of program storage space. Maximum is 262144 bytes.
-    - Power consumption in deep sleep is ~625 uA.
+    - Sketch uses 98720 bytes (37%) of program storage space. Maximum is 262144 bytes.
+    - Power consumption in deep sleep is ~625 uA at 12.5V
 
 */
 
@@ -64,7 +63,7 @@
 #define DEBUG           true  // Output debug messages to Serial Monitor
 #define DEBUG_GNSS      false  // Output GNSS debug information
 #define DEBUG_IRIDIUM   false  // Output Iridium debug messages to Serial Monitor
-#define CALIBRATE       true // Enable sensor calibration code
+#define CALIBRATE       false // Enable sensor calibration code
 
 #if DEBUG
 #define DEBUG_PRINT(x)            SERIAL_PORT.print(x)
@@ -166,8 +165,9 @@ unsigned long sampleInterval    = 5;      // Sampling interval (minutes). Defaul
 unsigned int  averageInterval   = 12;     // Number of samples to be averaged in each message. Default: 12 (hourly)
 unsigned int  transmitInterval  = 1;      // Number of messages in each Iridium transmission (340-byte limit)
 unsigned int  retransmitLimit   = 2;      // Failed data transmission reattempts (340-byte limit)
-unsigned int  gnssTimeout       = 120;    // Timeout for GNSS signal acquisition (seconds)
-unsigned int  iridiumTimeout    = 120;    // Timeout for Iridium transmission (seconds)
+unsigned int  gnssTimeout       = 5;    // Timeout for GNSS signal acquisition (seconds)
+unsigned int  iridiumTimeout    = 5;    // Timeout for Iridium transmission (seconds)
+unsigned int  iridiumStartup    = 5;      // Timeout for Iridium startup (seconds)
 bool          firstTimeFlag     = true;   // Flag to determine if program is running for the first time
 float         batteryCutoff     = 0.0;    // Battery voltage cutoff threshold (V)
 byte          loggingMode       = 1;      // Flag for new log file creation. 1: daily, 2: monthly, 3: yearly
@@ -186,8 +186,8 @@ size_t        moSbdBufferSize;
 size_t        mtSbdBufferSize;
 char          logFileName[30]   = "";     // Log file name
 char          dateTime[30]      = "";     // Datetime buffer
-byte          retransmitCounter = 0;      // Counter of Iridium 9603 transmission reattempts
-byte          transmitCounter   = 0;      // Counter of Iridium 9603 transmission intervals
+byte          retransmitCounter = 0;      // Counter for Iridium 9603 transmission reattempts
+byte          transmitCounter   = 0;      // Counter for Iridium 9603 transmission intervals
 byte          currentLogFile    = 0;      // Counter for tracking when new microSD log files are created
 byte          newLogFile        = 0;      // Counter for tracking when new microSD log files are created
 int           transmitStatus    = 0;      // Iridium transmission status code
@@ -337,6 +337,8 @@ void setup()
 
   printLine();
 
+  memset(&moSbdMessage, 0, sizeof(moSbdMessage));
+
   // Configure devices
   configureRtc();       // Configure real-time clock (RTC)
   readRtc();            // Read date and time from RTC
@@ -357,7 +359,7 @@ void setup()
     petDog(); // Reset WDT
 
     //calibrateAdc();
-    //read5103L();
+    read5103L();
     readHmp60();
     myDelay(500);
   }
