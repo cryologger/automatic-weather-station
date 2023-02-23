@@ -48,8 +48,8 @@ The Cryologger automatic weather stations requires several external libraries. T
 
 ## Step 6: Download Automatic Weather Station Program
 Code for the Cryologger AWS is made available on the following GitHubrepository:
-* [https://github.com/adamgarbo/Cryologger_Glacier_Velocity_Tracker](https://github.com/adamgarbo/Cryologger_Automatic_Weather_Station)
-* Click on "Releases" and download the v0.2.0 .zip file:
+* [https://github.com/adamgarbo/Cryologger Automatic Weather Station](https://github.com/adamgarbo/Cryologger_Automatic_Weather_Station)
+* Click on "Releases" and download the v0.4.0 .zip file:
 
 ![image](https://user-images.githubusercontent.com/22924092/178785591-752d2d29-11d5-4476-bb62-e745cd0b64f0.png)
 
