@@ -3,7 +3,7 @@ void configureIridium()
 {
   modem.setPowerProfile(IridiumSBD::DEFAULT_POWER_PROFILE); // Assume battery power (USB power: IridiumSBD::USB_POWER_PROFILE)
   modem.adjustSendReceiveTimeout(iridiumTimeout);           // Timeout for Iridium send/receive commands (default = 300 s)
-  modem.adjustStartupTimeout(iridiumStartup);               // Timeout for Iridium startup (default = 240 s)
+  modem.adjustStartupTimeout(120);                          // Timeout for Iridium startup (default = 240 s)
 }
 
 // Write data from structure to transmit buffer
@@ -73,7 +73,7 @@ void transmitData()
       if (returnCode == ISBD_SUCCESS)
       {
         DEBUG_PRINTLN("Info - MO-SBD message transmission successful!");
-        blinkLed(PIN_LED_GREEN, 20, 500);
+        blinkLed(PIN_LED_GREEN, 10, 500);
 
         failureCounter = 0; // Clear failed transmission counter
         retransmitCounter = 0; // Clear message retransmit counter

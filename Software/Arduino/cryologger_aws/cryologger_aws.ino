@@ -1,6 +1,6 @@
 /*
     Title:    Cryologger Automatic Weather Station
-    Date:     February 19, 2023
+    Date:     February 24, 2023
     Author:   Adam Garbo
     Version:  0.4
 
@@ -50,7 +50,7 @@
 // ----------------------------------------------------------------------------
 // Define unique identifier
 // ----------------------------------------------------------------------------
-#define CRYOLOGGER_ID 1
+#define CRYOLOGGER_ID "OEG"
 
 // ----------------------------------------------------------------------------
 // Data logging
@@ -165,12 +165,11 @@ unsigned long sampleInterval    = 5;      // Sampling interval (minutes). Defaul
 unsigned int  averageInterval   = 12;     // Number of samples to be averaged in each message. Default: 12 (hourly)
 unsigned int  transmitInterval  = 1;      // Number of messages in each Iridium transmission (340-byte limit)
 unsigned int  retransmitLimit   = 2;      // Failed data transmission reattempts (340-byte limit)
-unsigned int  gnssTimeout       = 5;    // Timeout for GNSS signal acquisition (seconds)
-unsigned int  iridiumTimeout    = 5;    // Timeout for Iridium transmission (seconds)
-unsigned int  iridiumStartup    = 5;      // Timeout for Iridium startup (seconds)
+unsigned int  gnssTimeout       = 120;    // Timeout for GNSS signal acquisition (seconds)
+unsigned int  iridiumTimeout    = 180;    // Timeout for Iridium transmission (seconds)
 bool          firstTimeFlag     = true;   // Flag to determine if program is running for the first time
 float         batteryCutoff     = 0.0;    // Battery voltage cutoff threshold (V)
-byte          loggingMode       = 1;      // Flag for new log file creation. 1: daily, 2: monthly, 3: yearly
+byte          loggingMode       = 2;      // Flag for new log file creation. 1: daily, 2: monthly, 3: yearly
 
 // ----------------------------------------------------------------------------
 // Global variable declarations
@@ -188,8 +187,10 @@ char          logFileName[30]   = "";     // Log file name
 char          dateTime[30]      = "";     // Datetime buffer
 byte          retransmitCounter = 0;      // Counter for Iridium 9603 transmission reattempts
 byte          transmitCounter   = 0;      // Counter for Iridium 9603 transmission intervals
-byte          currentLogFile    = 0;      // Counter for tracking when new microSD log files are created
-byte          newLogFile        = 0;      // Counter for tracking when new microSD log files are created
+byte          currentLogFile    = 0;      // Variable for tracking when new microSD log files are created
+byte          newLogFile        = 0;      // Variable for tracking when new microSD log files are created
+byte          currentDate       = 0;      // Variable for tracking when the date changes
+byte          newDate           = 0;      // Variable for tracking when the date changes
 int           transmitStatus    = 0;      // Iridium transmission status code
 unsigned int  iterationCounter  = 0;      // Counter for program iterations (zero indicates a reset)
 unsigned int  failureCounter    = 0;      // Counter of consecutive failed Iridium transmission attempts
@@ -328,7 +329,7 @@ void setup()
 
 #if DEBUG
   SERIAL_PORT.begin(115200); // Open serial port at 115200 baud
-  blinkLed(PIN_LED_RED, 4, 500); // Non-blocking delay to allow user to open Serial Monitor
+  blinkLed(PIN_LED_GREEN, 4, 500); // Non-blocking delay to allow user to open Serial Monitor
 #endif
 
   DEBUG_PRINTLN();
@@ -337,7 +338,19 @@ void setup()
 
   printLine();
 
-  memset(&moSbdMessage, 0, sizeof(moSbdMessage));
+#if CALIBRATE
+  enable5V();   // Enable 5V power
+  enable12V();  // Enable 12V power
+
+  while (true)
+  {
+    petDog(); // Reset WDT
+    //calibrateAdc();
+    read5103L();
+    readHmp60();
+    myDelay(500);
+  }
+#endif
 
   // Configure devices
   configureRtc();       // Configure real-time clock (RTC)
@@ -349,21 +362,6 @@ void setup()
   readGnss();           // Sync RTC with GNSS
   configureIridium();   // Configure Iridium 9603 transceiver
   createLogFile();      // Create initial log file
-
-#if CALIBRATE
-  enable5V();   // Enable 5V power
-  enable12V();  // Enable 12V power
-
-  while (true)
-  {
-    petDog(); // Reset WDT
-
-    //calibrateAdc();
-    read5103L();
-    readHmp60();
-    myDelay(500);
-  }
-#endif
 
   // Close serial port if immediately entering deep sleep
   if (!firstTimeFlag)
@@ -466,8 +464,16 @@ void loop()
         // Check if data transmission interval has been reached
         if ((transmitCounter == transmitInterval) || firstTimeFlag)
         {
-          readGnss();       // Sync RTC with the GNSS
-          transmitData();   // Transmit data via Iridium transceiver
+          // Check for date change
+          checkDate();
+          if (firstTimeFlag || (currentDate != newDate))
+          {
+            readGnss(); // Sync RTC with the GNSS
+            currentDate = newDate;
+            Serial.print("currentDate: "); Serial.println(currentDate);
+            Serial.print("newDate: "); Serial.println(newDate);
+          }
+          transmitData(); // Transmit data via Iridium transceiver
         }
         sampleCounter = 0; // Reset sample counter
       }
