@@ -44,3 +44,27 @@ Table x. LED blink patterns and associated description and troubleshooting guide
 |   10   |      100      |    Green    |   Single    | Iridium transmission successful | None                                      |
 |   10   |      100      |     Red     |   Single    | Iridium transmission failure    | Ensure good view of sky and reboot system |
 |    1   |      100      |     Red     |   Single    | Watchdog Timer every 8 seconds  | None                                      |
+
+
+## Tools
+| Component                             	| Type                       	| Tool(s)                             	|
+|---------------------------------------	|----------------------------	|-------------------------------------	|
+| Enclosure panel                       	| 10/32" 3/8" Pan Head Screw 	| Phillips Head Screwdriver (large)   	|
+| Enclosure pole mount bracket          	| 1/4"-20 Pan Head Screw     	| Phillips Head Screwdriver (large)   	|
+| Enclosure pole mount bracket          	| 1/4"-20 Hex Nut            	| 7/16" socket/wrench                 	|
+| Enclosure pole mount bracket u-bolt   	| 1/4"-20 Hex Nut            	| 7/16" socket/wrench                 	|
+| Radiation shield                      	| 1/4"-20 Locknut            	| 7/16" socket                        	|
+| Solar panel 1 3/4" u-bolt             	| 5/16"-18 Hex Nut           	| 1/2" wrench/socket                  	|
+| Polar Wire cable                      	| 14 AWG                     	| Wire stripper                       	|
+| Genasun GV-4 Solar charge controller  	| Screw terminal             	| Flat head (small)                   	|
+| Deka 8GUIH battery terminals          	| 1/4"-20 Hex Nut            	| 7/16" socket/wrench                 	|
+| Anemometer 1-3/4" & 1-5/8" u-bolts    	| 5/16"-18 Hex Nut           	| 1/2" socket/wrench                  	|
+| Anemometer stainless steel hose clamp 	| Screw                      	| Phillips Head Screwdriver  (medium) 	|
+| Anemometer stainless steel hose clamp 	| Nut                        	| 5/16" socket (optional)             	|
+| Tripod 1-3/4" u-bolt                  	| 5/16"-18 Hex Nut           	| 1/2" socket/wrench                  	|
+| Tripod 1-5/8" u-bolt                  	| 1/4"-20 Hex Nut            	| 7/16" socket/wrench                 	|
+| Tripod guy wire kit                   	| Cable                      	| Lineman Cutters                     	|
+| Tripod guy wire kit                   	| 10/32" 3/8" Pan Head Screw 	| Phillips Head Screwdriver (medium)  	|
+| Tripod guy wire kit                   	| 1/4"-20 Hex Nut            	| 7/16" socket                        	|
+| Tripod guy wire kit                   	| 5/16"-18 Hex Nut           	| 1/2" wrench                         	|
+| PCB Screw terminals                   	| Screw terminal             	| Flat head (small)                   	|
