@@ -18,7 +18,7 @@ The goal of this project is to determine if the Cryologger, an open-source datal
 ## Design
 The Cryologger design is based on the open-source Arduino platform (www.arduino.cc) and built using easy-to-use, do-it-yourself electronics. Code was written using the open-source Arduino integrated development environment (IDE) and compiled from community generated libraries. Programming logic is highly focused on power optimization.
 
-<img width="720" alt="image" src="https://user-images.githubusercontent.com/22924092/177602858-616b47ef-bbc0-4e06-b53c-eee3825a787f.png">
+<img width="720" alt="image" src="https://user-images.githubusercontent.com/22924092/224180959-e6673df1-275e-406b-9564-ec4f626f1293.png">
 
 ### Bill of Materials
 
