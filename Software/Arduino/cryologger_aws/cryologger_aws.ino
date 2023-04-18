@@ -1,6 +1,6 @@
 /*
     Title:    Cryologger Automatic Weather Station
-    Date:     February 24, 2023
+    Date:     April 18, 2023
     Author:   Adam Garbo
     Version:  0.4
 
@@ -50,7 +50,7 @@
 // ----------------------------------------------------------------------------
 // Define unique identifier
 // ----------------------------------------------------------------------------
-#define CRYOLOGGER_ID "OEG"
+#define CRYOLOGGER_ID "UBY"
 
 // ----------------------------------------------------------------------------
 // Data logging
@@ -61,9 +61,9 @@
 // Debugging macros
 // ----------------------------------------------------------------------------
 #define DEBUG           true  // Output debug messages to Serial Monitor
-#define DEBUG_GNSS      false  // Output GNSS debug information
-#define DEBUG_IRIDIUM   false  // Output Iridium debug messages to Serial Monitor
-#define CALIBRATE       false // Enable sensor calibration code
+#define DEBUG_GNSS      true  // Output GNSS debug information
+#define DEBUG_IRIDIUM   true  // Output Iridium debug messages to Serial Monitor
+#define CALIBRATE       true // Enable sensor calibration code
 
 #if DEBUG
 #define DEBUG_PRINT(x)            SERIAL_PORT.print(x)
@@ -141,7 +141,7 @@ sensirion                       sht(20, 21);  // (data, clock). Pull-up required
 // Custom TinyGPS objects to store fix and validity information
 // Note: $GPGGA and $GPRMC sentences produced by GPS receivers (PA6H module)
 // $GNGGA and $GNRMC sentences produced by GPS/GLONASS receivers (PA161D module)
-TinyGPSCustom gnssFix(gnss, "GNGGA", 6); // Fix quality
+TinyGPSCustom gnssFix(gnss, "GNGGA", 6); // Fix quality  c
 TinyGPSCustom gnssValidity(gnss, "GNRMC", 2); // Validity
 
 // ----------------------------------------------------------------------------
@@ -164,8 +164,8 @@ Statistic vStats;               // Wind north-south wind vector component (v)
 unsigned long sampleInterval    = 5;      // Sampling interval (minutes). Default: 5 min (300 seconds)
 unsigned int  averageInterval   = 12;     // Number of samples to be averaged in each message. Default: 12 (hourly)
 unsigned int  transmitInterval  = 1;      // Number of messages in each Iridium transmission (340-byte limit)
-unsigned int  retransmitLimit   = 2;      // Failed data transmission reattempts (340-byte limit)
-unsigned int  gnssTimeout       = 120;    // Timeout for GNSS signal acquisition (seconds)
+unsigned int  retransmitLimit   = 4;      // Failed data transmission reattempts (340-byte limit)
+unsigned int  gnssTimeout       = 1;      // Timeout for GNSS signal acquisition (seconds)
 unsigned int  iridiumTimeout    = 180;    // Timeout for Iridium transmission (seconds)
 bool          firstTimeFlag     = true;   // Flag to determine if program is running for the first time
 float         batteryCutoff     = 0.0;    // Battery voltage cutoff threshold (V)
@@ -345,9 +345,9 @@ void setup()
   while (true)
   {
     petDog(); // Reset WDT
-    //calibrateAdc();
-    read5103L();
-    readHmp60();
+    calibrateAdc();
+    //read5103L();
+    //readHmp60();
     myDelay(500);
   }
 #endif
