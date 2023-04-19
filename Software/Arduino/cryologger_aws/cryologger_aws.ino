@@ -2,7 +2,7 @@
     Title:    Cryologger Automatic Weather Station
     Date:     April 18, 2023
     Author:   Adam Garbo
-    Version:  0.4
+    Version:  1.0
 
     Description:
     - Code configured for automatic weather stations to be deployed in Igloolik, Nunavut.
@@ -50,7 +50,7 @@
 // ----------------------------------------------------------------------------
 // Define unique identifier
 // ----------------------------------------------------------------------------
-#define CRYOLOGGER_ID "UBY"
+#define CRYOLOGGER_ID "MPC"
 
 // ----------------------------------------------------------------------------
 // Data logging
@@ -63,7 +63,7 @@
 #define DEBUG           true  // Output debug messages to Serial Monitor
 #define DEBUG_GNSS      true  // Output GNSS debug information
 #define DEBUG_IRIDIUM   true  // Output Iridium debug messages to Serial Monitor
-#define CALIBRATE       true // Enable sensor calibration code
+#define CALIBRATE       false // Enable sensor calibration code
 
 #if DEBUG
 #define DEBUG_PRINT(x)            SERIAL_PORT.print(x)
@@ -165,7 +165,7 @@ unsigned long sampleInterval    = 5;      // Sampling interval (minutes). Defaul
 unsigned int  averageInterval   = 12;     // Number of samples to be averaged in each message. Default: 12 (hourly)
 unsigned int  transmitInterval  = 1;      // Number of messages in each Iridium transmission (340-byte limit)
 unsigned int  retransmitLimit   = 4;      // Failed data transmission reattempts (340-byte limit)
-unsigned int  gnssTimeout       = 1;      // Timeout for GNSS signal acquisition (seconds)
+unsigned int  gnssTimeout       = 120;    // Timeout for GNSS signal acquisition (seconds)
 unsigned int  iridiumTimeout    = 180;    // Timeout for Iridium transmission (seconds)
 bool          firstTimeFlag     = true;   // Flag to determine if program is running for the first time
 float         batteryCutoff     = 0.0;    // Battery voltage cutoff threshold (V)
@@ -313,12 +313,14 @@ void setup()
   pinMode(PIN_12V_EN, OUTPUT);
   pinMode(PIN_GNSS_EN, OUTPUT);
   pinMode(PIN_VBAT, INPUT);
-  digitalWrite(PIN_LED_GREEN, LOW);   // Disable green LED
-  digitalWrite(PIN_LED_RED, LOW);     // Disable red LED
-  digitalWrite(PIN_SENSOR_PWR, LOW);  // Disable power to 3.3V
-  digitalWrite(PIN_5V_EN, LOW);       // Disable power to Iridium 9603
-  digitalWrite(PIN_12V_EN, LOW);      // Disable 12V power
-  digitalWrite(PIN_GNSS_EN, HIGH);    // Disable power to GNSS
+  pinMode(PIN_IRIDIUM_SLEEP, OUTPUT);
+  digitalWrite(PIN_LED_GREEN, LOW);     // Disable green LED
+  digitalWrite(PIN_LED_RED, LOW);       // Disable red LED
+  digitalWrite(PIN_SENSOR_PWR, LOW);    // Disable power to 3.3V
+  digitalWrite(PIN_5V_EN, LOW);         // Disable power to Iridium 9603
+  digitalWrite(PIN_12V_EN, LOW);        // Disable 12V power
+  digitalWrite(PIN_GNSS_EN, HIGH);      // Disable power to GNSS
+  digitalWrite(PIN_IRIDIUM_SLEEP, LOW); // Disable power to Iridium
 
   // Configure analog-to-digital (ADC) converter
   configureAdc();
@@ -345,8 +347,8 @@ void setup()
   while (true)
   {
     petDog(); // Reset WDT
-    calibrateAdc();
-    //read5103L();
+    //calibrateAdc();
+    read5103L();
     //readHmp60();
     myDelay(500);
   }
