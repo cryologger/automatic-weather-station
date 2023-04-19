@@ -300,8 +300,8 @@ void read5103L()
   float sensorValue2 = analogRead(PIN_WIND_DIR); // Read analog wind direction value
 
   // Map wind speed and direction analogue values to
-  windSpeed = mapFloat(sensorValue1, 745, 3684, 0, 100); // 0-100 m/s range
-  windDirection = mapFloat(sensorValue2, 745, 3684, 0, 360); // 0-360 range
+  windSpeed = mapFloat(sensorValue1, 745, 3724, 0, 100); // 0-100 m/s range
+  windDirection = mapFloat(sensorValue2, 745, 3724, 0, 360); // 0-360 range
 
   DEBUG_PRINTLN("done.");
 
