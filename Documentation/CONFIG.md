@@ -12,8 +12,6 @@
 | 4   | Black | Channel 2: T  | Temperature (°C) (0-2.5V)      | A4        |
 | 5   | Shield | Earth ground |                                | GND       |
 
-<img width="240" alt="image" src="https://user-images.githubusercontent.com/22924092/166289749-5f874318-572a-4545-b4d9-ad0d5a73522e.png">
-
 #### HMP60 Configuration
 See section 6.4 of the Vaisala Humidity and Temperature Probes User Guide:  
 **Accessing serial line command interface from analog or Modbus mode**
