@@ -1,6 +1,6 @@
 /*
     Title:    Cryologger Automatic Weather Station
-    Date:     April 18, 2023
+    Date:     April 29, 2023
     Author:   Adam Garbo
     Version:  1.0
 
@@ -9,7 +9,7 @@
 
     Components:
     - Rock7 RockBLOCK 9603
-    - Maxtena M1621HCT-P-SMA antenna (optional)
+    - Maxtena M1621HCT-P-SMA antenna
     - Adafruit Feather M0 Adalogger
     - Adafruit Ultimate GPS Featherwing
     - Adafruit BME280 Temperature Humidity Pressure Sensor
@@ -34,14 +34,14 @@
 // ----------------------------------------------------------------------------
 #include <Adafruit_BME280.h>        // https://github.com/adafruit/Adafruit_BME280 (v2.2.2)
 #include <Adafruit_LSM303_Accel.h>  // https://github.com/adafruit/Adafruit_LSM303_Accel (v1.1.4)
-#include <Adafruit_Sensor.h>        // https://github.com/adafruit/Adafruit_Sensor (v1.1.4)
+#include <Adafruit_Sensor.h>        // https://github.com/adafruit/Adafruit_Sensor (v1.1.9)
 #include <Arduino.h>                // Required for new Serial instance. Include before <wiring_private.h>
 #include <ArduinoLowPower.h>        // https://github.com/arduino-libraries/ArduinoLowPower (v1.2.2)
 #include <IridiumSBD.h>             // https://github.com/sparkfun/SparkFun_IridiumSBD_I2C_Arduino_Library (v3.0.5)
 #include <RTCZero.h>                // https://github.com/arduino-libraries/RTCZero (v1.6.0)
-#include <SdFat.h>                  // https://github.com/greiman/SdFat (v2.1.2)
+#include <SdFat.h>                  // https://github.com/greiman/SdFat (v2.2.0)
 #include <sensirion.h>              // https://github.com/HydroSense/sensirion
-#include <Statistic.h>              // https://github.com/RobTillaart/Statistic (v1.0.0)
+#include <Statistic.h>              // https://github.com/RobTillaart/Statistic (v1.0.2)
 #include <TimeLib.h>                // https://github.com/PaulStoffregen/Time (v1.6.1)
 #include <TinyGPS++.h>              // https://github.com/mikalhart/TinyGPSPlus (v1.0.3)
 #include <Wire.h>                   // https://www.arduino.cc/en/Reference/Wire
@@ -50,7 +50,7 @@
 // ----------------------------------------------------------------------------
 // Define unique identifier
 // ----------------------------------------------------------------------------
-#define CRYOLOGGER_ID "MPC"
+#define CRYOLOGGER_ID "TST"
 
 // ----------------------------------------------------------------------------
 // Data logging
