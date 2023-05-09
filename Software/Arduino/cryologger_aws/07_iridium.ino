@@ -232,15 +232,13 @@ void IridiumSBD::setSleepPin(uint8_t enable)
 {
    if (enable == HIGH)
   {
-      pinMode(this->sleepPin, OUTPUT); 
-      digitalWrite(this->sleepPin, LOW); // LOW = awake
-      diagprint(F("HIGH\r\n"));
+      digitalWrite(this->sleepPin, LOW);  // LOW = awake. Inverted by N-MOSFET
+      diagprint(F("AWAKE\r\n"));
    }
    else
    {
-      pinMode(this->sleepPin, OUTPUT);
-      digitalWrite(this->sleepPin, HIGH); // HIGH = asleep
-      diagprint(F("LOW\r\n"));
+      digitalWrite(this->sleepPin, HIGH); // HIGH = asleep. Inverted by N-MOSFET
+      diagprint(F("ASLEEP\r\n"));
    }
 }
 */

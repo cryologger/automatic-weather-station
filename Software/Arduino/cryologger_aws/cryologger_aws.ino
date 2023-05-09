@@ -1,14 +1,15 @@
 /*
     Title:    Cryologger Automatic Weather Station
-    Date:     April 29, 2023
+    Date:     May 1, 2023
     Author:   Adam Garbo
     Version:  1.0
 
     Description:
-    - Code configured for automatic weather stations to be deployed in Igloolik, Nunavut.
+    - Code configured for automatic weather stations to be deployed in the communities of 
+    Arctic Bay, Igloolik and Pond Inlet, Nunavut.
 
     Components:
-    - Rock7 RockBLOCK 9603
+    - Ground Control RockBLOCK 9603
     - Maxtena M1621HCT-P-SMA antenna
     - Adafruit Feather M0 Adalogger
     - Adafruit Ultimate GPS Featherwing
@@ -24,9 +25,8 @@
     - Vaisala HMP60 Humidity and Temperature Probe
 
     Comments:
-    - Sketch uses 98720 bytes (37%) of program storage space. Maximum is 262144 bytes.
+    - Sketch uses 99144 bytes (37%) of program storage space.
     - Power consumption in deep sleep is ~625 uA at 12.5V
-
 */
 
 // ----------------------------------------------------------------------------
@@ -320,8 +320,9 @@ void setup()
   digitalWrite(PIN_5V_EN, LOW);         // Disable power to Iridium 9603
   digitalWrite(PIN_12V_EN, LOW);        // Disable 12V power
   digitalWrite(PIN_GNSS_EN, HIGH);      // Disable power to GNSS
-  digitalWrite(PIN_IRIDIUM_SLEEP, LOW); // Disable power to Iridium
-
+  digitalWrite(PIN_IRIDIUM_SLEEP, LOW); // Prior v3.F: Disable power to Iridium
+  //digitalWrite(PIN_IRIDIUM_SLEEP, HIGH);  // v3.F: Set N-FET controlling RockBLOCK On/Off pin to HIGH (no voltage)
+  
   // Configure analog-to-digital (ADC) converter
   configureAdc();
 
