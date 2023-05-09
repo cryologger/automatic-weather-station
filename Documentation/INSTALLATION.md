@@ -15,7 +15,7 @@ Download the latest release of the Arduino IDE from the following URL:
 * Search for: Adafruit SAMD Boards
 * Select and install the following two board definitions:
   * Arduino SAMD Boards v1.8.13
-  * Adafruit SAMD Boards v1.7.10
+  * Adafruit SAMD Boards v1.7.11
 <img width="720" alt="image" src="https://user-images.githubusercontent.com/22924092/178782962-b1719459-208c-4823-9fa6-06f69197af2a.png">
 
 ## Step 4: Install Libraries
@@ -27,12 +27,12 @@ The Cryologger automatic weather stations requires several external libraries. T
 | Library                                         | Version | GitHub URL                                                          | Comments                       |
 |-------------------------------------------------|---------|---------------------------------------------------------------------|--------------------------------|
 | Adafruit BME280 Library                         | 2.2.2   | https://github.com/adafruit/Adafruit_BME280                         |                                |
-| Adafruit DPS310 Barometric Pressure Library     | 1.1.1   | https://github.com/adafruit/Adafruit_DPS310                         |                                |
 | Adafruit LSM303 Accelerometer Library           | 1.1.4   | https://github.com/adafruit/Adafruit_LSM303_Accel                   |                                |
-| Adafruit Unified Sensor Driver                  | 1.1.4   | https://github.com/adafruit/Adafruit_Sensor                         |                                |
+| Adafruit Unified Sensor Driver                  | 1.1.9   | https://github.com/adafruit/Adafruit_Sensor                         |                                |
 | Arduino Low Power Library                       | 1.2.2   | https://github.com/arduino-libraries/ArduinoLowPower                |                                |
 | SparkFun IridiumSBD I2C Arduino Library         | 3.0.5   | https://github.com/sparkfun/SparkFun_IridiumSBD_I2C_Arduino_Library |                                |
 | RTCZero Library                                 | 1.6.0   | https://github.com/arduino-libraries/RTCZero                        |                                |
+| SdFat                                           | 2.2.0   | https://github.com/greiman/SdFat                                    |                                |
 | Sensirion Temperature / Humidity Sensor Library |         | https://github.com/HydroSense/sensirion                             | Download from GitHub           |
 | Statistic Library                               | 1.0.0   | https://github.com/RobTillaart/Statistic                            |                                |
 | Arduino Time Library                            | 1.6.1   | https://github.com/PaulStoffregen/Time                              |                                |
