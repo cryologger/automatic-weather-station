@@ -1,8 +1,9 @@
 # Cryologger - Automatic Weather Station Configuration
 
 ## Step 1: Download Arduino IDE
-Download the latest release of the Arduino IDE from the following URL: 
+Download the latest release of the Arduino IDE v1.8.x from the following URL: 
 * https://www.arduino.cc/en/software
+* Note: v2.x of the IDE is highly unreliable. Download at your own risk.
 
 ## Step 2: Add Additional Boards Manager URL:
 * In the Arduino IDE navigate to: Preferences
@@ -49,16 +50,14 @@ The Cryologger automatic weather stations requires several external libraries. T
 ## Step 6: Download Automatic Weather Station Program
 Code for the Cryologger AWS is made available on the following GitHubrepository:
 * [https://github.com/adamgarbo/Cryologger Automatic Weather Station](https://github.com/adamgarbo/Cryologger_Automatic_Weather_Station)
-* Click on "Releases" and download the v0.4.0 .zip file:
-
-![image](https://user-images.githubusercontent.com/22924092/178785591-752d2d29-11d5-4476-bb62-e745cd0b64f0.png)
+* Click on "Releases" and download the v1.0.0 .zip file:
 
 ## Step 7: Test Program Compiliation
 * Navigate to the /Software/cryologger_aws folder of the downloaded repository
 * Double click on the `cryologger_aws.ino` file
 * Click on the checkmark in the upper left corner of the Arduino IDE program window
 * Watch debugging window for compilation errors
-<img width="720" alt="image" src="https://user-images.githubusercontent.com/22924092/178785890-1d11ab50-9c9a-4c75-a30b-072174ac8bcd.png">
+<img width="720" alt="image" src="https://github.com/adamgarbo/cryologger-automatic-weather-station/assets/22924092/b86e3e6c-f294-46a8-9646-5754488ec4a9.png">
 
 ## Step 7: Upload Program
 * Once the code has compiled successfully, connect the Adafruit Feather M0 Adalogger via micro USB cable. 
