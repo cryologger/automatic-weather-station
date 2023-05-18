@@ -261,14 +261,14 @@ typedef union
 {
   struct
   {
-    uint8_t   sampleInterval;     // 2 bytes
+    uint8_t   sampleInterval;     // 1 bytes
     uint8_t   averageInterval;    // 1 byte
     uint8_t   transmitInterval;   // 1 byte
     uint8_t   retransmitLimit;    // 1 byte
     uint8_t   batteryCutoff;      // 1 bytes
     uint8_t   resetFlag;          // 1 byte
   };
-  uint8_t bytes[7]; // Size of message to be received in bytes
+  uint8_t bytes[6]; // Size of message to be received in bytes
 } SBD_MT_MESSAGE;
 
 SBD_MT_MESSAGE mtSbdMessage;
