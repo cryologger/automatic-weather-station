@@ -1,26 +1,27 @@
-# Cryologger - Automatic Weather Station Configuration
+# Cryologger Automatic Weather Station (AWS) - Installation
+This guide provides step-by-step instructions on installing the Arduino IDE and required board definitions and libraries, which are necessary for uploading code to the Cryologger AWS.
 
-## Step 1: Download Arduino IDE
-Download the latest release of the Arduino IDE v1.8.x from the following URL: 
-* https://www.arduino.cc/en/software
-* Note: v2.x of the IDE is highly unreliable. Download at your own risk.
+## Step 1: Download Arduino IDE  
+* Navigate to https://www.arduino.cc/en/software and download the most recent version of the Arduino IDE
+
+![image](https://github.com/adamgarbo/cryologger-ice-tracking-beacon/assets/22924092/323c74a1-2ce1-4e39-a8eb-d39ad760a9a6)
 
 ## Step 2: Add Additional Boards Manager URL:
 * In the Arduino IDE navigate to: Preferences
-* Add the following Additional Boards Manager URL as shown in the sceenshot below:
-  * `https://adafruit.github.io/arduino-board-index/package_adafruit_index.json`
-<img width="720" alt="image" src="https://user-images.githubusercontent.com/22924092/178781840-8e82d6f8-babb-4437-b90f-de9070d21310.png">
+* Add the following "Additional Boards Manager URL" as shown in the screenshot below:  
+```https://adafruit.github.io/arduino-board-index/package_adafruit_index.json```
+* Also during this step, check the "compile" and "upload" boxes for "Show verbose output during" and change "Compiler warnings" to "All"
+![image](https://github.com/adamgarbo/cryologger-ice-tracking-beacon/assets/22924092/f0db6767-526f-45cb-b0a7-c750295eeb83)
 
-## Step 3: Install Board Definition
+## Step 3: Install Board Definitions
 * Navigate to: Tools > Boards > Boards Manager
-* Search for: Adafruit SAMD Boards
-* Select and install the following two board definitions:
-  * Arduino SAMD Boards v1.8.13
-  * Adafruit SAMD Boards v1.7.11
-<img width="720" alt="image" src="https://user-images.githubusercontent.com/22924092/178782962-b1719459-208c-4823-9fa6-06f69197af2a.png">
+* Search for: SAMD Boards
+* Select and install version: Arduino SAMD Boards v1.8.13 
+* Select and install version: Adafruit SAMD Boards v1.7.12
+![image](https://github.com/adamgarbo/cryologger-ice-tracking-beacon/assets/22924092/f4d9af80-c4ba-4fab-958b-c35e1e4ac1e3)
 
 ## Step 4: Install Libraries
-The Cryologger automatic weather stations requires several external libraries. These can either be downloaded using the Arduino IDE's Library Manager (requires Internet connection), or directly from GitHub.
+Several libraries are required by the Cryologger ice tracking beacons. These can downloaded using the Arduino IDE's Library Manager (requires Internet connection).
 
 * Navigate to: Tools > Manage Libraries
 * Search for and install the following libraries:
