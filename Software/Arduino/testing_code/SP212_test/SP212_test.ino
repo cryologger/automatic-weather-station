@@ -1,5 +1,7 @@
 /*
-   Code to test Davis Instruments 7911 anemometer
+    Title:    Apogee Instruments SP-212-SS: Amplified 0-2.5 Volt Pyranometer Test Code
+    Date:     June 28, 2023
+    Author:   Adam Garbo
 */
 
 #define PIN_SOLAR   A3
@@ -31,16 +33,18 @@ void setup()
   ADC->CTRLB.bit.CORREN = true;
   while (ADC->STATUS.bit.SYNCBUSY);               // Wait for synchronization
 
+Serial.print(F("analog,voltage,irradiance")); 
+
 }
 
 void loop()
 {
   //(void)analogRead(PIN_SOLAR);
-  float sensorValue1 = analogRead(PIN_SOLAR); // Wind speed
-  float solar = mapFloat(sensorValue1, 0, 3102, 0, 2000); // 0-360 range
-  float voltage1 = sensorValue1 * (3.3 / 4095.0);
+  float sensorValue = analogRead(PIN_SOLAR); // Solar irradiance W m^-2
+  float voltage = sensorValue * (3.3 / 4095.0);
+  float solar = mapFloat(sensorValue, 0, 3102, 0, 2000); // Range: 0 to 2.5 V = 0 to 2000 W m^-2 
 
-  Serial.print(F("solar: ")); Serial.print(voltage1, 4); Serial.print(F(",")); Serial.print(sensorValue1); Serial.print(F(",")); Serial.println(solar, 2);
+  Serial.print(sensorValue); Serial.print(F(",")); Serial.print(voltage, 4); Serial.print(F(",")); Serial.println(solar, 2);
   delay(1000);
 }
 
