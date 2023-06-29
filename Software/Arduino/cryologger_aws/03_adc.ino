@@ -17,19 +17,8 @@ void configureAdc()
   while (ADC->STATUS.bit.SYNCBUSY);               // Wait for synchronization
 
   // Apply ADC gain and offset error calibration correction
-  // TST 0, 2048
-  // UBY -4, 2057
-  // ZTJ -3, 2043
-  // TDY 1, 2055
-  // LVY -5, 2053
-  // YBL -5, 2047
-  // MPC -3, 2045
-  // ALW 0, 2047
-  // LOA 3, 2059
-  // VKP -4, 2040
-  // VUU 3, 2025
-  ADC->OFFSETCORR.reg = ADC_OFFSETCORR_OFFSETCORR(0);
-  ADC->GAINCORR.reg = ADC_GAINCORR_GAINCORR(2048);
+  ADC->OFFSETCORR.reg = ADC_OFFSETCORR_OFFSETCORR(0); // Default: 0
+  ADC->GAINCORR.reg = ADC_GAINCORR_GAINCORR(2048); // Default: 2048
   ADC->CTRLB.bit.CORREN = true;
   while (ADC->STATUS.bit.SYNCBUSY); // Wait for synchronization
 }
