@@ -16,7 +16,7 @@
 |--------|-------------|-----|
 | Blue   | Data        | SDA |
 | Yellow | Power       | 5V  |
-| Green  | Grou nd     | GND |
+| Green  | Ground      | GND |
 | White  | Clock       | SCL |
 
 **Table 3.** Apogee SP-212 pyranometer.
