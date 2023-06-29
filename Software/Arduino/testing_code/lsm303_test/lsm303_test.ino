@@ -1,11 +1,14 @@
 /*
   Title:    Adafruit LSM303AGR Test Code
-  Date:     June 28, 2023
+  Date:     June 29, 2023
   Author:   Adam Garbo
 
-  Description:
-  - Code to test Adafruit LSM303AGR I2C sensor
+  Sensor:
+  - Adafruit LSM303AGR Accelerometer Magnetometer
   - https://www.adafruit.com/product/4413
+
+  Notes:
+  - I2C sensor
 */
 
 #include <Adafruit_LSM303_Accel.h>  // https://github.com/adafruit/Adafruit_LSM303_Accel (v1.1.4)

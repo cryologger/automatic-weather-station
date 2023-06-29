@@ -1,10 +1,14 @@
 /*
   Title:    MaxBotix MB7354 Test Code
-  Date:     June 27, 2023
+  Date:     June 29, 2023
   Author:   Adam Garbo
 
+  Sensor:
   MaxBotix MB7354 HRXL-MaxSonar-WRS5
   https://www.maxbotix.com/ultrasonic_sensors/mb7354.htm
+
+  Notes:
+  - Measurements acquired using pulse width output
   
   Wiring Diagram:
   --------------------------------------------------
@@ -70,12 +74,7 @@ void readMb7354()
   Statistic Maxbotix;
 
   // Create temporary variables
-  unsigned int z = 0;
-  unsigned int zAvg = 0;
-  unsigned int zStd = 0;
-  unsigned int zMax = 0;
-  unsigned int zMin = 0;
-  unsigned int zNan = 0;
+  unsigned int z = 0, zAvg = 0, zStd = 0, zMax = 0, zMin = 0, zNan = 0;
 
   // Get 30 z readings in mm, filtering out reading 50 mm
   // above/below sensor minumum/maximum readings

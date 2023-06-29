@@ -1,12 +1,16 @@
 /*
   Title:    Apogee Instruments SP-212-SS Test Code
-  Date:     June 28, 2023
+  Date:     June 29, 2023
   Author:   Adam Garbo
 
-  Description:
-  - Code to test Apogee Instruments SP-212-SS Amplified 0-2.5 Volt Pyranometer
+  Sensor:
+  - Apogee Instruments SP-212-SS Amplified 0-2.5 Volt Pyranometer
+  https://www.apogeeinstruments.com/sp-212-ss-amplified-0-2-5-volt-pyranometer/
 
-  Wiring Diagram
+  Notes: 
+  - 0 to 2.5V analog output mapped to 0 to 2000 W m^-2
+  
+  Wiring Diagram:
   -----------------------------------------------------
   Colour    Pin        Description
   -----------------------------------------------------
