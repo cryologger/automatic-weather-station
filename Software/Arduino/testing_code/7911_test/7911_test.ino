@@ -5,9 +5,9 @@
 
   Notes:
   - INPUT_PULLUP used in place of an external resistor
-  in deboucnce circuit to detect falling edges of wind 
+  in deboucnce circuit to detect falling edges of wind
   speed interrupts
-  
+
   Wiring Diagram
   ------------------------------
   Colour   Pin     Description
@@ -33,7 +33,7 @@ void setup()
 {
   pinMode(PIN_5V_EN, OUTPUT);
   digitalWrite(PIN_5V_EN, HIGH);
-  
+
   Serial.begin(115200);
   while (!Serial);
 
@@ -55,7 +55,7 @@ void setup()
   ADC->CTRLB.bit.CORREN = true;
   while (ADC->STATUS.bit.SYNCBUSY);               // Wait for synchronization
 
-Serial.print("wind speed,wind direction");
+  Serial.print("wind speed,wind direction,wind gust speed,wind gust direction");
 }
 
 void loop()
@@ -118,8 +118,10 @@ void read7911()
   }
 
   // Print debug info
-  Serial.print(windSpeed); Serial.print(","); Serial.println(windDirection);
-
+  Serial.print(windSpeed); Serial.print(",");
+  Serial.print(windDirection); Serial.print(",");
+  Serial.print(windGustSpeed); Serial.print(",");
+  Serial.println(windGustDirection);
 }
 
 // Interrupt service routine (ISR) for wind speed measurement
