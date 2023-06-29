@@ -2,6 +2,11 @@
   Title:    Davis Instruments 7911 Anemometer Test Code
   Date:     June 27, 2023
   Author:   Adam Garbo
+
+  Notes:
+  - INPUT_PULLUP used in place of an external resistor
+  in deboucnce circuit to detect falling edges of wind 
+  speed interrupts
   
   Wiring Diagram
   ------------------------------

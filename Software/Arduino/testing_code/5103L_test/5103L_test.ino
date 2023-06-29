@@ -1,5 +1,23 @@
 /*
-   Code to test 4-20 mA/analog measurements of RM Young 5103L Wind Monitor
+  Title:    R.M. Young Wind Monitor 5103L Test Code
+  Date:     June 27, 2023
+  Author:   Adam Garbo
+
+  Description:
+  - Test code for R.M. Young Wind Monitor 5103L 4-20 mA 
+  analog measurements 
+  - Measured across a 150 Ohm 0.1% resistor
+  - Ideal voltage range: 0.6 - 3.0 V
+
+  Wiring Diagram:
+  --------------------------------------------------
+  Colour     Pin       Description
+  --------------------------------------------------
+  Black      12V       Wind speed + (WS+)
+  Red        A1        Wind speed - (WS-)
+  White      12V       Wind direction + (WD+
+  Green      A2        Wind direction - (WD-)
+  Shield     GND       Earth ground
 */
 
 void setup()
@@ -19,21 +37,21 @@ void setup()
   ADC->CTRLA.bit.ENABLE = 1;                      // Enable ADC
   while (ADC->STATUS.bit.SYNCBUSY);               // Wait for synchronization
 
-  
-    // Apply ADC gain and offset error calibration correction
-    ADC->OFFSETCORR.reg = ADC_OFFSETCORR_OFFSETCORR(-3);
-    ADC->GAINCORR.reg = ADC_GAINCORR_GAINCORR(2074);
-    ADC->CTRLB.bit.CORREN = true;
-    while (ADC->STATUS.bit.SYNCBUSY);               // Wait for synchronization
-  
+
+  // Apply ADC gain and offset error calibration correction
+  ADC->OFFSETCORR.reg = ADC_OFFSETCORR_OFFSETCORR(0);
+  ADC->GAINCORR.reg = ADC_GAINCORR_GAINCORR(2048);
+  ADC->CTRLB.bit.CORREN = true;
+  while (ADC->STATUS.bit.SYNCBUSY);               // Wait for synchronization
+
 }
 
 void loop()
 {
   (void)analogRead(A1);
-  float sensorValue1 = analogRead(A1); // 5103L wind speed
+  float sensorValue1 = analogRead(A1); // Wind speed
   (void)analogRead(A2);
-  float sensorValue2 = analogRead(A2); // 5103L wind direction
+  float sensorValue2 = analogRead(A2); // Wind direction
 
   float windSpeed = mapFloat(sensorValue1, 745, 3691, 0, 100); // 0-100 m/s range
   float windDirection = mapFloat(sensorValue2, 745, 3691, 0, 360); // 0-360 range

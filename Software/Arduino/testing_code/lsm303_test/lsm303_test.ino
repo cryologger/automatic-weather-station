@@ -1,3 +1,13 @@
+/*
+  Title:    Adafruit LSM303AGR Test Code
+  Date:     June 28, 2023
+  Author:   Adam Garbo
+
+  Description:
+  - Code to test Adafruit LSM303AGR I2C sensor
+  - https://www.adafruit.com/product/4413
+*/
+
 #include <Adafruit_LSM303_Accel.h>  // https://github.com/adafruit/Adafruit_LSM303_Accel (v1.1.4)
 #include <Adafruit_Sensor.h>        // https://github.com/adafruit/Adafruit_Sensor (v1.1.4)
 
@@ -10,6 +20,8 @@ void setup()
 
   configureLsm303();
 
+  Serial.println("pitch,roll");
+  
 }
 
 void loop()
@@ -43,6 +55,5 @@ void readLsm303()
   float pitch = atan2(-accel.acceleration.x, sqrt(accel.acceleration.y * accel.acceleration.y + accel.acceleration.z * accel.acceleration.z)) * 180 / PI;
   float roll = atan2(accel.acceleration.y, accel.acceleration.z) * 180 / PI;
 
-  Serial.print(F("pitch: ")); Serial.print(pitch, 4);
-  Serial.print(F(" roll: ")); Serial.println(roll, 4);
+  Serial.print(pitch, 4); Serial.print(","); Serial.println(roll, 4);
 }
