@@ -99,29 +99,17 @@ void read7911()
   windDirection = analogRead(PIN_WIND_DIR); // Raw analog wind direction value
   windDirection = map(windDirection, 0, 4095, 0, 359); // Map wind direction to degrees (0-360°)
 
+/*
   // Correct for negative wind direction values
   if (windDirection > 360)
     windDirection -= 360;
   if (windDirection < 0)
     windDirection += 360;
-
-  if (windSpeed == 0)
-  {
-    windDirection = 0.0;
-  }
-
-  // Check and update wind gust speed and direction
-  if ((windSpeed > 0) && (windSpeed > windGustSpeed))
-  {
-    windGustSpeed = windSpeed;
-    windGustDirection = windDirection;
-  }
-
+*/
   // Print debug info
   Serial.print(windSpeed); Serial.print(",");
   Serial.print(windDirection); Serial.print(",");
-  Serial.print(windGustSpeed); Serial.print(",");
-  Serial.println(windGustDirection);
+
 }
 
 // Interrupt service routine (ISR) for wind speed measurement
