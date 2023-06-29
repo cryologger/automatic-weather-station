@@ -1,15 +1,33 @@
 /*
-   Code to test Davis Instruments 7911 anemometer
+  Title:    Davis Instruments 7911 Anemometer Test Code
+  Date:     June 27, 2023
+  Author:   Adam Garbo
+  
+  Wiring Diagram
+  ------------------------------
+  Colour   Pin     Description
+  ------------------------------
+  Black    A1      Wind speed
+  Green    A2      Wind direction
+  Yellow   5V      Power
+  Red      GND     Ground
+
 */
 
-#define PIN_WIND_SPEED      A1
-#define PIN_WIND_DIR        A2
-#define PIN_SENSOR_PWR      A4
+#define PIN_WIND_SPEED  A1
+#define PIN_WIND_DIR    A2
+#define PIN_5V_EN       6
+
+volatile int  revolutions       = 0;    // Wind speed ISR counter
+float         windSpeed         = 0.0;  // Wind speed (m/s)
+float         windDirection     = 0.0;  // Wind direction (°)
+float         windGustSpeed     = 0.0;  // Wind gust speed  (m/s)
+float         windGustDirection = 0.0;  // Wind gust direction (°)
 
 void setup()
 {
-  pinMode(PIN_SENSOR_PWR, OUTPUT);
-  digitalWrite(PIN_SENSOR_PWR, HIGH);
+  pinMode(PIN_5V_EN, OUTPUT);
+  digitalWrite(PIN_5V_EN, HIGH);
   
   Serial.begin(115200);
   while (!Serial);
@@ -27,33 +45,81 @@ void setup()
   while (ADC->STATUS.bit.SYNCBUSY);               // Wait for synchronization
 
   // Apply ADC gain and offset error calibration correction
-  ADC->OFFSETCORR.reg = ADC_OFFSETCORR_OFFSETCORR(30);
-  ADC->GAINCORR.reg = ADC_GAINCORR_GAINCORR(2144);
+  ADC->OFFSETCORR.reg = ADC_OFFSETCORR_OFFSETCORR(0);
+  ADC->GAINCORR.reg = ADC_GAINCORR_GAINCORR(2048);
   ADC->CTRLB.bit.CORREN = true;
   while (ADC->STATUS.bit.SYNCBUSY);               // Wait for synchronization
 
+Serial.print("wind speed,wind direction");
 }
 
 void loop()
 {
-  //(void)analogRead(PIN_WIND_DIR);
-  //float sensorValue1 = analogRead(PIN_WIND_DIR); // Wind speed
-  (void)analogRead(PIN_WIND_DIR);
-  float sensorValue2 = analogRead(PIN_WIND_DIR); // 5103L wind direction
-
-  //float windSpeed = mapFloat(sensorValue1, 745, 3684, 0, 100); // 0-100 m/s range
-  float windDirection = mapFloat(sensorValue2, 0, 4095, 0, 359); // 0-360 range
-
-  //float voltage1 = sensorValue1 * (3.3 / 4095.0);
-  float voltage2 = sensorValue2 * (3.3 / 4095.0);
-
-  //Serial.print(F("windSpeed: ")); Serial.print(voltage1, 4); Serial.print(F(",")); Serial.print(sensorValue1); Serial.print(F(",")); Serial.println(windSpeed, 2);
-  Serial.print(F("windDirection: ")); Serial.print(voltage2, 4); Serial.print(F(",")); Serial.print(sensorValue2); Serial.print(F(",")); Serial.println(windDirection, 2);
-  delay(500);
+  read7911();
+  delay(1000);
 }
 
-// Map raw ADC values to floats
-float mapFloat(float x, float in_min, float in_max, float out_min, float out_max)
+void read7911()
 {
-  return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+  uint32_t loopStartTime = millis();
+
+  // Enable pull-ups
+  pinMode(PIN_WIND_SPEED, INPUT_PULLUP);
+
+  // Attach interrupt to wind speed input pin
+  attachInterrupt(PIN_WIND_SPEED, windSpeedIsr, FALLING);
+  revolutions = 0;
+
+  // Measure wind speed for 3 seconds
+  while (millis() < loopStartTime + 3000);
+  {
+    // Do nothing
+  }
+
+  // Detach interrupt from wind speed input pin
+  detachInterrupt(PIN_WIND_SPEED);
+
+  // Disable pull-ups
+  pinMode(PIN_WIND_SPEED, INPUT);
+
+  // Calculate wind speed according to Davis Instruments formula: V = P(2.25/T)
+  // V = speed in miles per hour
+  // P = no. of pulses in sample period
+  // T = duration of sample period in seconds
+  windSpeed = revolutions * (2.25 / 3);   // Calculate wind speed in miles per hour
+  windSpeed *= 0.44704;                   // Convert wind speed to metres per second
+
+  // Measure wind direction
+  (void)analogRead(PIN_WIND_DIR);
+  windDirection = analogRead(PIN_WIND_DIR); // Raw analog wind direction value
+  windDirection = map(windDirection, 0, 4095, 0, 359); // Map wind direction to degrees (0-360°)
+
+  // Correct for negative wind direction values
+  if (windDirection > 360)
+    windDirection -= 360;
+  if (windDirection < 0)
+    windDirection += 360;
+
+  if (windSpeed == 0)
+  {
+    windDirection = 0.0;
+  }
+
+  // Check and update wind gust speed and direction
+  if ((windSpeed > 0) && (windSpeed > windGustSpeed))
+  {
+    windGustSpeed = windSpeed;
+    windGustDirection = windDirection;
+  }
+
+  // Print debug info
+  Serial.print(windSpeed); Serial.print(","); Serial.println(windDirection);
+
+}
+
+// Interrupt service routine (ISR) for wind speed measurement
+// for Davis Instruments 7911 anemometer
+void windSpeedIsr()
+{
+  revolutions++;
 }
