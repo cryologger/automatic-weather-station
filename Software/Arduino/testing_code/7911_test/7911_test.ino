@@ -112,7 +112,7 @@ void read7911()
   Serial.print(revolutions); Serial.print(",");
   Serial.print(windSpeed); Serial.print(",");
   Serial.print(sensorValue); Serial.print(",");
-  Serial.print(windDirection); Serial.print(",");
+  Serial.println(windDirection);
 
 }
 
