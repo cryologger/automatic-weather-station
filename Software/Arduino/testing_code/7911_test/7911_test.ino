@@ -21,7 +21,7 @@
 
 #define PIN_WIND_SPEED  A1
 #define PIN_WIND_DIR    A2
-#define PIN_5V_EN       6
+#define PIN_SENSOR_PWR  A4  // 3.3V power
 
 volatile int  revolutions       = 0;    // Wind speed ISR counter
 float         windSpeed         = 0.0;  // Wind speed (m/s)
@@ -32,8 +32,8 @@ int           sensorValue       = 0;
 
 void setup()
 {
-  pinMode(PIN_5V_EN, OUTPUT);
-  digitalWrite(PIN_5V_EN, HIGH);
+  pinMode(PIN_SENSOR_PWR, OUTPUT);
+  digitalWrite(PIN_SENSOR_PWR, LOW);
 
   Serial.begin(115200);
   while (!Serial);
@@ -95,10 +95,16 @@ void read7911()
   windSpeed = revolutions * (2.25 / 3);   // Calculate wind speed in miles per hour
   windSpeed *= 0.44704;                   // Convert wind speed to metres per second
 
+  // Enable power
+  digitalWrite(PIN_SENSOR_PWR, HIGH);
+
   // Measure wind direction
   (void)analogRead(PIN_WIND_DIR);
   sensorValue = analogRead(PIN_WIND_DIR); // Raw analog wind direction value
   windDirection = map(sensorValue, 0, 4095, 0, 359); // Map wind direction to degrees (0-360°)
+
+  // Disable power
+  digitalWrite(PIN_SENSOR_PWR, LOW);
 
   /*
     // Correct for negative wind direction values
