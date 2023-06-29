@@ -7,7 +7,8 @@ void calculateStats()
   moSbdMessage.pressureInt    = (pressureIntStats.average()     - 850) * 100;   // Mean internal pressure (hPa)
   moSbdMessage.temperatureExt = temperatureExtStats.average()   * 100;          // Mean external temperature (°C)
   moSbdMessage.humidityExt    = humidityExtStats.average()      * 100;          // Mean external humidity (%)
-  //moSbdMessage.solar          = solarStats.average()            * 10;           // Mean solar irradiance (W m-2)
+  moSbdMessage.solar          = solarStats.average()            * 10;           // Mean solar irradiance (W m-2)
+  moSbdMessage.snowDepth      = snowDepthStatsAvg.average();                    // Mean snow depth (mm)
   moSbdMessage.voltage        = batteryStats.average()          * 100;          // Mean battery voltage (V)
 
   // Calculate mean wind speed and direction vectors

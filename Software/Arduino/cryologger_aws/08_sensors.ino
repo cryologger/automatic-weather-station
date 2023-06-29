@@ -134,7 +134,7 @@ void readLsm303()
     myDelay(500);
 
     float xAvg = 0, yAvg = 0, zAvg = 0;
-   
+
     // Read accelerometer data
     sensors_event_t accel;
 
@@ -238,7 +238,7 @@ void readHmp60()
 // -----------------------------------------------------
 // Colour    Pin        Description
 // -----------------------------------------------------
-// White     ?          Positive (signal from sensor)
+// White     A3         Positive (signal from sensor)
 // Red       5V         Input Power 5-24 V DC
 // Black     GND        Ground (from sensor signal and output power)
 // Clear     GND        Shield/Ground
@@ -384,16 +384,10 @@ void read7911()
   windSpeed = revolutions * (2.25 / 3);   // Calculate wind speed in miles per hour
   windSpeed *= 0.44704;                   // Convert wind speed to metres per second
 
-  // Enable power
-  digitalWrite(PIN_SENSOR_PWR, HIGH);
-
   // Measure wind direction
   (void)analogRead(PIN_WIND_DIR);
   windDirection = analogRead(PIN_WIND_DIR); // Raw analog wind direction value
   windDirection = map(windDirection, 0, 4095, 0, 359); // Map wind direction to degrees (0-360°)
-
-  // Disable power
-  digitalWrite(PIN_SENSOR_PWR, LOW);
 
   // Correct for negative wind direction values
   if (windDirection > 360)
@@ -482,8 +476,8 @@ void windVectors()
 // Colour    Pin    Description             Pin
 // --------------------------------------------------
 // White    1       Temperature Sensor      Not connected
-// Orange   2       Pulse Width Output      Not connected
-// Brown    3       Analog Voltage Output   Analog In
+// Orange   2       Pulse Width Output      A3
+// Brown    3       Analog Voltage Output   Not connected
 // Green    4       Ranging Start/Stop      Not connected
 // Blue     5       Serial Output           Not connected
 // Red      6       Vcc                     5V
@@ -493,5 +487,82 @@ void windVectors()
 // Read Maxbotix distance to surface
 void readMb7354()
 {
+  // Start loop timer
+  unsigned int loopStartTime = millis();
+
+  // Create a temporary Statistic array to hold the maxbotix measurements
+  Statistic Maxbotix;
+
+  // Create temporary variables
+  unsigned int z = 0, zAvg = 0, zStd = 0, zMax = 0, zMin = 0, zNan = 0;
+
+  // Get 30 z readings in mm, filtering out reading 50 mm
+  // above/below sensor minumum/maximum readings
+  for (byte i = 0; i < 30; i++)
+  {
+    z = pulseIn(PIN_SNOW, HIGH); // Read distance to snow surface
+
+    // Filter readings
+    if (z > 550 && z < 4950)
+    {
+      Maxbotix.add(z); // Add good readings to stats array
+    }
+    else
+    {
+      zNan += 1; // Count bad readings
+    }
+    myDelay(100); // Delay 0.1 secs between readings
+  }
+
+  // Get stats from the Maxbotix array
+  zAvg = Maxbotix.average(), 0;
+  zStd = Maxbotix.pop_stdev(), 0;
+  zMax = Maxbotix.maximum(), 0;
+  zMin = Maxbotix.minimum(), 0;
+
+  // Deal with issue of a maximum long number in the instance of no
+  // readings within filtered range
+  if (zAvg > 5000)
+  {
+    zAvg = 0;
+  }
+  if (zStd > 5000)
+  {
+    zStd = 0;
+  }
+  if (zMax > 5000)
+  {
+    zMax = 0;
+  }
+  if (zMin > 5000)
+  {
+    zMin = 0;
+  }
+
+  // Add sample stats to global arrays
+  snowDepthStatsAvg.add(zAvg);
+  snowDepthStatsStd.add(zStd);
+  snowDepthStatsMax.add(zMax);
+  snowDepthStatsMin.add(zMin);
+  snowDepthStatsNan.add(zNan);
+
+  // Add to sample variables
+  snowDepthAvg = zAvg;
+  snowDepthStd = zStd;
+  snowDepthMax = zMax;
+  snowDepthMin = zMin;
+  snowDepthNan = zNan;
+
+  DEBUG_PRINT("snowDepthAvg: "); DEBUG_PRINTLN(snowDepthAvg);
+  DEBUG_PRINT("snowDepthStd: "); DEBUG_PRINTLN(snowDepthStd);
+  DEBUG_PRINT("snowDepthMax: "); DEBUG_PRINTLN(snowDepthMax);
+  DEBUG_PRINT("snowDepthMin: "); DEBUG_PRINTLN(snowDepthMin);
+  DEBUG_PRINT("snowDepthNan: "); DEBUG_PRINTLN(snowDepthNan);
+
+  // Clear local array
+  Maxbotix.clear();
+
+  // Stop loop timer
+  timer.readMb7354 = millis() - loopStartTime;
 
 }
