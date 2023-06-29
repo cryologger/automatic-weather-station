@@ -28,6 +28,7 @@ float         windSpeed         = 0.0;  // Wind speed (m/s)
 float         windDirection     = 0.0;  // Wind direction (°)
 float         windGustSpeed     = 0.0;  // Wind gust speed  (m/s)
 float         windGustDirection = 0.0;  // Wind gust direction (°)
+int           sensorValue       = 0;
 
 void setup()
 {
@@ -55,7 +56,7 @@ void setup()
   ADC->CTRLB.bit.CORREN = true;
   while (ADC->STATUS.bit.SYNCBUSY);               // Wait for synchronization
 
-  Serial.print("wind speed,wind direction,wind gust speed,wind gust direction");
+  Serial.println("revolutions,wind speed,analog,wind direction");
 }
 
 void loop()
@@ -96,18 +97,21 @@ void read7911()
 
   // Measure wind direction
   (void)analogRead(PIN_WIND_DIR);
-  windDirection = analogRead(PIN_WIND_DIR); // Raw analog wind direction value
-  windDirection = map(windDirection, 0, 4095, 0, 359); // Map wind direction to degrees (0-360°)
+  sensorValue = analogRead(PIN_WIND_DIR); // Raw analog wind direction value
+  windDirection = map(sensorValue, 0, 4095, 0, 359); // Map wind direction to degrees (0-360°)
 
-/*
-  // Correct for negative wind direction values
-  if (windDirection > 360)
-    windDirection -= 360;
-  if (windDirection < 0)
-    windDirection += 360;
-*/
+  /*
+    // Correct for negative wind direction values
+    if (windDirection > 360)
+      windDirection -= 360;
+    if (windDirection < 0)
+      windDirection += 360;
+  */
   // Print debug info
+
+  Serial.print(revolutions); Serial.print(",");
   Serial.print(windSpeed); Serial.print(",");
+  Serial.print(sensorValue); Serial.print(",");
   Serial.print(windDirection); Serial.print(",");
 
 }
