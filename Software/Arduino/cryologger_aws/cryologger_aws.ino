@@ -5,8 +5,8 @@
   Version:  1.2.0
 
   Description:
-  - Code configured for automatic weather stations to be deployed on Ellsemere Island, Nunavut
-  during the 2023 summer field season.
+  - Code configured for automatic weather stations to be deployed on Ellsemere Island, 
+  Nunavut during the 2023 summer field season.
 
   Components:
   - Ground Control RockBLOCK 9603
@@ -22,13 +22,12 @@
 
   Sensors:
   - Davis Instruments 7911 Anemometer
-  - Davis Instruments 6814 Temperature/Relative Humidity Sensor
+  - Davis Instruments Temperature/Relative Humidity Sensor
   - Apogee SP-212 Pyranometer
   - Maxbotix MB7354 Ultrasonic sensor
 
   Comments:
-  - Sketch uses 102824 bytes (39%) of program storage space. Maximum is 262144 bytes.
-  - Power consumption in deep sleep is ~625 uA at 12.5V
+  - Sketch uses 102824 bytes (39%) of program storage space.
 */
 
 // ----------------------------------------------------------------------------
@@ -105,8 +104,8 @@
 #define PIN_LED_RED         13
 
 // Unused
-#define PIN_HUMID           7   // Spare
 #define PIN_TEMP            7   // Spare
+#define PIN_HUMID           7   // Spare
 #define PIN_SENSOR_PWR      7   // Spare
 #define PIN_RFM95_CS        7   // LoRa "B"
 #define PIN_RFM95_RST       7   // LoRa "A"
@@ -324,15 +323,16 @@ void setup()
   // Pin assignments
   pinMode(PIN_LED_GREEN, OUTPUT);
   pinMode(PIN_LED_RED, OUTPUT);
-  pinMode(PIN_SENSOR_PWR, OUTPUT);
+  //pinMode(PIN_SENSOR_PWR, OUTPUT);
   pinMode(PIN_5V_EN, OUTPUT);
   pinMode(PIN_12V_EN, OUTPUT);
   pinMode(PIN_GNSS_EN, OUTPUT);
+  pinMode(PIN_SNOW, INPUT);
   pinMode(PIN_VBAT, INPUT);
   pinMode(PIN_IRIDIUM_SLEEP, OUTPUT);
   digitalWrite(PIN_LED_GREEN, LOW);     // Disable green LED
   digitalWrite(PIN_LED_RED, LOW);       // Disable red LED
-  digitalWrite(PIN_SENSOR_PWR, LOW);    // Disable power to 3.3V
+  //digitalWrite(PIN_SENSOR_PWR, LOW);    // Disable power to 3.3V
   digitalWrite(PIN_5V_EN, LOW);         // Disable power to Iridium 9603
   digitalWrite(PIN_12V_EN, LOW);        // Disable 12V power
   digitalWrite(PIN_GNSS_EN, HIGH);      // Disable power to GNSS

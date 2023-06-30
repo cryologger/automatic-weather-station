@@ -73,10 +73,10 @@ void printMoSbd()
   DEBUG_PRINT("pressureInt:");      printTab(2);  DEBUG_PRINTLN(moSbdMessage.pressureInt);
   DEBUG_PRINT("temperatureExt:");   printTab(2);  DEBUG_PRINTLN(moSbdMessage.temperatureExt);
   DEBUG_PRINT("humidityExt:");      printTab(2);  DEBUG_PRINTLN(moSbdMessage.humidityExt);
-  DEBUG_PRINT("solar:");            printTab(3);  DEBUG_PRINTLN(moSbdMessage.solar);
-  DEBUG_PRINT("snowDepth:");        printTab(2);  DEBUG_PRINTLN(moSbdMessage.snowDepth);
   DEBUG_PRINT("pitch:");            printTab(3);  DEBUG_PRINTLN(moSbdMessage.pitch);
   DEBUG_PRINT("roll:");             printTab(3);  DEBUG_PRINTLN(moSbdMessage.roll);
+  DEBUG_PRINT("solar:");            printTab(3);  DEBUG_PRINTLN(moSbdMessage.solar);
+  DEBUG_PRINT("snowDepth:");        printTab(2);  DEBUG_PRINTLN(moSbdMessage.snowDepth);
   DEBUG_PRINT("windSpeed:");        printTab(2);  DEBUG_PRINTLN(moSbdMessage.windSpeed);
   DEBUG_PRINT("windDirection:");    printTab(2);  DEBUG_PRINTLN(moSbdMessage.windDirection);
   DEBUG_PRINT("windGustSpeed:");    printTab(2);  DEBUG_PRINTLN(moSbdMessage.windGustSpeed);

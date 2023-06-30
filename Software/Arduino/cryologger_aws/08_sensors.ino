@@ -157,6 +157,12 @@ void readLsm303()
 
     // Calculate pitch and roll
     // Note: X-axis and Z axis swapped due to orientation of sensor when installed
+
+    // Standard orientation (e.g., Igloolik)
+    //pitch = atan2(-zAvg, sqrt(yAvg * yAvg + xAvg * xAvg)) * 180 / PI;
+    //roll = atan2(yAvg, xAvg) * 180 / PI;
+
+    // Rotated 90° orientation (e.g., Purple Valley)
     pitch = atan2(-zAvg, sqrt(yAvg * yAvg + xAvg * xAvg)) * 180 / PI;
     roll = atan2(yAvg, xAvg) * 180 / PI;
 
@@ -399,7 +405,7 @@ void read7911()
 
   if (windSpeed == 0)
   {
-    windDirection = 0.0;
+    // windDirection = 0.0; // Comment 2023-06-30: Perhaps not best practice?
   }
 
   // Check and update wind gust speed and direction
@@ -434,8 +440,8 @@ void read7911()
   timer.read7911 = millis() - loopStartTime;
 }
 
-// Interrupt service routine (ISR) for wind speed measurement
-// for Davis Instruments 7911 anemometer
+// Interrupt service routine (ISR) for Davis Instruments 7911 anemometer
+// wind speed measurement
 void windSpeedIsr()
 {
   revolutions++;
@@ -494,7 +500,7 @@ void readMb7354()
   // Start loop timer
   unsigned int loopStartTime = millis();
 
-  DEBUG_PRINT("Info - Reading MB7354...");
+  DEBUG_PRINTLN("Info - Reading MB7354...");
 
   // Create a temporary Statistic array to hold the maxbotix measurements
   Statistic Maxbotix;
@@ -559,6 +565,7 @@ void readMb7354()
   snowDepthMin = zMin;
   snowDepthNan = zNan;
 
+  // Debugging only
   DEBUG_PRINT("snowDepthAvg: "); DEBUG_PRINTLN(snowDepthAvg);
   DEBUG_PRINT("snowDepthStd: "); DEBUG_PRINTLN(snowDepthStd);
   DEBUG_PRINT("snowDepthMax: "); DEBUG_PRINTLN(snowDepthMax);
@@ -566,7 +573,7 @@ void readMb7354()
   DEBUG_PRINT("snowDepthNan: "); DEBUG_PRINTLN(snowDepthNan);
 
   DEBUG_PRINTLN("done.");
-  
+
   // Clear local array
   Maxbotix.clear();
 
