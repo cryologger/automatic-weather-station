@@ -27,7 +27,7 @@
   - Maxbotix MB7354 Ultrasonic sensor
 
   Comments:
-  - Sketch uses xxx bytes (37%) of program storage space.
+  - Sketch uses 102824 bytes (39%) of program storage space. Maximum is 262144 bytes.
   - Power consumption in deep sleep is ~625 uA at 12.5V
 */
 
@@ -35,15 +35,15 @@
 // Libraries
 // ----------------------------------------------------------------------------
 #include <Adafruit_BME280.h>        // https://github.com/adafruit/Adafruit_BME280 (v2.2.2)
-#include <Adafruit_LSM303_Accel.h>  // https://github.com/adafruit/Adafruit_LSM303_Accel (v1.1.4)
+#include <Adafruit_LSM303_Accel.h>  // https://github.com/adafruit/Adafruit_LSM303_Accel (v1.1.6)
 #include <Adafruit_Sensor.h>        // https://github.com/adafruit/Adafruit_Sensor (v1.1.9)
 #include <Arduino.h>                // Required for new Serial instance. Include before <wiring_private.h>
 #include <ArduinoLowPower.h>        // https://github.com/arduino-libraries/ArduinoLowPower (v1.2.2)
-#include <IridiumSBD.h>             // https://github.com/sparkfun/SparkFun_IridiumSBD_I2C_Arduino_Library (v3.0.5)
+#include <IridiumSBD.h>             // https://github.com/sparkfun/SparkFun_IridiumSBD_I2C_Arduino_Library (v3.0.6)
 #include <RTCZero.h>                // https://github.com/arduino-libraries/RTCZero (v1.6.0)
-#include <SdFat.h>                  // https://github.com/greiman/SdFat (v2.2.0)
+#include <SdFat.h>                  // https://github.com/greiman/SdFat (v2.2.2)
 #include <sensirion.h>              // https://github.com/HydroSense/sensirion
-#include <Statistic.h>              // https://github.com/RobTillaart/Statistic (v1.0.2)
+#include <Statistic.h>              // https://github.com/RobTillaart/Statistic (v1.0.4)
 #include <TimeLib.h>                // https://github.com/PaulStoffregen/Time (v1.6.1)
 #include <TinyGPS++.h>              // https://github.com/mikalhart/TinyGPSPlus (v1.0.3)
 #include <Wire.h>                   // https://www.arduino.cc/en/Reference/Wire
@@ -157,15 +157,14 @@ Statistic pressureIntStats;     // Internal pressure
 Statistic temperatureExtStats;  // External temperature
 Statistic humidityExtStats;     // External humidity
 Statistic solarStats;           // Solar radiation
+Statistic snowStatsAvg;         // Snow depth average distances
+Statistic snowStatsStd;         // Snow depth std distances
+Statistic snowStatsMax;         // Snow depth max distances
+Statistic snowStatsMin;         // Snow depth min distances
+Statistic snowStatsNan;         // Snow depth nan samples
 Statistic windSpeedStats;       // Wind speed
 Statistic uStats;               // Wind east-west wind vector component (u)
 Statistic vStats;               // Wind north-south wind vector component (v)
-Statistic snowDepthStatsAvg;    // Maxbotix average distances
-Statistic snowDepthStatsStd;    // Maxbotix std distances
-Statistic snowDepthStatsMax;    // Maxbotix max distances
-Statistic snowDepthStatsMin;    // Maxbotix min distances
-Statistic snowDepthStatsNan;    // Maxbotix nan samples
-
 
 
 // ----------------------------------------------------------------------------

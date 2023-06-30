@@ -89,6 +89,8 @@ void readSht31()
   //DEBUG_PRINT("Temperature: "); DEBUG_PRINT(temperatureExt); DEBUG_PRINTLN(" C");
   //DEBUG_PRINT("Humidity: "); DEBUG_PRINT(humidityExt); DEBUG_PRINTLN("%");
 
+  DEBUG_PRINTLN("done.");
+
   // Re-enable I2C bus
   Wire.begin();
 
@@ -356,7 +358,7 @@ void read7911()
 {
   uint32_t loopStartTime = millis();
 
-  DEBUG_PRINTLN("Info - Reading 7911...");
+  DEBUG_PRINT("Info - Reading 7911...");
 
   // Enable pull-ups
   pinMode(PIN_WIND_SPEED, INPUT_PULLUP);
@@ -421,6 +423,8 @@ void read7911()
   windSpeedStats.add(windSpeed);
   uStats.add(u);
   vStats.add(v);
+
+  DEBUG_PRINTLN("done.");
 
   // Print debug info
   //DEBUG_PRINT(F("Wind Speed: ")); DEBUG_PRINTLN(windSpeed);
@@ -490,6 +494,8 @@ void readMb7354()
   // Start loop timer
   unsigned int loopStartTime = millis();
 
+  DEBUG_PRINT("Info - Reading MB7354...");
+
   // Create a temporary Statistic array to hold the maxbotix measurements
   Statistic Maxbotix;
 
@@ -540,11 +546,11 @@ void readMb7354()
   }
 
   // Add sample stats to global arrays
-  snowDepthStatsAvg.add(zAvg);
-  snowDepthStatsStd.add(zStd);
-  snowDepthStatsMax.add(zMax);
-  snowDepthStatsMin.add(zMin);
-  snowDepthStatsNan.add(zNan);
+  snowStatsAvg.add(zAvg);
+  snowStatsStd.add(zStd);
+  snowStatsMax.add(zMax);
+  snowStatsMin.add(zMin);
+  snowStatsNan.add(zNan);
 
   // Add to sample variables
   snowDepthAvg = zAvg;
@@ -559,6 +565,8 @@ void readMb7354()
   DEBUG_PRINT("snowDepthMin: "); DEBUG_PRINTLN(snowDepthMin);
   DEBUG_PRINT("snowDepthNan: "); DEBUG_PRINTLN(snowDepthNan);
 
+  DEBUG_PRINTLN("done.");
+  
   // Clear local array
   Maxbotix.clear();
 

@@ -282,7 +282,7 @@ void logData()
       // Debugging information
       DEBUG_PRINT(transmitStatus);      DEBUG_PRINT(",");
       DEBUG_PRINT(rtcDrift);            DEBUG_PRINT(",");
-      DEBUG_PRINT(freeRam());
+      DEBUG_PRINT(freeRam());           DEBUG_PRINT(",");
 
       // Sampling information
       DEBUG_PRINT(sampleInterval);      DEBUG_PRINT(",");

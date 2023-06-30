@@ -14,7 +14,7 @@
   ------------------------------
   Black    A1      Wind speed
   Green    A2      Wind direction
-  Yellow   5V      Power
+  Yellow   A4      Power (3.3V)
   Red      GND     Ground
 
 */
