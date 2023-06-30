@@ -1,16 +1,26 @@
 /*
-   Code to test battery voltage 10/1 MOhm resistor divider
+  Title:    10/1 MOhm Resistor Voltage Divider Test Code
+  Date:     June 29, 2023
+  Author:   Adam Garbo
+
+  Notes:
+  - Code to test battery voltage measured across
+  10/1 MOhm resistor divider
 */
+
+#define PIN_VBAT    A0
+#define PIN_12V_EN  5   // 12 V step-up/down regulator
+#define PIN_5V_EN   6   // 5V step-down regulator
 
 void setup()
 {
+  pinMode(PIN_5V_EN, OUTPUT);
+  pinMode(PIN_12V_EN, OUTPUT);
+  digitalWrite(PIN_5V_EN, LOW);   // Disable 5V power
+  digitalWrite(PIN_12V_EN, LOW);  // Disable 12V power
+
   Serial.begin(115200);
   while (!Serial);
-
-  pinMode(A5, OUTPUT);
-  pinMode(6, OUTPUT);
-  digitalWrite(A5, LOW);
-  digitalWrite(6, LOW);
 
   // Configure ADC
   ADC->CTRLA.bit.ENABLE = 0;                      // Disable ADC
@@ -25,8 +35,8 @@ void setup()
   while (ADC->STATUS.bit.SYNCBUSY);               // Wait for synchronization
 
   // Apply ADC gain and offset error calibration correction
-  ADC->OFFSETCORR.reg = ADC_OFFSETCORR_OFFSETCORR(24);
-  ADC->GAINCORR.reg = ADC_GAINCORR_GAINCORR(2097);
+  ADC->OFFSETCORR.reg = ADC_OFFSETCORR_OFFSETCORR(0);
+  ADC->GAINCORR.reg = ADC_GAINCORR_GAINCORR(2048);
   ADC->CTRLB.bit.CORREN = true;
   while (ADC->STATUS.bit.SYNCBUSY);               // Wait for synchronization
 
@@ -34,8 +44,7 @@ void setup()
 
 void loop()
 {
-  float sensorValue = analogRead(A0);
-
+  float sensorValue = analogRead(PIN_VBAT);
   float voltage1 = sensorValue * (3.3 / 4096.0);
   float voltage2 = sensorValue * ((10000000.0 + 1000000.0) / 1000000.0); // Multiply back 1 MOhm / (10 MOhm + 1 MOhm)
   voltage2 *= 3.3;   // Multiply by 3.3V reference voltage

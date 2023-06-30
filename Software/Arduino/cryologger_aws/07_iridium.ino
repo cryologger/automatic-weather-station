@@ -73,7 +73,7 @@ void transmitData()
       if (returnCode == ISBD_SUCCESS)
       {
         DEBUG_PRINTLN("Info - MO-SBD message transmission successful!");
-        blinkLed(PIN_LED_GREEN, 10, 500);
+        blinkLed(PIN_LED_GREEN, 10, 250);
 
         failureCounter = 0; // Clear failed transmission counter
         retransmitCounter = 0; // Clear message retransmit counter
@@ -87,7 +87,7 @@ void transmitData()
           DEBUG_PRINT(mtSbdBufferSize); DEBUG_PRINTLN(" bytes.");
 
           // Check if MT-SBD message is the correct size
-          if (mtSbdBufferSize == 6)
+          if (mtSbdBufferSize == sizeof(mtSbdMessage))
           {
             DEBUG_PRINTLN("Info - MT-SBD message correct size.");
 
@@ -102,7 +102,7 @@ void transmitData()
             printMtSbd(); // Print MT-SBD message stored in union/structure
 
             // Check if MT-SBD message data is valid and update variables
-            if ((mtSbdMessage.sampleInterval    >= 1  &&  mtSbdMessage.sampleInterval   <= 60)  &&
+            if ((mtSbdMessage.sampleInterval    >= 1  &&  mtSbdMessage.sampleInterval   <= 10080)  &&
                 (mtSbdMessage.averageInterval   >= 1  &&  mtSbdMessage.averageInterval  <= 24)  &&
                 (mtSbdMessage.transmitInterval  >= 1  &&  mtSbdMessage.transmitInterval <= 24)  &&
                 (mtSbdMessage.retransmitLimit   >= 0  &&  mtSbdMessage.retransmitLimit  <= 24)  &&
@@ -133,7 +133,7 @@ void transmitData()
       {
         DEBUG_PRINT("Warning - Transmission failed with error code ");
         DEBUG_PRINTLN(returnCode);
-        blinkLed(PIN_LED_RED, 10, 500);
+        blinkLed(PIN_LED_RED, 10, 250);
       }
     }
 
@@ -228,6 +228,7 @@ void ISBDDiagsCallback(IridiumSBD * device, char c)
 }
 
 /*
+// Required for RockBLOCK v3.F only! Controls inverted logic of on/off pin
 void IridiumSBD::setSleepPin(uint8_t enable)
 {
    if (enable == HIGH)

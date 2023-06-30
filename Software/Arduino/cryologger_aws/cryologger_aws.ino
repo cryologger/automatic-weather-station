@@ -1,47 +1,48 @@
 /*
-    Title:    Cryologger Automatic Weather Station
-    Date:     May 1, 2023
-    Author:   Adam Garbo
-    Version:  1.0
+  Title:    Cryologger Automatic Weather Station
+  Date:     July 1, 2023
+  Author:   Adam Garbo
+  Version:  1.2.0
 
-    Description:
-    - Code configured for automatic weather stations to be deployed in the communities of 
-    Arctic Bay, Igloolik and Pond Inlet, Nunavut.
+  Description:
+  - Code configured for automatic weather stations to be deployed on Ellsemere Island, 
+  Nunavut during the 2023 summer field season.
 
-    Components:
-    - Ground Control RockBLOCK 9603
-    - Maxtena M1621HCT-P-SMA antenna
-    - Adafruit Feather M0 Adalogger
-    - Adafruit Ultimate GPS Featherwing
-    - Adafruit BME280 Temperature Humidity Pressure Sensor
-    - Adafruit LSM303AGR Accelerometer/Magnetomter
-    - Pololu 3.3V 600mA Step-Down Voltage Regulator D36V6F3
-    - Pololu 5V 600mA Step-Down Voltage Regulator D36V6F5
-    - Pololu 12V 600mA Step-Down Voltage Regulator D36V6F5
-    - SanDisk Industrial XI 8 GB microSD card
+  Components:
+  - Ground Control RockBLOCK 9603
+  - Maxtena M1621HCT-P-SMA antenna
+  - Adafruit Feather M0 Adalogger
+  - Adafruit Ultimate GPS Featherwing
+  - Adafruit BME280 Temperature Humidity Pressure Sensor
+  - Adafruit LSM303AGR Accelerometer/Magnetomter
+  - Pololu 3.3V 600mA Step-Down Voltage Regulator D36V6F3
+  - Pololu 5V 600mA Step-Down Voltage Regulator D36V6F5
+  - Pololu 12V 600mA Step-Down Voltage Regulator D36V6F5
+  - SanDisk Industrial XI 8 GB microSD card
 
-    Sensors:
-    - RM Young 05103L Wind Monitor
-    - Vaisala HMP60 Humidity and Temperature Probe
+  Sensors:
+  - Davis Instruments 7911 Anemometer
+  - Davis Instruments Temperature/Relative Humidity Sensor
+  - Apogee SP-212 Pyranometer
+  - Maxbotix MB7354 Ultrasonic sensor
 
-    Comments:
-    - Sketch uses 99144 bytes (37%) of program storage space.
-    - Power consumption in deep sleep is ~625 uA at 12.5V
+  Comments:
+  - Sketch uses 102824 bytes (39%) of program storage space.
 */
 
 // ----------------------------------------------------------------------------
 // Libraries
 // ----------------------------------------------------------------------------
 #include <Adafruit_BME280.h>        // https://github.com/adafruit/Adafruit_BME280 (v2.2.2)
-#include <Adafruit_LSM303_Accel.h>  // https://github.com/adafruit/Adafruit_LSM303_Accel (v1.1.4)
+#include <Adafruit_LSM303_Accel.h>  // https://github.com/adafruit/Adafruit_LSM303_Accel (v1.1.6)
 #include <Adafruit_Sensor.h>        // https://github.com/adafruit/Adafruit_Sensor (v1.1.9)
 #include <Arduino.h>                // Required for new Serial instance. Include before <wiring_private.h>
 #include <ArduinoLowPower.h>        // https://github.com/arduino-libraries/ArduinoLowPower (v1.2.2)
-#include <IridiumSBD.h>             // https://github.com/sparkfun/SparkFun_IridiumSBD_I2C_Arduino_Library (v3.0.5)
+#include <IridiumSBD.h>             // https://github.com/sparkfun/SparkFun_IridiumSBD_I2C_Arduino_Library (v3.0.6)
 #include <RTCZero.h>                // https://github.com/arduino-libraries/RTCZero (v1.6.0)
-#include <SdFat.h>                  // https://github.com/greiman/SdFat (v2.2.0)
+#include <SdFat.h>                  // https://github.com/greiman/SdFat (v2.2.2)
 #include <sensirion.h>              // https://github.com/HydroSense/sensirion
-#include <Statistic.h>              // https://github.com/RobTillaart/Statistic (v1.0.2)
+#include <Statistic.h>              // https://github.com/RobTillaart/Statistic (v1.0.4)
 #include <TimeLib.h>                // https://github.com/PaulStoffregen/Time (v1.6.1)
 #include <TinyGPS++.h>              // https://github.com/mikalhart/TinyGPSPlus (v1.0.3)
 #include <Wire.h>                   // https://www.arduino.cc/en/Reference/Wire
@@ -90,10 +91,10 @@
 #define PIN_VBAT            A0
 #define PIN_WIND_SPEED      A1
 #define PIN_WIND_DIR        A2
-#define PIN_HUMID           A3
-#define PIN_TEMP            A4
+#define PIN_SOLAR           A3
+#define PIN_SNOW            A4
 #define PIN_GNSS_EN         A5
-#define PIN_MICROSD_CS      4
+#define PIN_MICROSD_CS      4   // microSD chip select pin
 #define PIN_12V_EN          5   // 12 V step-up/down regulator
 #define PIN_5V_EN           6   // 5V step-down regulator
 #define PIN_LED_GREEN       8   // Green LED
@@ -103,8 +104,9 @@
 #define PIN_LED_RED         13
 
 // Unused
-#define PIN_SOLAR           7
-#define PIN_SENSOR_PWR      7
+#define PIN_TEMP            7   // Spare
+#define PIN_HUMID           7   // Spare
+#define PIN_SENSOR_PWR      7   // Spare
 #define PIN_RFM95_CS        7   // LoRa "B"
 #define PIN_RFM95_RST       7   // LoRa "A"
 #define PIN_RFM95_INT       7   // LoRa "D"
@@ -141,7 +143,7 @@ sensirion                       sht(20, 21);  // (data, clock). Pull-up required
 // Custom TinyGPS objects to store fix and validity information
 // Note: $GPGGA and $GPRMC sentences produced by GPS receivers (PA6H module)
 // $GNGGA and $GNRMC sentences produced by GPS/GLONASS receivers (PA161D module)
-TinyGPSCustom gnssFix(gnss, "GNGGA", 6); // Fix quality  c
+TinyGPSCustom gnssFix(gnss, "GNGGA", 6); // Fix quality
 TinyGPSCustom gnssValidity(gnss, "GNRMC", 2); // Validity
 
 // ----------------------------------------------------------------------------
@@ -154,9 +156,15 @@ Statistic pressureIntStats;     // Internal pressure
 Statistic temperatureExtStats;  // External temperature
 Statistic humidityExtStats;     // External humidity
 Statistic solarStats;           // Solar radiation
+Statistic snowStatsAvg;         // Snow depth average distances
+Statistic snowStatsStd;         // Snow depth std distances
+Statistic snowStatsMax;         // Snow depth max distances
+Statistic snowStatsMin;         // Snow depth min distances
+Statistic snowStatsNan;         // Snow depth nan samples
 Statistic windSpeedStats;       // Wind speed
 Statistic uStats;               // Wind east-west wind vector component (u)
 Statistic vStats;               // Wind north-south wind vector component (v)
+
 
 // ----------------------------------------------------------------------------
 // User defined global variable declarations
@@ -194,6 +202,11 @@ byte          newDate           = 0;      // Variable for tracking when the date
 int           transmitStatus    = 0;      // Iridium transmission status code
 unsigned int  iterationCounter  = 0;      // Counter for program iterations (zero indicates a reset)
 unsigned int  failureCounter    = 0;      // Counter of consecutive failed Iridium transmission attempts
+unsigned int  snowDepthAvg      = 0;      // Average distance from Maxbotix sensor to surface (mm)
+unsigned int  snowDepthStd      = 0;      // Standard deviation distance from Maxbotix sensor to surface (mm)
+unsigned int  snowDepthMax      = 0;      // Max distance from Maxbotix sensor to surface (mm)
+unsigned int  snowDepthMin      = 0;      // Min distance from Maxbotix sensor to surface (mm)
+unsigned int  snowDepthNan      = 0;      // Number of NaN readings in Maxbotix
 unsigned long previousMillis    = 0;      // Global millis() timer
 unsigned long alarmTime         = 0;      // Global epoch alarm time variable
 unsigned long unixtime          = 0;      // Global epoch time variable
@@ -237,7 +250,8 @@ typedef union
     uint16_t  humidityExt;        // External humidity (%)          (2 bytes)   * 10
     int16_t   pitch;              // Pitch (°)                      (2 bytes)   * 100
     int16_t   roll;               // Roll (°)                       (2 bytes)   * 100
-    //uint16_t  solar;              // Solar irradiance (W m-2)       (2 bytes)   * 100
+    uint16_t  solar;              // Solar irradiance (W m-2)       (2 bytes)   * 100
+    uint16_t  snowDepth;          // Snow depth (mm)                 (2 bytes)
     uint16_t  windSpeed;          // Mean wind speed (m/s)          (2 bytes)   * 100
     uint16_t  windDirection;      // Mean wind direction (°)        (2 bytes)
     uint16_t  windGustSpeed;      // Wind gust speed (m/s)          (2 bytes)   * 100
@@ -250,8 +264,8 @@ typedef union
     uint16_t  transmitDuration;   // Previous transmission duration (2 bytes)
     uint8_t   transmitStatus;     // Iridium return code            (1 byte)
     uint16_t  iterationCounter;   // Message counter                (2 bytes)
-  } __attribute__((packed));                                    // Total: (33 bytes)
-  uint8_t bytes[33];
+  } __attribute__((packed));                                    // Total: (37 bytes)
+  uint8_t bytes[37];
 } SBD_MO_MESSAGE;
 
 SBD_MO_MESSAGE moSbdMessage;
@@ -261,14 +275,14 @@ typedef union
 {
   struct
   {
-    uint8_t   sampleInterval;     // 1 bytes
+    uint16_t  sampleInterval;     // 2 bytes
     uint8_t   averageInterval;    // 1 byte
     uint8_t   transmitInterval;   // 1 byte
     uint8_t   retransmitLimit;    // 1 byte
     uint8_t   batteryCutoff;      // 1 bytes
     uint8_t   resetFlag;          // 1 byte
   };
-  uint8_t bytes[6]; // Size of message to be received in bytes
+  uint8_t bytes[7]; // Size of message to be received in bytes
 } SBD_MT_MESSAGE;
 
 SBD_MT_MESSAGE mtSbdMessage;
@@ -297,6 +311,7 @@ struct struct_timer
   unsigned long read5103L;
   unsigned long read7911;
   unsigned long readSp212;
+  unsigned long readMb7354;
   unsigned long iridium;
 } timer;
 
@@ -308,21 +323,22 @@ void setup()
   // Pin assignments
   pinMode(PIN_LED_GREEN, OUTPUT);
   pinMode(PIN_LED_RED, OUTPUT);
-  pinMode(PIN_SENSOR_PWR, OUTPUT);
+  //pinMode(PIN_SENSOR_PWR, OUTPUT);
   pinMode(PIN_5V_EN, OUTPUT);
   pinMode(PIN_12V_EN, OUTPUT);
   pinMode(PIN_GNSS_EN, OUTPUT);
+  pinMode(PIN_SNOW, INPUT);
   pinMode(PIN_VBAT, INPUT);
   pinMode(PIN_IRIDIUM_SLEEP, OUTPUT);
   digitalWrite(PIN_LED_GREEN, LOW);     // Disable green LED
   digitalWrite(PIN_LED_RED, LOW);       // Disable red LED
-  digitalWrite(PIN_SENSOR_PWR, LOW);    // Disable power to 3.3V
+  //digitalWrite(PIN_SENSOR_PWR, LOW);    // Disable power to 3.3V
   digitalWrite(PIN_5V_EN, LOW);         // Disable power to Iridium 9603
   digitalWrite(PIN_12V_EN, LOW);        // Disable 12V power
   digitalWrite(PIN_GNSS_EN, HIGH);      // Disable power to GNSS
-  digitalWrite(PIN_IRIDIUM_SLEEP, LOW); // Prior v3.F: Disable power to Iridium
-  //digitalWrite(PIN_IRIDIUM_SLEEP, HIGH);  // v3.F: Set N-FET controlling RockBLOCK On/Off pin to HIGH (no voltage)
-  
+  digitalWrite(PIN_IRIDIUM_SLEEP, LOW); // RockBLOCK v3.D and below: Disable power to Iridium
+  //digitalWrite(PIN_IRIDIUM_SLEEP, HIGH);  // RockBLOCK v3.F and above: Set N-FET controlling RockBLOCK On/Off pin to HIGH (no voltage)
+
   // Configure analog-to-digital (ADC) converter
   configureAdc();
 
@@ -444,15 +460,16 @@ void loop()
 
       // Perform measurements
       enable5V();       // Enable 5V power
-      enable12V();      // Enable 12V power
+      //enable12V();      // Enable 12V power
       readBme280();     // Read sensor
       readLsm303();     // Read accelerometer
-      //readSp212();      // Read solar radiation
-      //readSht31();      // Read temperature/relative humidity sensor
-      //read7911();       // Read anemometer
-      readHmp60();      // Read temperature/relative humidity sensor
-      read5103L();      // Read anemometer
-      disable12V();     // Disable 12V power
+      readSp212();      // Read solar radiation
+      readSht31();      // Read temperature/relative humidity sensor
+      read7911();       // Read anemometer
+      readMb7354();     // Read snow depth
+      //readHmp60();      // Read temperature/relative humidity sensor
+      //read5103L();      // Read anemometer
+      //disable12V();     // Disable 12V power
       disable5V();      // Disable 5V power
 
       // Print summary of statistics

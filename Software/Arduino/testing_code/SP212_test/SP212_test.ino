@@ -1,5 +1,24 @@
 /*
-   Code to test Davis Instruments 7911 anemometer
+  Title:    Apogee Instruments SP-212-SS Test Code
+  Date:     June 29, 2023
+  Author:   Adam Garbo
+
+  Sensor:
+  - Apogee Instruments SP-212-SS Amplified 0-2.5 Volt Pyranometer
+  https://www.apogeeinstruments.com/sp-212-ss-amplified-0-2-5-volt-pyranometer/
+
+  Notes: 
+  - 0 to 2.5V analog output mapped to 0 to 2000 W m^-2
+  
+  Wiring Diagram:
+  -----------------------------------------------------
+  Colour    Pin        Description
+  -----------------------------------------------------
+  White     A3         Positive (signal from sensor)
+  Red       5V         Input Power 5-24 V DC
+  Black     GND        Ground (from sensor signal and output power)
+  Clear     GND        Shield/Ground
+
 */
 
 #define PIN_SOLAR   A3
@@ -26,21 +45,23 @@ void setup()
   while (ADC->STATUS.bit.SYNCBUSY);               // Wait for synchronization
 
   // Apply ADC gain and offset error calibration correction
-  ADC->OFFSETCORR.reg = ADC_OFFSETCORR_OFFSETCORR(30);
-  ADC->GAINCORR.reg = ADC_GAINCORR_GAINCORR(2144);
+  ADC->OFFSETCORR.reg = ADC_OFFSETCORR_OFFSETCORR(0);
+  ADC->GAINCORR.reg = ADC_GAINCORR_GAINCORR(2048);
   ADC->CTRLB.bit.CORREN = true;
   while (ADC->STATUS.bit.SYNCBUSY);               // Wait for synchronization
+
+  Serial.print(F("analog,voltage,irradiance"));
 
 }
 
 void loop()
 {
-  //(void)analogRead(PIN_SOLAR);
-  float sensorValue1 = analogRead(PIN_SOLAR); // Wind speed
-  float solar = mapFloat(sensorValue1, 0, 3102, 0, 2000); // 0-360 range
-  float voltage1 = sensorValue1 * (3.3 / 4095.0);
+  (void)analogRead(PIN_SOLAR);
+  float sensorValue = analogRead(PIN_SOLAR); // Solar irradiance W m^-2
+  float voltage = sensorValue * (3.3 / 4095.0);
+  float solar = mapFloat(sensorValue, 0, 3102, 0, 2000); // Range: 0 to 2.5 V = 0 to 2000 W m^-2
 
-  Serial.print(F("solar: ")); Serial.print(voltage1, 4); Serial.print(F(",")); Serial.print(sensorValue1); Serial.print(F(",")); Serial.println(solar, 2);
+  Serial.print(sensorValue); Serial.print(F(",")); Serial.print(voltage, 4); Serial.print(F(",")); Serial.println(solar, 2);
   delay(1000);
 }
 

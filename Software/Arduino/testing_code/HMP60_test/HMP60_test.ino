@@ -1,5 +1,24 @@
 /*
-   Code to test 0-1 V analog measurements of Vaisala HMP60 Temperature/Relative Humidity sensor
+  Title:   Vaisala HMP60 Test Code
+  Date:     June 29, 2023
+  Author:   Adam Garbo
+
+  Sensor:
+  - Vaisala HMP60 Temperature/Relative Humidity sensor
+  https://www.vaisala.com/en/products/instruments-sensors-and-other-measurement-devices/instruments-industrial-measurements/hmp60
+
+  Notes:
+  - Sensors manually configured for 0 to 2.5V output
+
+  Wiring Diagram:
+  -----------------------------------------------------
+  Colour     Pin     Description
+  -----------------------------------------------------
+  Brown      12V     Power (5 - 28V)
+  White      A3      CH1: Relative humidity (0 - 2.5V)
+  Blue       GND     Ground
+  Black      A4      CH2: Temperature (0 - 2.5V)
+  Shield     GND     Earth ground
 */
 
 void setup()
@@ -21,8 +40,8 @@ void setup()
 
 
   // Apply ADC gain and offset error calibration correction
-  ADC->OFFSETCORR.reg = ADC_OFFSETCORR_OFFSETCORR(-3);
-  ADC->GAINCORR.reg = ADC_GAINCORR_GAINCORR(2074);
+  ADC->OFFSETCORR.reg = ADC_OFFSETCORR_OFFSETCORR(0);
+  ADC->GAINCORR.reg = ADC_GAINCORR_GAINCORR(2048);
   ADC->CTRLB.bit.CORREN = true;
   while (ADC->STATUS.bit.SYNCBUSY);               // Wait for synchronization
 }

@@ -89,6 +89,8 @@ void readSht31()
   //DEBUG_PRINT("Temperature: "); DEBUG_PRINT(temperatureExt); DEBUG_PRINTLN(" C");
   //DEBUG_PRINT("Humidity: "); DEBUG_PRINT(humidityExt); DEBUG_PRINTLN("%");
 
+  DEBUG_PRINTLN("done.");
+
   // Re-enable I2C bus
   Wire.begin();
 
@@ -134,7 +136,7 @@ void readLsm303()
     myDelay(500);
 
     float xAvg = 0, yAvg = 0, zAvg = 0;
-   
+
     // Read accelerometer data
     sensors_event_t accel;
 
@@ -155,6 +157,12 @@ void readLsm303()
 
     // Calculate pitch and roll
     // Note: X-axis and Z axis swapped due to orientation of sensor when installed
+
+    // Standard orientation (e.g., Igloolik)
+    //pitch = atan2(-zAvg, sqrt(yAvg * yAvg + xAvg * xAvg)) * 180 / PI;
+    //roll = atan2(yAvg, xAvg) * 180 / PI;
+
+    // Rotated 90° orientation (e.g., Purple Valley)
     pitch = atan2(-zAvg, sqrt(yAvg * yAvg + xAvg * xAvg)) * 180 / PI;
     roll = atan2(yAvg, xAvg) * 180 / PI;
 
@@ -238,7 +246,7 @@ void readHmp60()
 // -----------------------------------------------------
 // Colour    Pin        Description
 // -----------------------------------------------------
-// White     ?          Positive (signal from sensor)
+// White     A3         Positive (signal from sensor)
 // Red       5V         Input Power 5-24 V DC
 // Black     GND        Ground (from sensor signal and output power)
 // Clear     GND        Shield/Ground
@@ -356,7 +364,7 @@ void read7911()
 {
   uint32_t loopStartTime = millis();
 
-  DEBUG_PRINTLN("Info - Reading 7911...");
+  DEBUG_PRINT("Info - Reading 7911...");
 
   // Enable pull-ups
   pinMode(PIN_WIND_SPEED, INPUT_PULLUP);
@@ -384,16 +392,10 @@ void read7911()
   windSpeed = revolutions * (2.25 / 3);   // Calculate wind speed in miles per hour
   windSpeed *= 0.44704;                   // Convert wind speed to metres per second
 
-  // Enable power
-  digitalWrite(PIN_SENSOR_PWR, HIGH);
-
   // Measure wind direction
   (void)analogRead(PIN_WIND_DIR);
   windDirection = analogRead(PIN_WIND_DIR); // Raw analog wind direction value
   windDirection = map(windDirection, 0, 4095, 0, 359); // Map wind direction to degrees (0-360°)
-
-  // Disable power
-  digitalWrite(PIN_SENSOR_PWR, LOW);
 
   // Correct for negative wind direction values
   if (windDirection > 360)
@@ -403,7 +405,7 @@ void read7911()
 
   if (windSpeed == 0)
   {
-    windDirection = 0.0;
+    // windDirection = 0.0; // Comment 2023-06-30: Perhaps not best practice?
   }
 
   // Check and update wind gust speed and direction
@@ -428,6 +430,8 @@ void read7911()
   uStats.add(u);
   vStats.add(v);
 
+  DEBUG_PRINTLN("done.");
+
   // Print debug info
   //DEBUG_PRINT(F("Wind Speed: ")); DEBUG_PRINTLN(windSpeed);
   //DEBUG_PRINT(F("Wind Direction: ")); DEBUG_PRINTLN(windDirection);
@@ -436,8 +440,8 @@ void read7911()
   timer.read7911 = millis() - loopStartTime;
 }
 
-// Interrupt service routine (ISR) for wind speed measurement
-// for Davis Instruments 7911 anemometer
+// Interrupt service routine (ISR) for Davis Instruments 7911 anemometer
+// wind speed measurement
 void windSpeedIsr()
 {
   revolutions++;
@@ -482,8 +486,8 @@ void windVectors()
 // Colour    Pin    Description             Pin
 // --------------------------------------------------
 // White    1       Temperature Sensor      Not connected
-// Orange   2       Pulse Width Output      Not connected
-// Brown    3       Analog Voltage Output   Analog In
+// Orange   2       Pulse Width Output      A3
+// Brown    3       Analog Voltage Output   Not connected
 // Green    4       Ranging Start/Stop      Not connected
 // Blue     5       Serial Output           Not connected
 // Red      6       Vcc                     5V
@@ -493,5 +497,87 @@ void windVectors()
 // Read Maxbotix distance to surface
 void readMb7354()
 {
+  // Start loop timer
+  unsigned int loopStartTime = millis();
+
+  DEBUG_PRINTLN("Info - Reading MB7354...");
+
+  // Create a temporary Statistic array to hold the maxbotix measurements
+  Statistic Maxbotix;
+
+  // Create temporary variables
+  unsigned int z = 0, zAvg = 0, zStd = 0, zMax = 0, zMin = 0, zNan = 0;
+
+  // Get 30 z readings in mm, filtering out reading 50 mm
+  // above/below sensor minumum/maximum readings
+  for (byte i = 0; i < 30; i++)
+  {
+    z = pulseIn(PIN_SNOW, HIGH); // Read distance to snow surface
+
+    // Filter readings
+    if (z > 550 && z < 4950)
+    {
+      Maxbotix.add(z); // Add good readings to stats array
+    }
+    else
+    {
+      zNan += 1; // Count bad readings
+    }
+    myDelay(100); // Delay 0.1 secs between readings
+  }
+
+  // Get stats from the Maxbotix array
+  zAvg = Maxbotix.average(), 0;
+  zStd = Maxbotix.pop_stdev(), 0;
+  zMax = Maxbotix.maximum(), 0;
+  zMin = Maxbotix.minimum(), 0;
+
+  // Deal with issue of a maximum long number in the instance of no
+  // readings within filtered range
+  if (zAvg > 5000)
+  {
+    zAvg = 0;
+  }
+  if (zStd > 5000)
+  {
+    zStd = 0;
+  }
+  if (zMax > 5000)
+  {
+    zMax = 0;
+  }
+  if (zMin > 5000)
+  {
+    zMin = 0;
+  }
+
+  // Add sample stats to global arrays
+  snowStatsAvg.add(zAvg);
+  snowStatsStd.add(zStd);
+  snowStatsMax.add(zMax);
+  snowStatsMin.add(zMin);
+  snowStatsNan.add(zNan);
+
+  // Add to sample variables
+  snowDepthAvg = zAvg;
+  snowDepthStd = zStd;
+  snowDepthMax = zMax;
+  snowDepthMin = zMin;
+  snowDepthNan = zNan;
+
+  // Debugging only
+  DEBUG_PRINT("snowDepthAvg: "); DEBUG_PRINTLN(snowDepthAvg);
+  DEBUG_PRINT("snowDepthStd: "); DEBUG_PRINTLN(snowDepthStd);
+  DEBUG_PRINT("snowDepthMax: "); DEBUG_PRINTLN(snowDepthMax);
+  DEBUG_PRINT("snowDepthMin: "); DEBUG_PRINTLN(snowDepthMin);
+  DEBUG_PRINT("snowDepthNan: "); DEBUG_PRINTLN(snowDepthNan);
+
+  DEBUG_PRINTLN("done.");
+
+  // Clear local array
+  Maxbotix.clear();
+
+  // Stop loop timer
+  timer.readMb7354 = millis() - loopStartTime;
 
 }

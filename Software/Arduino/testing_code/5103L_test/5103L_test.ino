@@ -1,9 +1,38 @@
 /*
-   Code to test 4-20 mA/analog measurements of RM Young 5103L Wind Monitor
+  Title:    R.M. Young Wind Monitor 5103L Test Code
+  Date:     June 29, 2023
+  Author:   Adam Garbo
+
+  Sensor:
+  - R.M. Young Wind Monitor 5103L 4-20 mA
+  https://www.youngusa.com/product/wind-monitor/
+
+  Notes:
+  - 150 Ohm 0.1% resistor used to produce convert ideal
+  voltage range: 0.6 - 3.0 V
+
+  Wiring Diagram:
+  --------------------------------------------------
+  Colour     Pin       Description
+  --------------------------------------------------
+  Black      12V       Wind speed + (WS+)
+  Red        A1        Wind speed - (WS-)
+  White      12V       Wind direction + (WD+
+  Green      A2        Wind direction - (WD-)
+  Shield     GND       Earth ground
 */
+#define PIN_WIND_SPEED  A1
+#define PIN_WIND_DIR    A2
+#define PIN_12V_EN      5   // 12 V step-up/down regulator
+#define PIN_5V_EN       6   // 5V step-down regulator
 
 void setup()
 {
+  pinMode(PIN_5V_EN, OUTPUT);
+  pinMode(PIN_12V_EN, OUTPUT);
+  digitalWrite(PIN_5V_EN, HIGH);   // Enable 5V power
+  digitalWrite(PIN_12V_EN, HIGH);  // Enable 12V power
+
   Serial.begin(115200);
   while (!Serial);
 
@@ -19,21 +48,27 @@ void setup()
   ADC->CTRLA.bit.ENABLE = 1;                      // Enable ADC
   while (ADC->STATUS.bit.SYNCBUSY);               // Wait for synchronization
 
-  
-    // Apply ADC gain and offset error calibration correction
-    ADC->OFFSETCORR.reg = ADC_OFFSETCORR_OFFSETCORR(-3);
-    ADC->GAINCORR.reg = ADC_GAINCORR_GAINCORR(2074);
-    ADC->CTRLB.bit.CORREN = true;
-    while (ADC->STATUS.bit.SYNCBUSY);               // Wait for synchronization
-  
+
+  // Apply ADC gain and offset error calibration correction
+  ADC->OFFSETCORR.reg = ADC_OFFSETCORR_OFFSETCORR(0);
+  ADC->GAINCORR.reg = ADC_GAINCORR_GAINCORR(2048);
+  ADC->CTRLB.bit.CORREN = true;
+  while (ADC->STATUS.bit.SYNCBUSY);               // Wait for synchronization
+
 }
 
 void loop()
 {
-  (void)analogRead(A1);
-  float sensorValue1 = analogRead(A1); // 5103L wind speed
-  (void)analogRead(A2);
-  float sensorValue2 = analogRead(A2); // 5103L wind direction
+  read5103L();
+  delay(1000);
+}
+
+void read5103L()
+{
+  (void)analogRead(PIN_WIND_SPEED);
+  float sensorValue1 = analogRead(PIN_WIND_SPEED); // Wind speed
+  (void)analogRead(PIN_WIND_DIR);
+  float sensorValue2 = analogRead(PIN_WIND_DIR); // Wind direction
 
   float windSpeed = mapFloat(sensorValue1, 745, 3691, 0, 100); // 0-100 m/s range
   float windDirection = mapFloat(sensorValue2, 745, 3691, 0, 360); // 0-360 range
@@ -43,7 +78,6 @@ void loop()
 
   Serial.print(F("windSpeed: ")); Serial.print(sensorValue1); Serial.print(F(",")); Serial.print(voltage1, 4); Serial.print(F(",")); Serial.println(windSpeed, 2);
   Serial.print(F("windDirection: ")); Serial.print(sensorValue2); Serial.print(F(",")); Serial.print(voltage2, 4); Serial.print(F(",")); Serial.println(windDirection, 2);
-  delay(500);
 }
 
 // Map raw ADC values to floats
