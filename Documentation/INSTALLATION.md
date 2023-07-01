@@ -17,52 +17,58 @@ This guide provides step-by-step instructions on installing the Arduino IDE and 
 * Navigate to: Tools > Boards > Boards Manager
 * Search for: SAMD Boards
 * Select and install version: Arduino SAMD Boards v1.8.13 
-* Select and install version: Adafruit SAMD Boards v1.7.12
+* Select and install version: Adafruit SAMD Boards v1.7.13
 ![image](https://github.com/adamgarbo/cryologger-ice-tracking-beacon/assets/22924092/f4d9af80-c4ba-4fab-958b-c35e1e4ac1e3)
 
 ## Step 4: Install Libraries
-Several libraries are required by the Cryologger ice tracking beacons. These can downloaded using the Arduino IDE's Library Manager (requires Internet connection).
+Several libraries are required by the Cryologger ice tracking beacons. These can be downloaded using the Arduino IDE's Library Manager (requires an Internet connection).
 
 * Navigate to: Tools > Manage Libraries
 * Search for and install the following libraries:
 
-| Library                                         | Version | GitHub URL                                                          | Comments                       |
-|-------------------------------------------------|---------|---------------------------------------------------------------------|--------------------------------|
-| Adafruit BME280 Library                         | 2.2.2   | https://github.com/adafruit/Adafruit_BME280                         |                                |
-| Adafruit LSM303 Accelerometer Library           | 1.1.4   | https://github.com/adafruit/Adafruit_LSM303_Accel                   |                                |
-| Adafruit Unified Sensor Driver                  | 1.1.9   | https://github.com/adafruit/Adafruit_Sensor                         |                                |
-| Arduino Low Power Library                       | 1.2.2   | https://github.com/arduino-libraries/ArduinoLowPower                |                                |
-| SparkFun IridiumSBD I2C Arduino Library         | 3.0.5   | https://github.com/sparkfun/SparkFun_IridiumSBD_I2C_Arduino_Library |                                |
-| RTCZero Library                                 | 1.6.0   | https://github.com/arduino-libraries/RTCZero                        |                                |
-| SdFat                                           | 2.2.0   | https://github.com/greiman/SdFat                                    |                                |
-| Sensirion Temperature / Humidity Sensor Library |         | https://github.com/HydroSense/sensirion                             | Download from GitHub           |
-| Statistic Library                               | 1.0.0   | https://github.com/RobTillaart/Statistic                            |                                |
-| Arduino Time Library                            | 1.6.1   | https://github.com/PaulStoffregen/Time                              |                                |
-| TinyGPSPlus                                     | 1.0.3   | https://github.com/mikalhart/TinyGPSPlus                            |                                |
+**Table 1.** Libraries required by Cryologger AWS. Last updated 2023-07-01.
+| Library                                         | Version | GitHub Repository                                                   |
+|-------------------------------------------------|:-------:|---------------------------------------------------------------------|
+| Adafruit BME280 Library                         |  2.2.2  | https://github.com/adafruit/Adafruit_BME280                         |
+| Adafruit LSM303 Accelerometer Library           |  1.1.6  | https://github.com/adafruit/Adafruit_LSM303_Accel                   |
+| Adafruit Unified Sensor Driver                  |  1.1.9  | https://github.com/adafruit/Adafruit_Sensor                         |
+| Arduino Low Power Library                       |  1.2.2  | https://github.com/arduino-libraries/ArduinoLowPower                |
+| SparkFun IridiumSBD I2C Arduino Library         |  3.0.6  | https://github.com/sparkfun/SparkFun_IridiumSBD_I2C_Arduino_Library |
+| RTCZero Library                                 |  1.6.0  | https://github.com/arduino-libraries/RTCZero                        |
+| SdFat                                           |  2.2.2  | https://github.com/greiman/SdFat                                    |
+| Sensirion Temperature / Humidity Sensor Library |         | https://github.com/HydroSense/sensirion                             |
+| Statistic Library                               |  1.0.4  | https://github.com/RobTillaart/Statistic                            |
+| Arduino Time Library                            |  1.6.1  | https://github.com/PaulStoffregen/Time                              |
+| TinyGPSPlus                                     |  1.0.3  | https://github.com/mikalhart/TinyGPSPlus                            |
 
-## Step 5: Select Harware & Configure Port Settings
-*  Navigate to Tools > Board > Adafruit SAMD Boards
+![image](https://github.com/adamgarbo/cryologger-ice-tracking-beacon/assets/22924092/dadb37fe-46c7-48af-ad3d-cbb4061d01a6)
 
-<img width="377" alt="image" src="https://user-images.githubusercontent.com/22924092/178784887-24cdacb0-873f-40f0-aaa0-9549235a5816.png"><img width="503" alt="image" src="https://user-images.githubusercontent.com/22924092/178784943-1ce56d81-3cba-4b58-93e5-b5df031debfc.png">
-
-*  Select Adafruit Feather M0
-<img width="366" alt="image" src="https://user-images.githubusercontent.com/22924092/178784990-380931f8-7d47-4fb0-bde5-7b0f8bc7f536.png">
-
-## Step 6: Download Automatic Weather Station Program
-Code for the Cryologger AWS is made available on the following GitHubrepository:
+## Step 5: Download Software
+Code for the Cryologger AWS is made available on the following GitHub repository:
 * [https://github.com/adamgarbo/Cryologger Automatic Weather Station](https://github.com/adamgarbo/Cryologger_Automatic_Weather_Station)
-* Click on "Releases" and download the v1.0.0 .zip file:
+* Click on "Releases" and download the v1.2.0 .zip file:
+![image](https://github.com/adamgarbo/cryologger-automatic-weather-station/assets/22924092/7f80eec5-b06e-466e-aa5a-90dcd1c81258)
 
-## Step 7: Test Program Compiliation
-* Navigate to the /Software/cryologger_aws folder of the downloaded repository
-* Double click on the `cryologger_aws.ino` file
+## Step 6: Test Program Compilation
+* Navigate to the /Software/Arduino/cryologger_aws folder of the downloaded repository
+* Double click on the `cryologger_itb.aws` file
 * Click on the checkmark in the upper left corner of the Arduino IDE program window
 * Watch debugging window for compilation errors
-<img width="720" alt="image" src="https://github.com/adamgarbo/cryologger-automatic-weather-station/assets/22924092/b86e3e6c-f294-46a8-9646-5754488ec4a9.png">
+![image](https://github.com/adamgarbo/cryologger-automatic-weather-station/assets/22924092/99570272-b388-4752-a01e-235f2eb6a84b)
 
-## Step 7: Upload Program
-* Once the code has compiled successfully, connect the Adafruit Feather M0 Adalogger via micro USB cable. 
-* The board should appear under "Port" as a USB or COM device
-* Make any necessary changes to the code
-* Click on the right pointed arrow to upload the code
-* Watch debugging window for compilation errors and/or success messages
+## Step 7: Connect Hardware
+* Connect to the Cryologger ITB using a micro USB cable.
+* In the Arduino IDE click on "Select Board" and then "Adafruit Feather M0 (SAMD)
+![image](https://github.com/adamgarbo/cryologger-ice-tracking-beacon/assets/22924092/0199d2f2-ca16-42ae-bb7f-c8cd82348479)
+* If the board is not auto-populated, click on "Select other board and port..." and search for "Adafruit Feather M0":
+* Be sure to select the appropriate serial port that is connected to the Arduino
+![image](https://github.com/adamgarbo/cryologger-ice-tracking-beacon/assets/22924092/dc0b3bcc-e7c9-4635-941f-46600e63a128)
+
+## Step 8: Upload Program
+* Once the code has compiled successfully, click on the right-pointed arrow to upload the code
+* Watch the output window for compilation errors and/or success messages
+* If no errors are presented, the code has now been successfully uploaded! 
+![image](https://github.com/adamgarbo/cryologger-automatic-weather-station/assets/22924092/7dc17bf4-c6a8-4e82-bd01-af80899bb6d0)
+
+## Step 9: Next Steps
+* The detailed operation of the Cryologger AWS will be covered next in OPERATION.md
