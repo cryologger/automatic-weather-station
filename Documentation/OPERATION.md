@@ -49,9 +49,10 @@ Table x. LED blink patterns and associated description and troubleshooting guide
 |    4   |      500      |     Red     |   Single    | System start up                 | None                                      |
 |   10   |      100      | Green + Red | Alternating | Initialization complete         | None                                      |
 |    2   |      250      |     Red     |  Continuous | microSD failure                 | Reseat microSD card and reboot system     |
-|    1   |      1000     |     Red     |  Continuous | GNSS signal acquisition         | None                                      |
+|    1   |      1000     |    Green    |  Continuous | GNSS signal acquisition         | None                                      |
 |    5   |      100      |    Green    |   Single    | GNSS fix found                  | None                                      |
 |    5   |      100      |     Red     |   Single    | GNSS fix not found              | Ensure good view of sky                   |
+|    1   |      1000     |    Green    |  Continuous | Iridium transmission attempt    | None                                      |
 |   10   |      250      |    Green    |   Single    | Iridium transmission successful | None                                      |
 |   10   |      250      |     Red     |   Single    | Iridium transmission failure    | Ensure good view of sky and reboot system |
 |    1   |      100      |     Red     |   Single    | Watchdog Timer every 8 seconds  | None                                      |
