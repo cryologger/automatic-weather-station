@@ -1,4 +1,5 @@
-# Cryologger - Automatic Weather Station (AWS)
+# Cryologger Automatic Weather Station (AWS) - Operation
+
 
 
 ## Wiring Diagram
@@ -9,17 +10,17 @@
 | Black  | Wind speed     | A1  |
 | Red    | Ground         | GND |
 | Green  | Wind direction | A2  |
-| Yellow | Power          | A4  |
+| Yellow | Power          | U3  |
 
 **Table 2.** Davis Instruments temperature relative humidity sensor (Sensiron SHT31-LSS).
 | Wire   | Description | Pin |
 |--------|-------------|-----|
 | Blue   | Data        | SDA |
-| Yellow | Power       | 5V  |
+| Yellow | Power       | 3.3 |
 | Green  | Ground      | GND |
 | White  | Clock       | SCL |
 
-**Table 3.** Apogee SP-212 pyranometer.
+**Table 3.** Wiring diagram for Apogee SP-212 pyranometer.
 | Wire   | Description | Pin |
 |--------|-------------|-----|
 | Black  | Ground      | GND |
@@ -27,10 +28,20 @@
 | Red    | Power       | 5V  |
 | Shield | Shield      | GND |
 
+**Table 4.** Wiring diagram for MaxBotix MB7354 HRXL-MaxSonar-WRS5 ultrasonic sensor.
+| Wire Colour |      Description      |      Pin      |
+|:-----------:|:---------------------:|:-------------:|
+|    White    |   Temperature Sensor  | Not connected |
+|    Orange   |   Pulse Width Output  |       A3      |
+|    Brown    | Analog Voltage Output | Not connected |
+|    Green    |   Ranging Start/Stop  | Not connected |
+|     Blue    |     Serial Output     | Not connected |
+|     Red     |          Vcc          |       5V      |
+|    Black    |         Ground        |      GND      |
 
 ## LED Blink Patterns
 
-When initially powered on, the system will attempt to establish a GNSS fix and sychronize the real-time clock (RTC) for up to 2 minutes. During this time, the LED will blink every second. Once the RTC is synchronized, the system will set an alarm to wake at the user-specified time and then enter a low-power deep sleep. While the system is in deep sleep, the Watchdog Timer (WDT) will wake the system to check the program has not frozen approximately every 8 seconds. The LED will blink briefly (100 ms) during this time.
+When initially powered on, the system will attempt to establish a GNSS fix and synchronize the real-time clock (RTC) for up to 2 minutes. During this time, the LED will blink every second. Once the RTC is synchronized, the system will set an alarm to wake at the user-specified time and then enter a low-power deep sleep. While the system is in deep sleep, the Watchdog Timer (WDT) will wake the system to check the program has not frozen approximately every 8 seconds. The LED will blink briefly (100 ms) during this time.
 
 Table x. LED blink patterns and associated description and troubleshooting guide.
 | Number | Duration (ms) |    Colour   |   Pattern   | Description                     | Troubleshooting Steps                     |
@@ -41,8 +52,8 @@ Table x. LED blink patterns and associated description and troubleshooting guide
 |    1   |      1000     |     Red     |  Continuous | GNSS signal acquisition         | None                                      |
 |    5   |      100      |    Green    |   Single    | GNSS fix found                  | None                                      |
 |    5   |      100      |     Red     |   Single    | GNSS fix not found              | Ensure good view of sky                   |
-|   10   |      100      |    Green    |   Single    | Iridium transmission successful | None                                      |
-|   10   |      100      |     Red     |   Single    | Iridium transmission failure    | Ensure good view of sky and reboot system |
+|   10   |      250      |    Green    |   Single    | Iridium transmission successful | None                                      |
+|   10   |      250      |     Red     |   Single    | Iridium transmission failure    | Ensure good view of sky and reboot system |
 |    1   |      100      |     Red     |   Single    | Watchdog Timer every 8 seconds  | None                                      |
 
 
