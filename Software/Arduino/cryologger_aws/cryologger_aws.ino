@@ -51,7 +51,7 @@
 // ----------------------------------------------------------------------------
 // Define unique identifier
 // ----------------------------------------------------------------------------
-#define CRYOLOGGER_ID "TST"
+#define UID "TST"
 
 // ----------------------------------------------------------------------------
 // Data logging
@@ -353,7 +353,7 @@ void setup()
 
   DEBUG_PRINTLN();
   printLine();
-  DEBUG_PRINT("Cryologger - Automatic Weather Station #"); DEBUG_PRINTLN(CRYOLOGGER_ID);
+  DEBUG_PRINT("Cryologger - Automatic Weather Station #"); DEBUG_PRINTLN(UID);
 
   printLine();
 

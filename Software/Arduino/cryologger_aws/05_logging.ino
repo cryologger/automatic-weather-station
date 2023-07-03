@@ -60,7 +60,7 @@ void createLogFile()
 
   // Get timestamp log file name
   sprintf(logFileName, "AWS_%s_20%02d%02d%02d_%02d%02d%02d.csv",
-          CRYOLOGGER_ID, rtc.getYear(), rtc.getMonth(), rtc.getDay(),
+          UID, rtc.getYear(), rtc.getMonth(), rtc.getDay(),
           rtc.getHours(), rtc.getMinutes(), rtc.getSeconds());
 
   DEBUG_PRINT("Info - Log file name: "); DEBUG_PRINTLN(logFileName);
