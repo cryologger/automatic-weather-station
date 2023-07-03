@@ -1,8 +1,8 @@
 /*
   Title:    Cryologger Automatic Weather Station
-  Date:     July 1, 2023
+  Date:     July 3, 2023
   Author:   Adam Garbo
-  Version:  1.2.0
+  Version:  1.2.1
 
   Description:
   - Code configured for automatic weather stations to be deployed on Ellsemere Island, 
