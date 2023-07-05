@@ -51,13 +51,13 @@ Code for the Cryologger AWS is made available on the following GitHub repository
 
 ## Step 6: Test Program Compilation
 * Navigate to the /Software/Arduino/cryologger_aws folder of the downloaded repository
-* Double click on the `cryologger_itb.aws` file
+* Double-click on the `cryologger_aws.ino` file
 * Click on the checkmark in the upper left corner of the Arduino IDE program window
 * Watch debugging window for compilation errors
 ![image](https://github.com/adamgarbo/cryologger-automatic-weather-station/assets/22924092/99570272-b388-4752-a01e-235f2eb6a84b)
 
 ## Step 7: Connect Hardware
-* Connect to the Cryologger ITB using a micro USB cable.
+* Connect to the Cryologger AWS using a micro USB cable.
 * In the Arduino IDE click on "Select Board" and then "Adafruit Feather M0 (SAMD)
 ![image](https://github.com/adamgarbo/cryologger-ice-tracking-beacon/assets/22924092/0199d2f2-ca16-42ae-bb7f-c8cd82348479)
 * If the board is not auto-populated, click on "Select other board and port..." and search for "Adafruit Feather M0":
