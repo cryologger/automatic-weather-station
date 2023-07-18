@@ -2,7 +2,7 @@
 This guide provides step-by-step instructions on installing the Arduino IDE and required board definitions and libraries, which are necessary for uploading code to the Cryologger AWS.
 
 ## Step 1: Download Arduino IDE  
-* Navigate to https://www.arduino.cc/en/software and download the most recent version of the Arduino IDE
+* Navigate to https://www.arduino.cc/en/software and download the Legacy 1.8.x version of the Arduino IDE
 ![image](/Images/arduino-ide-download.png)
 
 ## Step 2: Add Additional Boards Manager URL:
@@ -45,7 +45,7 @@ Several libraries are required by the Cryologger ice tracking beacons. These can
 ## Step 5: Download Software
 Code for the Cryologger AWS is made available on the following GitHub repository:
 * [https://github.com/adamgarbo/Cryologger Automatic Weather Station](https://github.com/adamgarbo/Cryologger_Automatic_Weather_Station)
-* Click on "Releases" and download the v1.2.0 .zip file:
+* Click on "Releases" and download the .zip file of the most recent release:
 ![image](https://github.com/adamgarbo/cryologger-automatic-weather-station/assets/22924092/7f80eec5-b06e-466e-aa5a-90dcd1c81258)
 
 ## Step 6: Test Program Compilation
@@ -59,6 +59,14 @@ Code for the Cryologger AWS is made available on the following GitHub repository
 ## Step 7: Connect Hardware & Configure Port Settings
 * Connect to the Cryologger AWS using a micro USB cable.
 * In the Arduino IDE click on Tools > Board > Adafruit SAMD > Adafruit Feather M0 (SAMD)
+
+![image](/Images/arduino-ide-board-1.png)
+![image](/Images/arduino-ide-board-2.png)
+![image](/Images/arduino-ide-board-3.png)
+
+* Next, click on Tools > Port and select the appropriate serial port for the Adafruit Feather M0 Adalogger
+![image](/Images/arduino-ide-port-1.png)
+![image](/Images/arduino-ide-port-2.png)
 
 ## Step 8: Upload Program
 * Once the code has compiled successfully, click on the right-pointed arrow to upload the code
