@@ -7,8 +7,8 @@ void calculateStats()
   moSbdMessage.pressureInt    = (pressureIntStats.average()     - 850) * 100;   // Mean internal pressure (hPa)
   moSbdMessage.temperatureExt = temperatureExtStats.average()   * 100;          // Mean external temperature (°C)
   moSbdMessage.humidityExt    = humidityExtStats.average()      * 100;          // Mean external humidity (%)
-  moSbdMessage.solar          = solarStats.average()            * 10;           // Mean solar irradiance (W m-2)
-  moSbdMessage.snowDepth      = snowStatsAvg.average();                         // Mean snow depth (mm)
+  //moSbdMessage.solar          = solarStats.average()            * 10;           // Mean solar irradiance (W m-2)
+  //moSbdMessage.snowDepth      = snowStatsAvg.average();                         // Mean snow depth (mm)
   moSbdMessage.voltage        = batteryStats.average()          * 100;          // Mean battery voltage (V)
 
   // Calculate mean wind speed and direction vectors
@@ -79,6 +79,7 @@ void printStats()
   DEBUG_PRINT(F("Min: "));        DEBUG_PRINT(humidityExtStats.minimum());      printTab(1);
   DEBUG_PRINT(F("Max: "));        DEBUG_PRINT(humidityExtStats.maximum());      printTab(1);
   DEBUG_PRINT(F("Mean: "));       DEBUG_PRINTLN(humidityExtStats.average());
+  /*
   DEBUG_PRINT(F("Solar"));                                                      printTab(2);
   DEBUG_PRINT(F("Samples: "));    DEBUG_PRINT(solarStats.count());              printTab(1);
   DEBUG_PRINT(F("Min: "));        DEBUG_PRINT(solarStats.minimum());            printTab(1);
@@ -89,6 +90,7 @@ void printStats()
   DEBUG_PRINT(F("Min: "));        DEBUG_PRINT(snowStatsAvg.minimum());          printTab(1);
   DEBUG_PRINT(F("Max: "));        DEBUG_PRINT(snowStatsAvg.maximum());          printTab(1);
   DEBUG_PRINT(F("Mean: "));       DEBUG_PRINTLN(snowStatsAvg.average());
+  */
   DEBUG_PRINT(F("Wind speed"));   printTab(1);
   DEBUG_PRINT(F("Samples: "));    DEBUG_PRINT(windSpeedStats.count());          printTab(1);
   DEBUG_PRINT(F("Min: "));        DEBUG_PRINT(windSpeedStats.minimum());        printTab(1);

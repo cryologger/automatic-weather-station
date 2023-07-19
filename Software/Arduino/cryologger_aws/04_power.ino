@@ -1,5 +1,5 @@
 // Read battery voltage from voltage divider
-void readBattery()
+float readBattery()
 {
   // Start loop timer
   unsigned long loopStartTime = millis();
@@ -15,16 +15,10 @@ void readBattery()
   //float voltage = analogRead(A7);
   //voltage = voltage * 3.3 * 2 / 4096.0;
 
-  // Write data to union
-  moSbdMessage.voltage = voltage * 100;
-
   // Add to statistics object
   batteryStats.add(voltage);
 
-  if (firstTimeFlag)
-  {
-    DEBUG_PRINT("Info - Battery voltage: "); DEBUG_PRINTLN(voltage);
-  }
+  return voltage;
 
   // Stop loop timer
   timer.readBattery = millis() - loopStartTime;

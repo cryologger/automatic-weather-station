@@ -20,15 +20,6 @@ void configureSd()
       {
         online.microSd = false;
         DEBUG_PRINTLN("Warning - microSD failed to initialize.");
-
-        /*
-          while (1)
-          {
-          // Force WDT to reset system
-          blinkLed(PIN_LED_RED, 2, 250);
-          delay(2000);
-          }
-        */
       }
       else
       {
@@ -75,7 +66,7 @@ void createLogFile()
   // O_WRITE  - Open the file for writing
   if (!logFile.open(logFileName, O_CREAT | O_APPEND | O_WRITE))
   {
-    DEBUG_PRINT("Warning - Failed to create log file"); DEBUG_PRINTLN(logFileName);
+    DEBUG_PRINT("Warning - Failed to create log file "); DEBUG_PRINTLN(logFileName);
     return;
   }
   else
@@ -93,15 +84,15 @@ void createLogFile()
 
   // Write header to file
   logFile.println("sample,datetime,voltage,temperature_int,humidity_int,pressure_int,temperature_ext,"
-                  "humidity_ext,pitch,roll,wind_speed,wind_direction,solar,snow_avg,snow_std,snow_max,"
-                  "snow_min,snow_nan,latitude,longitude,satellites,hdop,"
+                  "humidity_ext,pitch,roll,wind_speed,wind_direction,latitude,longitude,satellites,hdop,"
                   "online_microsd,online_bme280,online_lsm303,timer_rtc,timer_battery,timer_microSd,"
-                  "timer_gnss,timer_bme280,timer_lsm303,timer_sht31,timer_7911,timer_sp212,timer_mb7354,"
-                  "timer_iridium,transmit_status,rtc_drift,free_ram,"
-                  "sampleInterval,averageInterval,transmitInterval,retransmitLimit,gnssTimeout,iridiumTimeout");
+                  "timer_gnss,timer_bme280,timer_lsm303,timer_hmp60,timer_5103l,timer_iridium,transmit_status,"
+                  "rtc_drift,free_ram,sampleInterval,averageInterval,transmitInterval,retransmitLimit,"
+                  "gnssTimeout,iridiumTimeout");
 
-  // Unused: timer_hmp60,timer_5103l
-
+  // Unused:
+  //timer_sht31,timer_7911,timer_sp212,timer_mb7354,
+  //solar,snow_avg,snow_std,snow_max,snow_min,snow_nan,
 
   // Close log file
   logFile.close();
@@ -173,12 +164,12 @@ void logData()
       logFile.print(roll);                logFile.print(",");
       logFile.print(windSpeed);           logFile.print(",");
       logFile.print(windDirection);       logFile.print(",");
-      logFile.print(solar);               logFile.print(",");
-      logFile.print(snowDepthAvg);        logFile.print(",");
-      logFile.print(snowDepthStd);        logFile.print(",");
-      logFile.print(snowDepthMax);        logFile.print(",");
-      logFile.print(snowDepthMin);        logFile.print(",");
-      logFile.print(snowDepthNan);        logFile.print(",");
+      //logFile.print(solar);               logFile.print(",");
+      //logFile.print(snowDepthAvg);        logFile.print(",");
+      //logFile.print(snowDepthStd);        logFile.print(",");
+      //logFile.print(snowDepthMax);        logFile.print(",");
+      //logFile.print(snowDepthMin);        logFile.print(",");
+      //logFile.print(snowDepthNan);        logFile.print(",");
       logFile.print(latitude, 6);         logFile.print(",");
       logFile.print(longitude, 6);        logFile.print(",");
       logFile.print(satellites);          logFile.print(",");
@@ -196,12 +187,12 @@ void logData()
       logFile.print(timer.readGnss);      logFile.print(",");
       logFile.print(timer.readBme280);    logFile.print(",");
       logFile.print(timer.readLsm303);    logFile.print(",");
-      //logFile.print(timer.readHmp60);     logFile.print(",");
-      //logFile.print(timer.read5103L);     logFile.print(",");
-      logFile.print(timer.readSht31);     logFile.print(",");
-      logFile.print(timer.read7911);      logFile.print(",");
-      logFile.print(timer.readSp212);     logFile.print(",");
-      logFile.print(timer.readMb7354);     logFile.print(",");
+      logFile.print(timer.readHmp60);     logFile.print(",");
+      logFile.print(timer.read5103L);     logFile.print(",");
+      //logFile.print(timer.readSht31);     logFile.print(",");
+      //logFile.print(timer.read7911);      logFile.print(",");
+      //logFile.print(timer.readSp212);     logFile.print(",");
+      //logFile.print(timer.readMb7354);     logFile.print(",");
       logFile.print(timer.iridium);       logFile.print(",");
 
       // Debugging information
@@ -239,7 +230,7 @@ void logData()
       DEBUG_PRINT("Info - Logging data to: "); DEBUG_PRINTLN(logFileName);
       DEBUG_PRINT(samplesSaved);        DEBUG_PRINT(",");
       DEBUG_PRINT(dateTime);            DEBUG_PRINT(",");
-      DEBUG_PRINT(voltage);             DEBUG_PRINT(",");
+      DEBUG_PRINT(readBattery());       DEBUG_PRINT(",");
       DEBUG_PRINT(temperatureInt);      DEBUG_PRINT(",");
       DEBUG_PRINT(humidityInt);         DEBUG_PRINT(",");
       DEBUG_PRINT(pressureInt);         DEBUG_PRINT(",");
@@ -249,12 +240,12 @@ void logData()
       DEBUG_PRINT(roll);                DEBUG_PRINT(",");
       DEBUG_PRINT(windSpeed);           DEBUG_PRINT(",");
       DEBUG_PRINT(windDirection);       DEBUG_PRINT(",");
-      DEBUG_PRINT(solar);               DEBUG_PRINT(",");
-      DEBUG_PRINT(snowDepthAvg);        DEBUG_PRINT(",");
-      DEBUG_PRINT(snowDepthStd);        DEBUG_PRINT(",");
-      DEBUG_PRINT(snowDepthMax);        DEBUG_PRINT(",");
-      DEBUG_PRINT(snowDepthMin);        DEBUG_PRINT(",");
-      DEBUG_PRINT(snowDepthNan);        DEBUG_PRINT(",");
+      //DEBUG_PRINT(solar);               DEBUG_PRINT(",");
+      //DEBUG_PRINT(snowDepthAvg);        DEBUG_PRINT(",");
+      //DEBUG_PRINT(snowDepthStd);        DEBUG_PRINT(",");
+      //DEBUG_PRINT(snowDepthMax);        DEBUG_PRINT(",");
+      //DEBUG_PRINT(snowDepthMin);        DEBUG_PRINT(",");
+      //DEBUG_PRINT(snowDepthNan);        DEBUG_PRINT(",");
       DEBUG_PRINT_DEC(latitude, 6);     DEBUG_PRINT(",");
       DEBUG_PRINT_DEC(longitude, 6);    DEBUG_PRINT(",");
       DEBUG_PRINT(satellites);          DEBUG_PRINT(",");
@@ -272,11 +263,12 @@ void logData()
       DEBUG_PRINT(timer.readGnss);      DEBUG_PRINT(",");
       DEBUG_PRINT(timer.readBme280);    DEBUG_PRINT(",");
       DEBUG_PRINT(timer.readLsm303);    DEBUG_PRINT(",");
-      //DEBUG_PRINT(timer.readHmp60);     DEBUG_PRINT(",");
-      //DEBUG_PRINT(timer.read5103L);     DEBUG_PRINT(",");
-      DEBUG_PRINT(timer.readSht31);     DEBUG_PRINT(",");
-      DEBUG_PRINT(timer.read7911);      DEBUG_PRINT(",");
-      DEBUG_PRINT(timer.readSp212);     DEBUG_PRINT(",");
+      DEBUG_PRINT(timer.readHmp60);     DEBUG_PRINT(",");
+      DEBUG_PRINT(timer.read5103L);     DEBUG_PRINT(",");
+      //DEBUG_PRINT(timer.readSht31);     DEBUG_PRINT(",");
+      //DEBUG_PRINT(timer.read7911);      DEBUG_PRINT(",");
+      //DEBUG_PRINT(timer.readSp212);     DEBUG_PRINT(",");
+      //DEBUG_PRINT(timer.readMb7354);    DEBUG_PRINT(",");
       DEBUG_PRINT(timer.iridium);       DEBUG_PRINT(",");
 
       // Debugging information
