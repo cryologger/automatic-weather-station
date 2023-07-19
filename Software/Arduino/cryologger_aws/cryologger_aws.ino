@@ -1,12 +1,12 @@
 /*
   Title:    Cryologger Automatic Weather Station
-  Date:     July 3, 2023
+  Date:     July 19, 2023
   Author:   Adam Garbo
-  Version:  1.2.1
+  Version:  1.3.0
 
   Description:
-  - Code configured for automatic weather stations to be deployed on Ellsemere Island, 
-  Nunavut during the 2023 summer field season.
+  - Code configured for automatic weather stations to be
+  deployed in Nunavut, Canada.
 
   Components:
   - Ground Control RockBLOCK 9603
@@ -21,13 +21,11 @@
   - SanDisk Industrial XI 8 GB microSD card
 
   Sensors:
-  - Davis Instruments 7911 Anemometer
-  - Davis Instruments Temperature/Relative Humidity Sensor
-  - Apogee SP-212 Pyranometer
-  - Maxbotix MB7354 Ultrasonic sensor
+    - RM Young 05103L Wind Monitor
+    - Vaisala HMP60 Humidity and Temperature Probe
 
   Comments:
-  - Sketch uses 102824 bytes (39%) of program storage space.
+  - Sketch uses 99744 bytes (38%) of program storage space.
 */
 
 // ----------------------------------------------------------------------------
@@ -51,13 +49,14 @@
 // ----------------------------------------------------------------------------
 // Define hardware and software versions
 // ----------------------------------------------------------------------------
-#define SOFTWARE_VERSION  "2.1.0"
-#define HARDWARE_VERSION  "0.4"
+#define SOFTWARE_VERSION      "1.3.0"
+#define HARDWARE_VERSION      "0.4"
+#define ROCKBLOCK_VERSION_3F  true
 
 // ----------------------------------------------------------------------------
 // Define unique identifier
 // ----------------------------------------------------------------------------
-char UID[5] = "TST";
+char UID[5] = "XXX";
 
 // ----------------------------------------------------------------------------
 // Data logging
@@ -97,10 +96,10 @@ char UID[5] = "TST";
 #define PIN_VBAT            A0
 #define PIN_WIND_SPEED      A1
 #define PIN_WIND_DIR        A2
-#define PIN_SOLAR           A3
-#define PIN_SNOW            A4
+#define PIN_HUMID           A3
+#define PIN_TEMP            A4
 #define PIN_GNSS_EN         A5
-#define PIN_MICROSD_CS      4   // microSD chip select pin
+#define PIN_MICROSD_CS      4
 #define PIN_12V_EN          5   // 12 V step-up/down regulator
 #define PIN_5V_EN           6   // 5V step-down regulator
 #define PIN_LED_GREEN       8   // Green LED
@@ -110,8 +109,8 @@ char UID[5] = "TST";
 #define PIN_LED_RED         13
 
 // Unused
-#define PIN_TEMP            7   // Spare
-#define PIN_HUMID           7   // Spare
+#define PIN_SOLAR           7
+#define PIN_SNOW            7
 #define PIN_SENSOR_PWR      7   // Spare
 #define PIN_RFM95_CS        7   // LoRa "B"
 #define PIN_RFM95_RST       7   // LoRa "A"
@@ -256,8 +255,8 @@ typedef union
     uint16_t  humidityExt;        // External humidity (%)          (2 bytes)   * 10
     int16_t   pitch;              // Pitch (°)                      (2 bytes)   * 100
     int16_t   roll;               // Roll (°)                       (2 bytes)   * 100
-    uint16_t  solar;              // Solar irradiance (W m-2)       (2 bytes)   * 100
-    uint16_t  snowDepth;          // Snow depth (mm)                 (2 bytes)
+    //uint16_t  solar;              // Solar irradiance (W m-2)       (2 bytes)   * 100
+    //uint16_t  snowDepth;          // Snow depth (mm)                 (2 bytes)
     uint16_t  windSpeed;          // Mean wind speed (m/s)          (2 bytes)   * 100
     uint16_t  windDirection;      // Mean wind direction (°)        (2 bytes)
     uint16_t  windGustSpeed;      // Wind gust speed (m/s)          (2 bytes)   * 100
@@ -270,8 +269,8 @@ typedef union
     uint16_t  transmitDuration;   // Previous transmission duration (2 bytes)
     uint8_t   transmitStatus;     // Iridium return code            (1 byte)
     uint16_t  iterationCounter;   // Message counter                (2 bytes)
-  } __attribute__((packed));                                    // Total: (37 bytes)
-  uint8_t bytes[37];
+  } __attribute__((packed));                                        // Total: (33 bytes)
+  uint8_t bytes[33];
 } SBD_MO_MESSAGE;
 
 SBD_MO_MESSAGE moSbdMessage;
@@ -342,8 +341,11 @@ void setup()
   digitalWrite(PIN_5V_EN, LOW);         // Disable power to Iridium 9603
   digitalWrite(PIN_12V_EN, LOW);        // Disable 12V power
   digitalWrite(PIN_GNSS_EN, HIGH);      // Disable power to GNSS
-  digitalWrite(PIN_IRIDIUM_SLEEP, LOW); // RockBLOCK v3.D and below: Disable power to Iridium
-  //digitalWrite(PIN_IRIDIUM_SLEEP, HIGH);  // RockBLOCK v3.F and above: Set N-FET controlling RockBLOCK On/Off pin to HIGH (no voltage)
+#ifdef ROCKBLOCK_VERSION_3F
+  digitalWrite(PIN_IRIDIUM_SLEEP, HIGH); // RockBLOCK v3.F and above: Set N-FET controlling RockBLOCK On/Off pin to HIGH (no voltage)
+#else
+  digitalWrite(PIN_IRIDIUM_SLEEP, LOW); // RockBLOCK v3.D and below: Set On/Off pin LOW to disable power to Iridium
+#endif
 
   // Configure analog-to-digital (ADC) converter
   configureAdc();
@@ -359,8 +361,13 @@ void setup()
 
   DEBUG_PRINTLN();
   printLine();
-  DEBUG_PRINT("Cryologger - Automatic Weather Station #"); DEBUG_PRINTLN(UID);
-
+  DEBUG_PRINTLN("Cryologger - Automatic Weather Station");
+  printLine();
+  DEBUG_PRINT("Unique Identifier:");  printTab(1);  DEBUG_PRINTLN(UID);
+  DEBUG_PRINT("Software Version:");   printTab(1);  DEBUG_PRINTLN(SOFTWARE_VERSION);
+  DEBUG_PRINT("Hardware Version:");   printTab(1);  DEBUG_PRINTLN(HARDWARE_VERSION);
+  DEBUG_PRINT("Datetime:");           printTab(2);  printDateTime();
+  DEBUG_PRINT("Battery Voltage:");    printTab(1);  DEBUG_PRINTLN(readBattery());
   printLine();
 
 #if CALIBRATE
@@ -378,6 +385,8 @@ void setup()
 #endif
 
   // Configure devices
+  DEBUG_PRINTLN("Device Configuration");
+  printLine();
   configureRtc();       // Configure real-time clock (RTC)
   readRtc();            // Read date and time from RTC
   configureWdt();       // Configure Watchdog Timer (WDT)
@@ -466,16 +475,16 @@ void loop()
 
       // Perform measurements
       enable5V();       // Enable 5V power
-      //enable12V();      // Enable 12V power
+      enable12V();      // Enable 12V power
       readBme280();     // Read sensor
       readLsm303();     // Read accelerometer
-      readSp212();      // Read solar radiation
-      readSht31();      // Read temperature/relative humidity sensor
-      read7911();       // Read anemometer
-      readMb7354();     // Read snow depth
-      //readHmp60();      // Read temperature/relative humidity sensor
-      //read5103L();      // Read anemometer
-      //disable12V();     // Disable 12V power
+      //readSp212();      // Read solar radiation
+      //readSht31();      // Read temperature/relative humidity sensor
+      //read7911();       // Read anemometer
+      //readMb7354();     // Read snow depth
+      readHmp60();      // Read temperature/relative humidity sensor
+      read5103L();      // Read anemometer
+      disable12V();     // Disable 12V power
       disable5V();      // Disable 5V power
 
       // Print summary of statistics
@@ -496,8 +505,8 @@ void loop()
           {
             readGnss(); // Sync RTC with the GNSS
             currentDate = newDate;
-            Serial.print("currentDate: "); Serial.println(currentDate);
-            Serial.print("newDate: "); Serial.println(newDate);
+            DEBUG_PRINT("currentDate: "); DEBUG_PRINTLN(currentDate);
+            DEBUG_PRINT("newDate: "); DEBUG_PRINTLN(newDate);
           }
           transmitData(); // Transmit data via Iridium transceiver
         }
