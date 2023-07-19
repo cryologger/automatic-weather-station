@@ -152,7 +152,6 @@ void printAlarm()
   DEBUG_PRINTLN(alarmBuffer);
 }
 
-
 void checkDate()
 {
   // Record log file tracker the first time program runs
@@ -161,6 +160,6 @@ void checkDate()
     currentDate = rtc.getDay();
   }
   newDate = rtc.getDay();
-  Serial.print("currentDate: "); Serial.println(currentDate);
-  Serial.print("newDate: "); Serial.println(newDate);
+  //DEBUG_PRINT("currentDate: "); DEBUG_PRINTLN(currentDate);
+  //DEBUG_PRINT("newDate: "); DEBUG_PRINTLN(newDate);
 }
