@@ -20,7 +20,7 @@ This guide provides step-by-step instructions on installing the Arduino IDE and 
 ![image](/Images/arduino-ide-boards.png)
 
 ## Step 4: Install Libraries
-Several libraries are required by the Cryologger ice tracking beacons. These can be downloaded using the Arduino IDE's Library Manager (requires an Internet connection).
+Several libraries are required by the Cryologger AWS. These can be downloaded using the Arduino IDE's Library Manager (requires an Internet connection).
 
 * Navigate to: Tools > Manage Libraries
 * Search for and install the following libraries:
