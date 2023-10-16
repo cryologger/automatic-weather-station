@@ -1,12 +1,12 @@
 /*
-  Title:    Cryologger Automatic Weather Station
-  Date:     July 19, 2023
+  Title:    Cryologger - Automatic Weather Station (AWS)
+  Date:     October 16, 2023
   Author:   Adam Garbo
-  Version:  1.3.0
+  Version:  1.3.1
 
   Description:
-  - Code configured for automatic weather stations to be
-  deployed in Nunavut, Canada.
+  - Code configured for an automatic weather station to be
+  deployed in Ottawa, Canada that will serve as a test unit.
 
   Components:
   - Ground Control RockBLOCK 9603
@@ -23,9 +23,10 @@
   Sensors:
     - RM Young 05103L Wind Monitor
     - Vaisala HMP60 Humidity and Temperature Probe
+    - Maxbotix MB7354 Ultrasonic Sensor
 
   Comments:
-  - Sketch uses 99744 bytes (38%) of program storage space.
+  - Sketch uses 100048 bytes (38%) of program storage space. Maximum is 262144 bytes.
 */
 
 // ----------------------------------------------------------------------------
@@ -49,14 +50,14 @@
 // ----------------------------------------------------------------------------
 // Define hardware and software versions
 // ----------------------------------------------------------------------------
-#define SOFTWARE_VERSION      "1.3.0"
+#define SOFTWARE_VERSION      "1.3.1"
 #define HARDWARE_VERSION      "0.4"
 #define ROCKBLOCK_VERSION_3F  true
 
 // ----------------------------------------------------------------------------
 // Define unique identifier
 // ----------------------------------------------------------------------------
-char UID[5] = "XXX";
+char UID[5] = "TST";
 
 // ----------------------------------------------------------------------------
 // Data logging
@@ -103,6 +104,7 @@ char UID[5] = "XXX";
 #define PIN_12V_EN          5   // 12 V step-up/down regulator
 #define PIN_5V_EN           6   // 5V step-down regulator
 #define PIN_LED_GREEN       8   // Green LED
+#define PIN_SNOW            9
 #define PIN_IRIDIUM_RX      10  // Pin 1 RXD (Yellow)
 #define PIN_IRIDIUM_TX      11  // Pin 6 TXD (Orange)
 #define PIN_IRIDIUM_SLEEP   12  // Pin 7 OnOff (Grey)
@@ -110,7 +112,6 @@ char UID[5] = "XXX";
 
 // Unused
 #define PIN_SOLAR           7
-#define PIN_SNOW            7
 #define PIN_SENSOR_PWR      7   // Spare
 #define PIN_RFM95_CS        7   // LoRa "B"
 #define PIN_RFM95_RST       7   // LoRa "A"
@@ -256,7 +257,7 @@ typedef union
     int16_t   pitch;              // Pitch (°)                      (2 bytes)   * 100
     int16_t   roll;               // Roll (°)                       (2 bytes)   * 100
     //uint16_t  solar;              // Solar irradiance (W m-2)       (2 bytes)   * 100
-    //uint16_t  snowDepth;          // Snow depth (mm)                 (2 bytes)
+    uint16_t  snowDepth;          // Snow depth (mm)                (2 bytes)
     uint16_t  windSpeed;          // Mean wind speed (m/s)          (2 bytes)   * 100
     uint16_t  windDirection;      // Mean wind direction (°)        (2 bytes)
     uint16_t  windGustSpeed;      // Wind gust speed (m/s)          (2 bytes)   * 100
@@ -269,8 +270,8 @@ typedef union
     uint16_t  transmitDuration;   // Previous transmission duration (2 bytes)
     uint8_t   transmitStatus;     // Iridium return code            (1 byte)
     uint16_t  iterationCounter;   // Message counter                (2 bytes)
-  } __attribute__((packed));                                        // Total: (33 bytes)
-  uint8_t bytes[33];
+  } __attribute__((packed));                                        // Total: (35 bytes)
+  uint8_t bytes[35];
 } SBD_MO_MESSAGE;
 
 SBD_MO_MESSAGE moSbdMessage;
@@ -481,7 +482,7 @@ void loop()
       //readSp212();      // Read solar radiation
       //readSht31();      // Read temperature/relative humidity sensor
       //read7911();       // Read anemometer
-      //readMb7354();     // Read snow depth
+      readMb7354();     // Read snow depth
       readHmp60();      // Read temperature/relative humidity sensor
       read5103L();      // Read anemometer
       disable12V();     // Disable 12V power

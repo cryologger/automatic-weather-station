@@ -165,11 +165,11 @@ void logData()
       logFile.print(windSpeed);           logFile.print(",");
       logFile.print(windDirection);       logFile.print(",");
       //logFile.print(solar);               logFile.print(",");
-      //logFile.print(snowDepthAvg);        logFile.print(",");
-      //logFile.print(snowDepthStd);        logFile.print(",");
-      //logFile.print(snowDepthMax);        logFile.print(",");
-      //logFile.print(snowDepthMin);        logFile.print(",");
-      //logFile.print(snowDepthNan);        logFile.print(",");
+      logFile.print(snowDepthAvg);        logFile.print(",");
+      logFile.print(snowDepthStd);        logFile.print(",");
+      logFile.print(snowDepthMax);        logFile.print(",");
+      logFile.print(snowDepthMin);        logFile.print(",");
+      logFile.print(snowDepthNan);        logFile.print(",");
       logFile.print(latitude, 6);         logFile.print(",");
       logFile.print(longitude, 6);        logFile.print(",");
       logFile.print(satellites);          logFile.print(",");
@@ -192,7 +192,7 @@ void logData()
       //logFile.print(timer.readSht31);     logFile.print(",");
       //logFile.print(timer.read7911);      logFile.print(",");
       //logFile.print(timer.readSp212);     logFile.print(",");
-      //logFile.print(timer.readMb7354);     logFile.print(",");
+      logFile.print(timer.readMb7354);     logFile.print(",");
       logFile.print(timer.iridium);       logFile.print(",");
 
       // Debugging information
@@ -241,11 +241,11 @@ void logData()
       DEBUG_PRINT(windSpeed);           DEBUG_PRINT(",");
       DEBUG_PRINT(windDirection);       DEBUG_PRINT(",");
       //DEBUG_PRINT(solar);               DEBUG_PRINT(",");
-      //DEBUG_PRINT(snowDepthAvg);        DEBUG_PRINT(",");
-      //DEBUG_PRINT(snowDepthStd);        DEBUG_PRINT(",");
-      //DEBUG_PRINT(snowDepthMax);        DEBUG_PRINT(",");
-      //DEBUG_PRINT(snowDepthMin);        DEBUG_PRINT(",");
-      //DEBUG_PRINT(snowDepthNan);        DEBUG_PRINT(",");
+      DEBUG_PRINT(snowDepthAvg);        DEBUG_PRINT(",");
+      DEBUG_PRINT(snowDepthStd);        DEBUG_PRINT(",");
+      DEBUG_PRINT(snowDepthMax);        DEBUG_PRINT(",");
+      DEBUG_PRINT(snowDepthMin);        DEBUG_PRINT(",");
+      DEBUG_PRINT(snowDepthNan);        DEBUG_PRINT(",");
       DEBUG_PRINT_DEC(latitude, 6);     DEBUG_PRINT(",");
       DEBUG_PRINT_DEC(longitude, 6);    DEBUG_PRINT(",");
       DEBUG_PRINT(satellites);          DEBUG_PRINT(",");
@@ -268,7 +268,7 @@ void logData()
       //DEBUG_PRINT(timer.readSht31);     DEBUG_PRINT(",");
       //DEBUG_PRINT(timer.read7911);      DEBUG_PRINT(",");
       //DEBUG_PRINT(timer.readSp212);     DEBUG_PRINT(",");
-      //DEBUG_PRINT(timer.readMb7354);    DEBUG_PRINT(",");
+      DEBUG_PRINT(timer.readMb7354);    DEBUG_PRINT(",");
       DEBUG_PRINT(timer.iridium);       DEBUG_PRINT(",");
 
       // Debugging information
