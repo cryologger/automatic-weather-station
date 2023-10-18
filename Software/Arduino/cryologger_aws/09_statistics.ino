@@ -8,7 +8,7 @@ void calculateStats()
   moSbdMessage.temperatureExt = temperatureExtStats.average()   * 100;          // Mean external temperature (°C)
   moSbdMessage.humidityExt    = humidityExtStats.average()      * 100;          // Mean external humidity (%)
   //moSbdMessage.solar          = solarStats.average()            * 10;           // Mean solar irradiance (W m-2)
-  //moSbdMessage.snowDepth      = snowStatsAvg.average();                         // Mean snow depth (mm)
+  moSbdMessage.snowDepth      = snowStatsAvg.average();                         // Mean snow depth (mm)
   moSbdMessage.voltage        = batteryStats.average()          * 100;          // Mean battery voltage (V)
 
   // Calculate mean wind speed and direction vectors
@@ -85,12 +85,13 @@ void printStats()
   DEBUG_PRINT(F("Min: "));        DEBUG_PRINT(solarStats.minimum());            printTab(1);
   DEBUG_PRINT(F("Max: "));        DEBUG_PRINT(solarStats.maximum());            printTab(1);
   DEBUG_PRINT(F("Mean: "));       DEBUG_PRINTLN(solarStats.average());
+  */
   DEBUG_PRINT(F("Snow "));                                                      printTab(2);
   DEBUG_PRINT(F("Samples: "));    DEBUG_PRINT(snowStatsAvg.count());            printTab(1);
   DEBUG_PRINT(F("Min: "));        DEBUG_PRINT(snowStatsAvg.minimum());          printTab(1);
   DEBUG_PRINT(F("Max: "));        DEBUG_PRINT(snowStatsAvg.maximum());          printTab(1);
   DEBUG_PRINT(F("Mean: "));       DEBUG_PRINTLN(snowStatsAvg.average());
-  */
+
   DEBUG_PRINT(F("Wind speed"));   printTab(1);
   DEBUG_PRINT(F("Samples: "));    DEBUG_PRINT(windSpeedStats.count());          printTab(1);
   DEBUG_PRINT(F("Min: "));        DEBUG_PRINT(windSpeedStats.minimum());        printTab(1);
