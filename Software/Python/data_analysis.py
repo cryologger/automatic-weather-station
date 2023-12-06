@@ -3,7 +3,10 @@
 """
 Created on Sun May 15 09:55:23 2022
 
-@author: adam
+@author: Adam Garbo
+
+Description:
+    Code to analyze the operation of the Cryologger AWS.
 """
 
 import pandas as pd
@@ -13,6 +16,7 @@ import matplotlib.dates as mdates
 import numpy as np
 import seaborn as sns
 
+
 # -----------------------------------------------------------------------------
 # Plotting attributes
 # -----------------------------------------------------------------------------
@@ -21,39 +25,40 @@ import seaborn as sns
 sns.set_theme(style="ticks")
 sns.set_context("talk") # talk, paper, poster
 
-# Set ticks to point inward
-sns.set_style({"xtick.direction": "in", "ytick.direction": "in"})
-
 # Set colour palette
 sns.set_palette("colorblind")
-colours = sns.color_palette("colorblind").as_hex()
 
-# Graph
-lw = 2
-interval = 1
+# Graph attributes
+lw = 1
+interval = 30
 date_format = "%Y-%m-%d"
 
 # Figure DPI
 dpi = 300
 
-# -----------------------------------------------------------------------------
-# Paths
-# -----------------------------------------------------------------------------
 
-# Path to data
-path_data = ("/Users/adam/Documents/GitHub/cryologger-automatic-weather-station/Software/Python/")
-
-# Path to figures
-path_figures = ("/Users/adam/Documents/GitHub/cryologger-automatic-weather-station/Software/Python/")
-
+# Test
+# Set ticks to point inward
+sns.set_style({"xtick.direction": "in", "ytick.direction": "in"})
 
 # -----------------------------------------------------------------------------
-# Load and clean data exported from MariaDB
+# Folder paths
 # -----------------------------------------------------------------------------
 
+# Python code directory
+path = "/Users/adam/Documents/GitHub/automatic-weather-station/Software/Python/"
+
+# Data directory
+path_data = "/Users/adam/Documents/GitHub/automatic-weather-station/Software/Python"
+
+# Figure directory
+path_figures = "/Users/adam/Documents/GitHub/automatic-weather-station/Software/Python/Figures/"
+
+# -----------------------------------------------------------------------------
+# Download and clean data exported from MariaDB
+# -----------------------------------------------------------------------------
 
 df1 = pd.read_csv("/Users/adam/Downloads/cryologger_aws.csv", index_col=False)
-
 
 df1 = pd.read_csv(path_data + "2022_aws_arctic_bay.csv", index_col=False)
 df2 = pd.read_csv(path_data + "2022_aws_milne.csv", index_col=False)
@@ -80,7 +85,7 @@ df2.loc[df2["transmit_duration"] == 0, "transmit_duration"] = np.nan
 
 
 # -----------------------------------------------------------------------------
-# Optional: Download and clean data exported from WordPress
+# Download and clean data exported from WordPress
 # -----------------------------------------------------------------------------
 
 # Load most recent output file downloaded from WordPress
@@ -94,6 +99,17 @@ df["IMEI"] = df["IMEI"].astype(str)
 
 # Set zero transmission duration values to null
 df.loc[df["Transmit Duration (s)"] == 0, "Transmit Duration (s)"] = np.nan
+
+# -----------------------------------------------------------------------------
+# Download and clean data from microSD card
+# -----------------------------------------------------------------------------
+
+# Load most recent output file downloaded from WordPress
+df = pd.read_csv(path_data + "/AWS_LVY_20231119_133401.csv", index_col=False)
+
+# Convert to datetime
+df["datetime"] = pd.to_datetime(df["datetime"].astype(str), format="%Y-%m-%d %H:%M:%S")
+
 
 # -----------------------------------------------------------------------------
 # Plot temperature, wind speed, and wind direction
