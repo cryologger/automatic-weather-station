@@ -61,7 +61,7 @@ When initially powered on, the Cryologger AWS will attempt to establish a GNSS f
 
 While the system is in deep sleep, a Watchdog Timer (WDT) will wake the system to check the program has not frozen every 8 seconds and perform a reset, if necessary. This helps to ensure the long-term reliability of the system.
 
-### 2.2.1 Measurements
+#### 2.2.1 Measurements
 
 **Table 2.** List of Cryologger AWS v1.0 data variables that can be transmitted and/or logged with variable sizes.
 
@@ -89,17 +89,17 @@ While the system is in deep sleep, a Watchdog Timer (WDT) will wake the system t
 | uint8_t  | transmitStatus    | Iridium return code                 | 1            |
 | uint16_t | iterationCounter  | Message counter                     | 2            | 
 
-### 2.3 Data transmission and processing
+#### 2.2.2 Data Transmission and Processing
 
 Sensor measurements and GNSS position are recorded hourly and stored in memory until the desired transmission interval is reached. Data are compressed into a binary message (340 bytes maximum) to minimize the cost and total number of transmissions required. Data are transmitted via the Iridium Short Burst Data (SBD) satellite network at user-specified intervals, which can be remotely updated based on the desired sampling frequency. SBD data messages are received by an Iridium ground station and sent to Ground Control's server. The data is then forwarded to an Amazon Web Services (AWS) SQS queue, decoded using an AWS Lambda Python function and stored in a database using the Amazon Relational Database Service (RDS). Data can be viewed in near-real time at https://cryologger.org.
 
-# 3.0 Deployments
+## 3.0 Deployments
 
 
-# 4.0 Results
+## 4.0 Results
 
 
-# 5.0 Conclusion
+## 5.0 Conclusion
 
 
 ## Repository Contents
