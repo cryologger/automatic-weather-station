@@ -5,7 +5,8 @@
 </p>
 
 # Cryologger - Automatic Weather Station (AWS)
-![Image](https://user-images.githubusercontent.com/22924092/221362172-0b745dd7-2e42-4ac3-a1aa-66db8dc36bda.JPG)
+
+![DSC_7941](https://github.com/cryologger/automatic-weather-station/assets/22924092/5b3acadf-4ccf-4cc4-9847-c8cd8aa003ba)
 
 ## Background
 Polar environments are undergoing rapid environmental change, yet there is a lack of high spatial and temporal monitoring data available in these remote regions. Reliance on expensive and proprietary commercial data acquisition and telemetry systems can inhibit both researchers and citizen scientists and present a significant barrier to the establishment of widespread monitoring networks. 
