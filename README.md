@@ -7,7 +7,6 @@
 # Cryologger - Automatic Weather Station (AWS)
 
 ### Note: This project is under active development.
-
 ![DSC_7941](https://github.com/cryologger/automatic-weather-station/assets/22924092/5b3acadf-4ccf-4cc4-9847-c8cd8aa003ba)
 
 ## 1.0 Introduction
@@ -96,7 +95,7 @@ Sensor measurements and GNSS position are recorded hourly and stored in memory u
 
 ## 3.0 Deployments
 
-<p align="center"><img src="https://github.com/cryologger/automatic-weather-station/assets/22924092/1f591af9-fa7d-48b0-97dc-aee63c6f5255" width="640"></p>
+<p align="center"><img src="https://github.com/cryologger/automatic-weather-station/assets/22924092/408cfb7d-fccc-4c50-a84e-6c36417edb49" width="640"></p>
 <p align="center"><b>Figure 3.</b> Map of Cryologger AWS deployments made between 2019 and 2023.</p>
 
 ## 4.0 Results
