@@ -22,38 +22,39 @@ The Cryologger AWS is based on the open-source Arduino platform (www.arduino.cc)
 
 Planned for extended deployments in harsh Arctic conditions, the Cryologger AWS provides long-term measurements of weather variables such as temperature, humidity, wind speed, wind direction, solar irradiance and snow depth, as well as system diagnostic variables including pitch, roll, battery voltage. Data are transmitted over the Iridium satellite network at specified intervals and can be remotely updated based on the desired sampling frequency. Collected data are made available in near-real time at https://cryologger.org.
 
-<img width="720" alt="image" src="https://user-images.githubusercontent.com/22924092/224180959-e6673df1-275e-406b-9564-ec4f626f1293.png">
+<img src="https://user-images.githubusercontent.com/22924092/224180959-e6673df1-275e-406b-9564-ec4f626f1293.png" width="720">
 
 #### 2.1.1. Bill of Materials (BOM)
 
 For a complete bill of materials, including requirements for power and mounting of a complete deployable system, please see ASSEMBLY.md.
 
-**Table 1.** Bill of materials and associated costs for components used in the Cryologger AWS v1.0. Prices are listed in USD and are current as of December 2023. Taxes and shipping not included. <sup>1</sup>Denotes optional component. Please note the BOM is a work in progress.
-| Component             | Product                                                               | Cost (USD) |
-|-----------------------|-----------------------------------------------------------| :---: |
-| Satellite transceiver | [Rock7 RockBLOCK 9603](http://www.rock7mobile.com/products-rockblock-9603) | $267.50
-| Satellite antenna*    | [Maxtena M1621HCT-P-SMA](https://maxtena.com/products/f-passive/m1621hct-p-sma-iridium-passive-antenna/) | $54.00 
-| Processor             | [Adafruit Feather M0 Adalogger](https://www.adafruit.com/product/2796) | $19.95
-| GNSS                  | [Adafruit Ultimate GPS FeatherWing](https://www.adafruit.com/product/3133) | $24.95
-| IMU                   | [Adafruit LSM303AGR Accelerometer Magnetometer](https://www.adafruit.com/product/4413) | $12.50
-| Sensor                | [Adafruit BME280 Temperature Humidity Pressure Sensor ](https://www.adafruit.com/product/2652) | $14.95
-| Voltage regulator     | [Pololu D36V6F3 3.3V 600mA Step-Down Voltage Regulator](https://www.pololu.com/product/3791) | $16.95 
-| Voltage regulator     | [Pololu D36V6F5 5V 600mA Step-Down Voltage Regulator](https://www.pololu.com/product/3792) | $16.95 
-| Voltage regulator     | [Pololu U3V40F12 12V Step-Up Voltage Regulator ](https://www.pololu.com/product/4016) | $9.95 
-| Resistor              | [10 M 1% 0.6 W resistor](https://www.mouser.ca/ProductDetail/594-MBB02070C1005FCT) | $0.44 |
-| Resistor              | [1 M 1% 0.6 W resistor](https://www.mouser.ca/ProductDetail/594-B0207C1M000F5T) | $0.40 
-| Capacitor             | [0.1 uF Capacitor](https://www.mouser.ca/ProductDetail/Vishay-BC-Components/K104K15X7RF53L2?qs=mWFvmKOfYW8KbAXlf9eSQA%3D%3D) | $0.29 
-| Power connector       |	[Phoenix Contact MSTB 2,5/ 2-ST-5,08 - 1757019](https://www.mouser.ca/ProductDetail/Phoenix-Contact/1757242?qs=%2Fha2pyFadugVjodGKkrF4xNq%252BZEVHysqCHlL2cTnJ%252B8%3D) | $0.67 
-| Power connector	      | [Phoenix Contact MSTBA 2,5/ 2-G-5,08 - 1757242](https://www.mouser.ca/ProductDetail/Phoenix-Contact/1757019?qs=sGAEpiMZZMvlX3nhDDO4AGmxTE5dWGQY3FmaBdjJUN0%3D) | $2.08 
-| Connector             |	[Molex PicoBlade PCB Header](https://www.mouser.ca/datasheet/2/276/0530471010_PCB_HEADERS-171035.pdf) | $0.50 
+**Table 1.** Bill of materials and associated costs for the main components used in the Cryologger AWS v1.0. Prices are listed in USD and are current as of December 2023. Taxes and shipping not included. <sup>1</sup>Denotes optional component.
+| Component             | Product                                                                                                                      | Quantity | Cost (USD) |
+|-----------------------|------------------------------------------------------------------------------------------------------------------------------|:--------:|:----------:|
+| PCB                   | [Custom Cryologger Printed Circuit Board](https://jlcpcb.com)                                                                |     1    |    $5.00   |
+| Satellite transceiver | [Rock7 RockBLOCK 9603](http://www.rock7mobile.com/products-rockblock-9603)                                                   |     1    |   $267.50  |
+| Satellite antenna     | [Maxtena M1621HCT-P-SMA](https://maxtena.com/products/f-passive/m1621hct-p-sma-iridium-passive-antenna/)                     |     1    |   $54.00   |
+| Processor             | [Adafruit Feather M0 Adalogger](https://www.adafruit.com/product/2796)                                                       |     1    |   $19.95   |
+| GNSS                  | [Adafruit Ultimate GPS FeatherWing](https://www.adafruit.com/product/3133)                                                   |     1    |   $24.95   |
+| IMU                   | [Adafruit LSM303AGR Accelerometer Magnetometer](https://www.adafruit.com/product/4413)                                       |     1    |   $12.50   |
+| Sensor                | [Adafruit BME280 Temperature Humidity Pressure Sensor ](https://www.adafruit.com/product/2652)                               |     1    |   $14.95   |
+| Voltage regulator     | [Pololu D36V6F3 3.3V 600mA Step-Down Voltage Regulator](https://www.pololu.com/product/3791)                                 |     1    |   $16.95   |
+| Voltage regulator     | [Pololu D36V6F5 5V 600mA Step-Down Voltage Regulator](https://www.pololu.com/product/3792)                                   |     1    |   $16.95   |
+| Voltage regulator     | [Pololu U3V40F12 12V Step-Up Voltage Regulator ](https://www.pololu.com/product/4016)                                        |     1    |    $9.95   |
+| Resistor              | [10 M 1% 0.6 W resistor](https://www.mouser.ca/ProductDetail/594-MBB02070C1005FCT)                                           |     1    |    $0.44   |
+| Resistor              | [1 M 1% 0.6 W resistor](https://www.mouser.ca/ProductDetail/594-B0207C1M000F5T)                                              |     1    |    $0.40   |
+| Capacitor             | [0.1 uF Capacitor](https://www.mouser.ca/ProductDetail/Vishay-BC-Components/K104K15X7RF53L2?qs=mWFvmKOfYW8KbAXlf9eSQA%3D%3D) |     1    |    $0.29   |
+| Power connector       |                                                                                                                              |     1    |            |
+| Power connector       |                                                                                                                              |     1    |            |
+| Connector             |                                                                                                                              |     1    |            |
 
 **Table 2.** Environmental sensors used in Cryologger AWS v1.0. Prices are listed in USD and are current as of December 2023. Taxes and shipping not included.
-| Environment Variable          | Sensor                                                                                         | Cost (USD) |
-|-------------------------------|------------------------------------------------------------------------------------------------|:----------:|
-| Wind Speed & Direction        | [RM Young Wind Monitor 5103L Anemometer](https://www.youngusa.com/product/wind-monitor/)       | $1432      |
-| Temperature/Relative Humidity | [Vaisala HMP60 Humidity and Temperature Probe](https://store.vaisala.com/en/products/HMP60)    | $330       |
+| Environment Variable          | Sensor                                                                                                                       | Cost (USD) |
+|-------------------------------|------------------------------------------------------------------------------------------------------------------------------|:----------:|
+| Wind Speed & Direction        | [RM Young Wind Monitor 5103L Anemometer](https://www.youngusa.com/product/wind-monitor/)                                     | $1432      |
+| Temperature/Relative Humidity | [Vaisala HMP60 Humidity and Temperature Probe](https://store.vaisala.com/en/products/HMP60)                                  | $330       |
 | Solar Irradiance              | [SP-212-SS: Amplified 0-2.5 Volt Pyranometer](https://www.apogeeinstruments.com/sp-212-ss-amplified-0-2-5-volt-pyranometer/) | $325       |
-| Snow Depth                    | [Maxboxtix MB7374 HRXL-MaxSonar-WRST7](https://maxbotix.com/products/mb7374)                   | $290       |
+| Snow Depth                    | [Maxboxtix MB7374 HRXL-MaxSonar-WRST7](https://maxbotix.com/products/mb7374)                                                 | $290       |
 
 
 ### 2.2 Operation
@@ -65,29 +66,29 @@ While the system is in deep sleep, a Watchdog Timer (WDT) will wake the system t
 
 **Table 2.** List of Cryologger AWS v1.0 data variables that can be transmitted and/or logged with variable sizes.
 
-| Type     | Variable          | Description                         | Size (btyes) | 
-|----------|-------------------|-------------------------------------|:------------:|
-| uint32_t | unixtime          | UNIX Epoch time                     | 4            |
-| int16_t  | temperatureInt    | Internal temperature (°C)           | 2            | 
-| uint16_t | humidityInt       | Internal humidity (%)               | 2            |
-| uint16_t | pressureInt       | Internal pressure (hPa)             | 2            |
-| int16_t  | temperatureExt    | External temperature (°C)           | 2            |
-| uint16_t | humidityExt       | External humidity (%)               | 2            |
-| int16_t  | pitch             | Pitch (°)                           | 2            | 
-| int16_t  | roll              | Roll (°)                            | 2            |
-| uint16_t | solar             | Solar irradiance (W m-2)            | 2            |
-| uint16_t | windSpeed         | Mean wind speed (m/s)               | 2            |
-| uint16_t | windDirection     | Mean wind direction (°)             | 2            |
-| uint16_t | windGustSpeed     | Wind gust speed (m/s)               | 2            |
-| uint16_t | windGustDirection | Wind gust direction (°)             | 2            |
-| int32_t  | latitude          | Latitude (DD)                       | 4            |
-| int32_t  | longitude         | Longitude (DD)                      | 4            |
-| uint8_t  | satellites        | Number of satellites                | 1            | 
-| uint16_t | hdop              | HDOP                                | 2            |
-| uint16_t | voltage           | Battery voltage (V)                 | 2            |
-| uint16_t | transmitDuration  | Previous transmission duration (s)  | 2            |
-| uint8_t  | transmitStatus    | Iridium return code                 | 1            |
-| uint16_t | iterationCounter  | Message counter                     | 2            | 
+| Type     | Variable          | Description                        | Size (bytes) |
+|----------|-------------------|------------------------------------|:------------:|
+| uint32_t | unixtime          | UNIX Epoch time                    |       4      |
+| int16_t  | temperatureInt    | Internal temperature (°C)          |       2      |
+| uint16_t | humidityInt       | Internal humidity (%)              |       2      |
+| uint16_t | pressureInt       | Internal pressure (hPa)            |       2      |
+| int16_t  | temperatureExt    | External temperature (°C)          |       2      |
+| uint16_t | humidityExt       | External humidity (%)              |       2      |
+| int16_t  | pitch             | Pitch (°)                          |       2      |
+| int16_t  | roll              | Roll (°)                           |       2      |
+| uint16_t | solar             | Solar irradiance (W m-2)           |       2      |
+| uint16_t | windSpeed         | Mean wind speed (m/s)              |       2      |
+| uint16_t | windDirection     | Mean wind direction (°)            |       2      |
+| uint16_t | windGustSpeed     | Wind gust speed (m/s)              |       2      |
+| uint16_t | windGustDirection | Wind gust direction (°)            |       2      |
+| int32_t  | latitude          | Latitude (DD)                      |       4      |
+| int32_t  | longitude         | Longitude (DD)                     |       4      |
+| uint8_t  | satellites        | Number of satellites               |       1      |
+| uint16_t | hdop              | HDOP                               |       2      |
+| uint16_t | voltage           | Battery voltage (V)                |       2      |
+| uint16_t | transmitDuration  | Previous transmission duration (s) |       2      |
+| uint8_t  | transmitStatus    | Iridium return code                |       1      |
+| uint16_t | iterationCounter  | Message counter                    |       2      |
 
 #### 2.2.2 Data Transmission and Processing
 
@@ -95,6 +96,8 @@ Sensor measurements and GNSS position are recorded hourly and stored in memory u
 
 ## 3.0 Deployments
 
+<p align="center"><img src="https://github.com/cryologger/automatic-weather-station/assets/22924092/1f591af9-fa7d-48b0-97dc-aee63c6f5255" width="640"></p>
+<p align="center"><b>Figure 3.</b> Map of Cryologger AWS deployments made between 2019 and 2023.</p>
 
 ## 4.0 Results
 
