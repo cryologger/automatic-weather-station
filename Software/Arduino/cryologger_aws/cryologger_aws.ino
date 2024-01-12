@@ -3,7 +3,8 @@
   Date:     October 16, 2023
   Author:   Adam Garbo
   Version:  1.3.1
-
+  License:  GPLv3. See license file for more information.
+    
   Description:
   - Code configured for an automatic weather station to be
   deployed in Ottawa, Canada that will serve as a test unit.
